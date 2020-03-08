@@ -1,0 +1,22 @@
+{
+    "race" : [
+        "Human",
+        "Feathered",
+        "Demon",
+        "Goblin",
+        "Beast",
+        "Glacier",
+        "Dragon",
+        "Divinity"
+    ],
+    "class":[
+        "Mech",
+        "Mage",
+        "Warlock",
+        "Assasin",
+        "Knight",
+        "Hunter",
+        "Warrior"
+    ]
+  }
+  
