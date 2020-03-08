@@ -97,7 +97,7 @@ function sendSynergyMessages(message, msgArguments, synergyList) {
     }
 
     // write a message for every name
-    writePlayer(message, playerPick);
+    writePlayerSynergy(message, playerPick);
 }
 
 function writePlayerSynergy(message, playerPick) {
