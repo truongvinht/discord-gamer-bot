@@ -6,6 +6,7 @@
 const synergy = require("./synergy.json");
 const raceList = synergy.race;
 const classList = synergy.class;
+const urlList = synergy.icons;
 
 // race randomizer
 const randomizerRace = (count) => {
@@ -48,9 +49,14 @@ const randomSynergy = (count) => {
     return getRandomSynergyFrom(synergyList, count);
 }
 
+const iconUrl = (name) => {
+    return urlList[name];
+}
+
 //export
 module.exports = {
     getRandomRace: randomizerRace,
     getRandomClass: randomizerClass,
-    getRandomSynergy:randomSynergy
+    getRandomSynergy:randomSynergy,
+    getIconUrl: iconUrl
 };

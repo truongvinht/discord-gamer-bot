@@ -17,6 +17,25 @@
         "Knight",
         "Hunter",
         "Warrior"
-    ]
+    ],
+    "icons": {
+        "Human":"https://static.ilongyuan.cn/official_website/e52b47a8c88/61268e367c33412f5cce9bf77333d723.png",
+        "Feathered":"https://static.ilongyuan.cn/official_website/e52b47a8c88/972becf052237e407b4aa130ad7e0b70.png",
+        "Demon":"https://static.ilongyuan.cn/official_website/e52b47a8c88/644294a18184c290727a857cb154736d.png",
+        "Goblin":"https://static.ilongyuan.cn/official_website/e52b47a8c88/35226075dba30e07cc30a10ca3bfeb1d.png",
+        "Beast":"https://static.ilongyuan.cn/official_website/e52b47a8c88/69485fb0c8a01d003e0ec684e1312f84.png",
+        "Glacier":"https://static.ilongyuan.cn/official_website/e52b47a8c88/62b9cfe4bce629cae6ce86f576369617.png",
+        "Dragon":"https://static.ilongyuan.cn/official_website/e52b47a8c88/2ee03035e72ecb190faf2f5b4c9a6872.png",
+        "Divinity":"https://static.ilongyuan.cn/official_website/e52b47a8c88/6cc4cfe05c451dc75dced9a1500890ec.png",
+        "Mech":"https://static.ilongyuan.cn/official_website/e52b47a8c88/8f85fc0479dee3cf46cf3d6a7b5f78c6.png",
+        "Mage":"https://static.ilongyuan.cn/official_website/e52b47a8c88/9861ffead99f3ad3461a14ab828392e7.png",
+        "Warlock":"https://static.ilongyuan.cn/official_website/e52b47a8c88/c6e18077bf180d9cc485c63f99bf4ff2.png",
+        "Assasin":"https://static.ilongyuan.cn/official_website/e52b47a8c88/72ff33f06b3919320a2b08cb062ac640.png",
+        "Knight":"https://static.ilongyuan.cn/official_website/e52b47a8c88/2cc51101f7d3654b24eeaa6f9ee477b8.png",
+        "Hunter":"https://static.ilongyuan.cn/official_website/e52b47a8c88/81b087740927905d754d67e89dcab1bf.png",
+        "Warrior":"https://static.ilongyuan.cn/official_website/e52b47a8c88/2bdac56aaebf15609e6a2d08c8dec5c7.png"
+
+
+    }
   }
   

@@ -5,7 +5,7 @@
 const Discord = require("discord.js");
 const service = require("./autochessService");
 const AUTOCHESS_TITLE = "Auto Chess"
-
+const LOGO_URL = "https://pbs.twimg.com/profile_images/1088372392945045505/3JOuR2pY.jpg"
 
 const help = (PREFIX, author) => {
     let embed = new Discord.MessageEmbed()
@@ -14,12 +14,13 @@ const help = (PREFIX, author) => {
     .setDescription(`Following commands are available:`)
     .addField(`${PREFIX}acrace NAME`, `Random hero pick [RACE]`)
     .addField(`${PREFIX}acclass NAME`, `Random hero pick [CLASS]`)
-    .addField(`${PREFIX}acany NAME`, `Random hero pick [RACE/CLASS]`);
+    .addField(`${PREFIX}acany NAME`, `Random hero pick [RACE/CLASS]`)
+    .setThumbnail(LOGO_URL);
+
     return embed;
 }
 
 const raceForMessage = (message) => {
-    let channel = message.channel;
     let msgArguments = message.content.split(" ");
 
     var playerCounter = msgArguments.length;
@@ -38,7 +39,6 @@ const raceForMessage = (message) => {
 } 
 
 const classForMessage = (message) => {
-    let channel = message.channel;
     let msgArguments = message.content.split(" ");
 
     var playerCounter = msgArguments.length;
@@ -57,7 +57,6 @@ const classForMessage = (message) => {
 } 
 
 const synergyForMessage = (message) => {
-    let channel = message.channel;
     let msgArguments = message.content.split(" ");
 
     var playerCounter = msgArguments.length;
@@ -110,12 +109,11 @@ function writePlayerSynergy(message, playerPick) {
         let d = new Discord.MessageEmbed();
         d.setTitle(`${AUTOCHESS_TITLE} - Synergy Pick`);
         d.setDescription("$1, try $2 [$3]".replace("$1", player).replace("$2", pick['synergy']).replace("[$3]", "synergy"));
-
+        d.setThumbnail(service.getIconUrl(pick['synergy']));
         message.channel.send(d).then(async function (message) {
             // write next player
             writePlayerSynergy(message, playerPick);
         });
-
     }
 }
 

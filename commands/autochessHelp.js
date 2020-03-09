@@ -15,10 +15,8 @@ class autochessHelpCommand extends Command {
            aliases: ['achelp'] 
         });
     }
-
     exec(message) {
         return message.channel.send(controller.getHelpMessage(c.prefix(),message.author.username));
-        //return message.reply(acservice.getRandomSynergy(1));
     }
 }
 
