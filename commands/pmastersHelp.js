@@ -3,21 +3,19 @@
 // ================
 
 //import
-//const pmMastersService = require("../service/pmasters/pmastersService");
-const autoChessService = require("../service/autochess/autochessService");
+const controller = require("../service/pmasters/pmastersController");
+const c = require("../helper/envHandler");
 
 const { Command } = require('discord-akairo');
 
 class pmHelpCommand extends Command {
     constructor() {
         super('pmhelp', {
-           aliases: ['pmHelp'] 
+           aliases: ['pmHelp','pokemonmastershelp','pmasterhelp'] 
         });
     }
-
     exec(message) {
-        
-        return message.reply(autoChessService.getRandomSynergy(1));
+        return message.channel.send(controller.getHelpMessage(c.prefix(),message.author.username));
     }
 }
 
