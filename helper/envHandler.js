@@ -22,6 +22,8 @@ if (botToken == "") {
     botToken = process.env.BOT_TOKEN;
 }
 
+//command prefix
+let prefix = process.env.PREFIX  || botSettings.prefix;
 
 const getBotToken = () => {
     return botToken;
@@ -29,7 +31,7 @@ const getBotToken = () => {
 
 //load prefix
 const getPrefix = () => {
-    return botSettings.prefix;
+    return prefix;
 }
 
 //load roles
