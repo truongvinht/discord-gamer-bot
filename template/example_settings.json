@@ -1,7 +1,7 @@
 {
   "token" : "",
   "prefix":"!",
-  "lang": "en",
+  "roles":[],
   "author":"C4CW",
   "version":"1.0.0"
 }

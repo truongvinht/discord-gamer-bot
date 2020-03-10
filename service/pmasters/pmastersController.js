@@ -15,10 +15,10 @@ const LOGO_URL = "https://cdn.player.one/sites/player.one/files/styles/lg/public
 const help = (PREFIX, author) => {
 
     let embed = new Discord.MessageEmbed()
-    .setTitle(`General Commands`)
+    .setTitle(`${POKEMONMASTERS_TITLE} - Commands`)
     .setAuthor(`${author}`)
     .setDescription(`Following commands are available:`)
-    .addField(`${PREFIX}pmHelp`, `Pokemon Masters Help`)
+    .addField(`${PREFIX}pmevent`, `Pokemon Masters Current Sync Pair Event`)
     .setThumbnail(LOGO_URL);
 
     return embed;

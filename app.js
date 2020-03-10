@@ -5,7 +5,7 @@
 //import
 const c = require("./helper/envHandler");
 
-const { AkairoClient, CommandHandler } = require('discord-akairo');
+const { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler} = require('discord-akairo');
 
 class MyClient extends AkairoClient {
     constructor() {
@@ -20,11 +20,24 @@ class MyClient extends AkairoClient {
             prefix: c.prefix(),
             directory: './commands/'
         });
+
+        this.inhibitorHandler = new InhibitorHandler(this, {
+            directory: './inhibitors/'
+        });
+
+        this.listenerHandler = new ListenerHandler(this, {
+            directory: './listeners/'
+        });
+        
         this.commandHandler.loadAll();
+        this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
+        this.inhibitorHandler.loadAll();
+        this.commandHandler.useListenerHandler(this.listenerHandler);
+        this.listenerHandler.loadAll();
     }
 }
 
 const client = new MyClient();
 client.login(c.botToken()).then(() => {
-    console.log('Started up!');
+    //console.log('Started up!');
 });

@@ -15,7 +15,6 @@ try {
     botSettings = exampleSettings;
 }
 
-
 //Bot Token
 var botToken = botSettings.token;
 if (botToken == "") {
@@ -23,17 +22,6 @@ if (botToken == "") {
     botToken = process.env.BOT_TOKEN;
 }
 
-// default language
-var language = botSettings.lang;
-if (language == "") {
-    if (process.env.LANG != null && process.env.LANG != "") {
-        // Heroku ENV token
-        language = process.env.LANG;
-    } else {
-        //default language EN
-        language = 'en';
-    }
-}
 
 const getBotToken = () => {
     return botToken;
@@ -44,9 +32,9 @@ const getPrefix = () => {
     return botSettings.prefix;
 }
 
-// language settings for bot output
-const lang = () => {
-    return language;
+//load roles
+const getRoles = () => {
+    return botSettings.roles;
 }
 
 // author information
@@ -62,7 +50,7 @@ const getVersion = () => {
 module.exports = {
     botToken: getBotToken,
     prefix: getPrefix,
-    language: lang,
+    roles: getRoles,
     author: author,
     version: getVersion
 };
