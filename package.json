@@ -6,6 +6,12 @@
   "scripts": {
     "start": "node app.js"
   },
+  "keywords": [
+    "discord",
+    "music",
+    "bot",
+    "game"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/truongvinht/discord-gamer-bot.git"
