@@ -14,7 +14,9 @@ class MyClient extends AkairoClient {
         }, {
             disableEveryone: true
         });
-		this.queue = new Map();
+        this.queue = new Map();
+        this.dispatcher = null;
+        this.defaultVolume = 1.0;
 
         this.commandHandler = new CommandHandler(this, {
             // Options for the command handler goes here.

@@ -96,7 +96,9 @@ function play(message, song) {
       .on("error", error => {
         console.error(error);
       });
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    //dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    dispatcher.setVolume(message.client.defaultVolume);
+    message.client.dispatcher = dispatcher;
 }
 
 const summon = (message) => {
@@ -170,11 +172,44 @@ const skip = (message) => {
   serverQueue.connection.dispatcher.end();
 }
 
+const volume = (message) => {
+  const serverQueue = message.client.queue.get(message.guild.id);
+  if (!message.member.voice.channel) return message.channel.send('You have to be in a voice channel adjust the volume!');
+  let dispatcher = message.client.dispatcher;
+
+  if (dispatcher == null) {
+    
+  } else {
+    const args = message.content.split(" ");
+
+    if (args.length==1) {
+      message.channel.send("Current volume: " + dispatcher.volume);
+      return;
+    }
+
+    const updatedVolume = parseFloat(args[1]);
+
+    if (updatedVolume != NaN ) {
+
+      if (updatedVolume >= 0 && updatedVolume <= 2) {
+        dispatcher.setVolume(updatedVolume);
+      } else {
+        message.channel.send("Invalid volume range! Please select volume between 0.0 (min) - 2.0 (max)");
+      }
+    } else {
+      // invalid number
+        message.channel.send("Invalid volume input");
+    }
+  }
+  
+}
+
 //export
 module.exports = {
     play: mediaPlay,
     summon:summon,
     disconnect:disconnect,
     queue: queue,
-    skip:skip
+    skip:skip,
+    volume:volume
 };

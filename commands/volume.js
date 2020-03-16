@@ -7,8 +7,8 @@ const controller = require("../service/media/mediaController");
 
 class VolumeCommand extends Command {
     constructor() {
-        super('skip', {
-           aliases: ['skip'] 
+        super('volume', {
+           aliases: ['volume'] 
         });
     }
     async exec(message) {
