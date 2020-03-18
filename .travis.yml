@@ -1,4 +1,17 @@
 language: node_js
+node_js: node
+os:
+  - linux
+  - osx
+sudo: required
+dist: trusty
 before_install:
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://launchpad.net/~mc3man/+archive/ubuntu/trusty-media/+files/ffmpeg_3.3.3~trusty2_amd64.deb ; fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i ffmpeg_3.3.3~trusty2_amd64.deb ; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:mc3man/trusty-media; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install -y ffmpeg; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install ffmpeg; fi
+  - ffmpeg -hwaccels
+after_success:
+  - npm run examples
+  - npm run out
