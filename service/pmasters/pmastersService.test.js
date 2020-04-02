@@ -9,13 +9,26 @@ const service = require('./pmastersService');
 // afterAll(() => doSomething());
 // const checkSynergy = () => console.log('check synergy...');
 
-describe('Get Event', () => {
+describe('Get Pokemon Event', () => {
     // beforeEach(() => checkSynergy());
 
-    test('Get event', () => {
+    test('Get current pokemon event', () => {
         const callback = (json) => {
             expect(json).not.toBeNull();
         };
         service.getSyncEvents(callback);
     });
 });
+
+describe('Get Pokemons as list', () => {
+    // beforeEach(() => checkSynergy());
+
+    test('Get pokemons', () => {
+        const callback = (json) => {
+            expect(json).not.toBeNull();
+        };
+        service.getPokemons(callback);
+    });
+});
+
+test.todo('Mockup server requests');

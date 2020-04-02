@@ -4,10 +4,10 @@
 const fetch = require('node-fetch');
 const servicesJson = require('./services.json');
 
-const pokemon = () => {
+const pokemon = (callback) => {
     fetch('https://gamepress.gg/sites/default/files/aggregatedjson/StatRankingsMastersPokemon.json')
         .then(res => res.json())
-        .then(json => console.log(json));
+        .then(json => callback(json));
 };
 
 const syncEvents = (callback) => {
