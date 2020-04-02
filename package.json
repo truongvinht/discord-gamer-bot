@@ -4,7 +4,8 @@
   "description": "Discord bot for showing functions for different games",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "jest"
   },
   "keywords": [
     "discord",
@@ -32,6 +33,7 @@
     "ytdl-core": "^2.0.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.9"
+    "coveralls": "^3.0.9",
+    "jest": "^25.2.6"
   }
 }
