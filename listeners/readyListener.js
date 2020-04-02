@@ -2,18 +2,18 @@
 // show log after bot launched
 // ================
 
-//import
+// import
 const { Listener } = require('discord-akairo');
 
 class ReadyListener extends Listener {
-    constructor() {
+    constructor () {
         super('ready', {
             emitter: 'client',
             event: 'ready'
         });
     }
 
-    exec() {
+    exec () {
         console.log('Started up!');
     }
 }

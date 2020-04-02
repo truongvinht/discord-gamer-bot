@@ -2,15 +2,15 @@
 // main class
 // ================
 
-//import
-const c = require("./helper/envHandler");
+// import
+const c = require('./helper/envHandler');
 
 const { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler} = require('discord-akairo');
 
 class MyClient extends AkairoClient {
-    constructor() {
+    constructor () {
         super({
-            ownerID: '123992700587343872', // or ['123992700587343872', '86890631690977280']
+            ownerID: '123992700587343872' // or ['123992700587343872', '86890631690977280']
         }, {
             disableEveryone: true
         });
@@ -31,7 +31,7 @@ class MyClient extends AkairoClient {
         this.listenerHandler = new ListenerHandler(this, {
             directory: './listeners/'
         });
-        
+
         this.commandHandler.loadAll();
         this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
         this.inhibitorHandler.loadAll();
@@ -42,5 +42,5 @@ class MyClient extends AkairoClient {
 
 const client = new MyClient();
 client.login(c.botToken()).then(() => {
-    //console.log('Started up!');
+    // console.log('Started up!');
 });

@@ -2,17 +2,17 @@
 // Prevent direct message bot for spamming
 // ================
 
-//import
+// import
 const { Inhibitor } = require('discord-akairo');
 
 class PreventDmInhibitor extends Inhibitor {
-    constructor() {
+    constructor () {
         super('restrictDirectMessage', {
             reason: 'restrictDirectMessage'
-        })
+        });
     }
 
-    exec(message) {
+    exec (message) {
         return false;
         // if (message.channel.type === "dm") {
         //     return true;

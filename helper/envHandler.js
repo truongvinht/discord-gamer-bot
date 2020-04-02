@@ -3,10 +3,10 @@
 // ==================
 
 var botSettings = {};
-const exampleSettings = require("../template/example_settings.json");
+const exampleSettings = require('../template/example_settings.json');
 
 try {
-    botSettings = require("../config/settings.json");
+    botSettings = require('../config/settings.json');
 } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {
         throw e;
@@ -15,38 +15,38 @@ try {
     botSettings = exampleSettings;
 }
 
-//Bot Token
+// Bot Token
 var botToken = botSettings.token;
-if (botToken == "") {
+if (botToken === '') {
     // Heroku ENV token
     botToken = process.env.BOT_TOKEN;
 }
 
-//command prefix
-let prefix = process.env.PREFIX  || botSettings.prefix;
+// command prefix
+const prefix = process.env.PREFIX || botSettings.prefix;
 
 const getBotToken = () => {
     return botToken;
-}
+};
 
-//load prefix
+// load prefix
 const getPrefix = () => {
     return prefix;
-}
+};
 
-//load roles
+// load roles
 const getRoles = () => {
     return botSettings.roles;
-}
+};
 
 // author information
 const author = () => {
     return exampleSettings.author;
-}
+};
 
 const getVersion = () => {
     return exampleSettings.version;
-}
+};
 
 // export
 module.exports = {
