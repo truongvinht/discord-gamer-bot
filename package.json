@@ -12,6 +12,12 @@
     "test:coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "test:staged": "jest --findRelatedTests"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
   "keywords": [
     "discord",
     "music",
