@@ -13,3 +13,7 @@ before_install:
 after_success:
   - npm run examples
   - npm run out
+  - npm run test:coveralls
+
+notification:
+  email: false
