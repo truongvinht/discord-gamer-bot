@@ -3,18 +3,18 @@
 // show general available commands
 // ================
 
-//import
-const controller = require("../service/base/baseController");
+// import
+const controller = require('../service/base/baseController');
 const { Command } = require('discord-akairo');
 
 class generalHelpCommand extends Command {
-    constructor() {
+    constructor () {
         super('help', {
-           aliases: ['help', 'command'] 
+            aliases: ['help', 'command']
         });
     }
 
-    exec(message) {
+    exec (message) {
         return controller.getHelpMessage(message);
     }
 }

@@ -3,15 +3,16 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+const controller = require('../service/media/mediaController');
 
 class SummonCommand extends Command {
-    constructor() {
+    constructor () {
         super('summon', {
-           aliases: ['summon'] 
+            aliases: ['summon']
         });
     }
-    async exec(message) {
+
+    async exec (message) {
         controller.summon(message);
     }
 }

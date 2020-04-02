@@ -3,24 +3,23 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const c = require("../helper/envHandler");
+const c = require('../helper/envHandler');
 
 class PingCommand extends Command {
-    constructor() {
+    constructor () {
         super('ping', {
-           aliases: ['ping'] 
+            aliases: ['ping']
         });
     }
 
-    userPermissions(message) {
-
+    userPermissions (message) {
         var permission = null;
 
-        for (let role of c.roles()) {
+        for (const role of c.roles()) {
             permission = role;
-            let roles = message.member._roles;
+            const roles = message.member._roles;
 
-            if (roles.length == 0) {
+            if (roles.length === 0) {
                 return role;
             }
 
@@ -32,7 +31,7 @@ class PingCommand extends Command {
         return permission;
     }
 
-    exec(message) {
+    exec (message) {
         return message.reply('Pong!');
     }
 }

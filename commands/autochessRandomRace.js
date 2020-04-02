@@ -2,17 +2,18 @@
 // Command for getting random race pick
 // ================
 
-//import
-const controller = require("../service/autochess/autochessController");
+// import
+const controller = require('../service/autochess/autochessController');
 const { Command } = require('discord-akairo');
 
 class autochessRandomRaceCommand extends Command {
-    constructor() {
+    constructor () {
         super('acrace', {
-           aliases: ['acrace','autochessrace'] 
+            aliases: ['acrace', 'autochessrace']
         });
     }
-    exec(message) {
+
+    exec (message) {
         return controller.getRandomRace(message);
     }
 }

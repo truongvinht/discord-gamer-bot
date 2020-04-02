@@ -3,15 +3,16 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+const controller = require('../service/media/mediaController');
 
 class DisconnectCommand extends Command {
-    constructor() {
+    constructor () {
         super('disconnect', {
-           aliases: ['disconnect','leave','discon'] 
+            aliases: ['disconnect', 'leave', 'discon']
         });
     }
-    async exec(message) {
+
+    async exec (message) {
         controller.disconnect(message);
     }
 }

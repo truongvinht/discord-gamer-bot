@@ -2,17 +2,18 @@
 // Command for getting current sync events
 // ================
 
-//import
-const controller = require("../service/pmasters/pmastersController");
+// import
+const controller = require('../service/pmasters/pmastersController');
 const { Command } = require('discord-akairo');
 
 class pmastersSyncEventsCommand extends Command {
-    constructor() {
+    constructor () {
         super('pmsyncevent', {
-           aliases: ['pmsyncevent','pmevent'] 
+            aliases: ['pmsyncevent', 'pmevent']
         });
     }
-    exec(message) {
+
+    exec (message) {
         return controller.getSyncEvents(message);
     }
 }

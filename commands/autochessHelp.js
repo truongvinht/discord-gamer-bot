@@ -3,19 +3,20 @@
 // show available commands for Auto Chess
 // ================
 
-//import
-const controller = require("../service/autochess/autochessController");
-const c = require("../helper/envHandler");
+// import
+const controller = require('../service/autochess/autochessController');
+const c = require('../helper/envHandler');
 
 const { Command } = require('discord-akairo');
 
 class autochessHelpCommand extends Command {
-    constructor() {
+    constructor () {
         super('autochessHelp', {
-           aliases: ['achelp'] 
+            aliases: ['achelp']
         });
     }
-    exec(message) {
+
+    exec (message) {
         return message.channel.send(controller.getHelpMessage(c.prefix(),message.author.username));
     }
 }

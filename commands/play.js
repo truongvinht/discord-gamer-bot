@@ -3,15 +3,16 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+const controller = require('../service/media/mediaController');
 
 class PlayCommand extends Command {
-    constructor() {
+    constructor () {
         super('play', {
-           aliases: ['play'] 
+            aliases: ['play']
         });
     }
-    async exec(message) {
+
+    async exec (message) {
         controller.play(message);
     }
 }

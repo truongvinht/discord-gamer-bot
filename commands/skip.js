@@ -3,17 +3,18 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+// const controller = require('../service/media/mediaController');
 
 class SkipCommand extends Command {
-    constructor() {
+    constructor () {
         super('skip', {
-           aliases: ['skip'] 
+            aliases: ['skip']
         });
     }
-    async exec(message) {
-        //controller.skip(message);
-        return message.channel.send("Feature: NOT READY");
+
+    async exec (message) {
+        // controller.skip(message);
+        return message.channel.send('Feature: NOT READY');
     }
 }
 

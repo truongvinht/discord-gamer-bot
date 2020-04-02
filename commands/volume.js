@@ -3,15 +3,16 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+const controller = require('../service/media/mediaController');
 
 class VolumeCommand extends Command {
-    constructor() {
+    constructor () {
         super('volume', {
-           aliases: ['volume'] 
+            aliases: ['volume']
         });
     }
-    async exec(message) {
+
+    async exec (message) {
         controller.volume(message);
     }
 }

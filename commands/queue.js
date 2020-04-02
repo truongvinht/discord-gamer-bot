@@ -3,15 +3,16 @@
 // ================
 
 const { Command } = require('discord-akairo');
-const controller = require("../service/media/mediaController");
+const controller = require('../service/media/mediaController');
 
 class QueueCommand extends Command {
-    constructor() {
+    constructor () {
         super('queue', {
-           aliases: ['queue'] 
+            aliases: ['queue']
         });
     }
-    async exec(message) {
+
+    async exec (message) {
         controller.queue(message);
     }
 }

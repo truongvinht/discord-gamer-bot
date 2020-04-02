@@ -2,20 +2,21 @@
 // Help Command for Pokemon Masters
 // ================
 
-//import
-const controller = require("../service/pmasters/pmastersController");
-const c = require("../helper/envHandler");
+// import
+const controller = require('../service/pmasters/pmastersController');
+const c = require('../helper/envHandler');
 
 const { Command } = require('discord-akairo');
 
 class pmHelpCommand extends Command {
-    constructor() {
+    constructor () {
         super('pmhelp', {
-           aliases: ['pmHelp','pokemonmastershelp','pmasterhelp'] 
+            aliases: ['pmHelp', 'pokemonmastershelp', 'pmasterhelp']
         });
     }
-    exec(message) {
-        return message.channel.send(controller.getHelpMessage(c.prefix(),message.author.username));
+
+    exec (message) {
+        return message.channel.send(controller.getHelpMessage(c.prefix(), message.author.username));
     }
 }
 
