@@ -17,7 +17,7 @@ class autochessHelpCommand extends Command {
     }
 
     exec (message) {
-        return message.channel.send(controller.getHelpMessage(c.prefix(),message.author.username));
+        return message.channel.send(controller.getHelpMessage(c.prefix(), message.author.username));
     }
 }
 

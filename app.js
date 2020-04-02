@@ -5,7 +5,7 @@
 // import
 const c = require('./helper/envHandler');
 
-const { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler} = require('discord-akairo');
+const { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler } = require('discord-akairo');
 
 class MyClient extends AkairoClient {
     constructor () {

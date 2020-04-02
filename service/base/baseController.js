@@ -2,27 +2,26 @@
 // Controller to prepare base content for discord response
 // ================
 
-const Discord = require("discord.js");
-const c = require("../../helper/envHandler");
+const Discord = require('discord.js');
+const c = require('../../helper/envHandler');
 
 const help = (message) => {
+    const author = message.author.username;
+    const PREFIX = c.prefix();
 
-    let author = message.author.username;
-    let PREFIX = c.prefix();
+    const embed = new Discord.MessageEmbed()
+        .setTitle('General Commands')
+        .setAuthor(`${author}`)
+        .setDescription('Following commands are available:')
+        .addField(`${PREFIX}achelp`, 'Auto Chess Help')
+        .addField(`${PREFIX}pmHelp`, 'Pokemon Masters Help');
 
-    let embed = new Discord.MessageEmbed()
-    .setTitle(`General Commands`)
-    .setAuthor(`${author}`)
-    .setDescription(`Following commands are available:`)
-    .addField(`${PREFIX}achelp`, `Auto Chess Help`)
-    .addField(`${PREFIX}pmHelp`, `Pokemon Masters Help`);
-    
     embed.setFooter(`Version: ${c.version()} - ${c.author()}`);
 
     message.channel.send(embed);
-}
+};
 
-//export
+// export
 module.exports = {
-    getHelpMessage: help,
+    getHelpMessage: help
 };
