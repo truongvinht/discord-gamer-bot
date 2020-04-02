@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/truongvinht/discord-gamer-bot.svg?branch=master)](https://travis-ci.org/truongvinht/discord-gamer-bot)
+[![Coverage Status](https://coveralls.io/repos/github/truongvinht/discord-gamer-bot/badge.svg?branch=master)](https://coveralls.io/github/truongvinht/discord-gamer-bot?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # discord-gamer-bot
