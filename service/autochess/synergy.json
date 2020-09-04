@@ -5,9 +5,15 @@
         "Demon",
         "Goblin",
         "Beast",
+        "Cave",
+        "Marine",
         "Glacier",
         "Dragon",
-        "Divinity"
+        "Divinity",
+        "Kira",
+        "Egersis",
+        "Spirit",
+        "Dwarf"
     ],
     "class":[
         "Mech",
@@ -16,9 +22,23 @@
         "Assasin",
         "Knight",
         "Hunter",
-        "Warrior"
+        "Warrior",
+        "Druid",
+        "Witcher",
+        "Shaman",
+        "Wizard",
+        "Priest"
     ],
     "icons": {
+        "Dwarf":"http://static.ilongyuan.cn/official_website/e52b47a8c88/7fad1c4176b5d95c3d796450b07710a8.png",
+        "Priest":"http://static.ilongyuan.cn/official_website/e52b47a8c88/560e2a8327caf84dc03983e5b2cd0a7d.png",
+        "Wizard":"http://static.ilongyuan.cn/official_website/e52b47a8c88/b70d40942e52f567b78445724b6adfaa.png",
+        "Spirit":"http://static.ilongyuan.cn/official_website/e52b47a8c88/706bd22810680a3b4205ab3376308982.png",
+        "Egersis":"http://static.ilongyuan.cn/official_website/e52b47a8c88/ef2c6e8100d6d0364a433ce45af25e7e.png",
+        "Shaman":"http://static.ilongyuan.cn/official_website/e52b47a8c88/48125964659e8cafbd3cb33d96e61096.png",
+        "Witcher":"http://static.ilongyuan.cn/official_website/e52b47a8c88/9e8655f18603c141f0a1c15c4b0555a0.png",
+        "Kira":"http://static.ilongyuan.cn/official_website/e52b47a8c88/3cc14366e5fb37f7ffe64f68d77ebff5.png",
+        "Druid":"http://static.ilongyuan.cn/official_website/e52b47a8c88/3317df9cc4b75d3f551eb72fa8d53629.png",
         "Human":"https://static.ilongyuan.cn/official_website/e52b47a8c88/61268e367c33412f5cce9bf77333d723.png",
         "Feathered":"https://static.ilongyuan.cn/official_website/e52b47a8c88/972becf052237e407b4aa130ad7e0b70.png",
         "Demon":"https://static.ilongyuan.cn/official_website/e52b47a8c88/644294a18184c290727a857cb154736d.png",
@@ -33,9 +53,9 @@
         "Assasin":"https://static.ilongyuan.cn/official_website/e52b47a8c88/72ff33f06b3919320a2b08cb062ac640.png",
         "Knight":"https://static.ilongyuan.cn/official_website/e52b47a8c88/2cc51101f7d3654b24eeaa6f9ee477b8.png",
         "Hunter":"https://static.ilongyuan.cn/official_website/e52b47a8c88/81b087740927905d754d67e89dcab1bf.png",
+        "Cave":"http://static.ilongyuan.cn/official_website/e52b47a8c88/67417f616d0ba9b7975cb61e02d8c26f.png",
+        "Marine":"http://static.ilongyuan.cn/official_website/e52b47a8c88/af60da706792ea6b405052db376c51eb.png",
         "Warrior":"https://static.ilongyuan.cn/official_website/e52b47a8c88/2bdac56aaebf15609e6a2d08c8dec5c7.png"
-
-
     }
   }
   
