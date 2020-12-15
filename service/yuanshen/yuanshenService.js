@@ -119,6 +119,7 @@ const today = () => {
     const d = new Date();
     var weekday = d.getDay(); // 0-6 Sonntag - Samstag
 
+    // collect all farmable talent books for today
     const talentbooks = data.talentbooks;
     const talentkeys = Object.keys(talentbooks);
 
@@ -135,7 +136,20 @@ const today = () => {
         }
     }
 
-    // collect all farmable talent books for today
+    // weapons
+    const weaponmats = data.weapondrops;
+    const weaponkeys = Object.keys(weaponmats);
+
+    for (var a = 0; a < weaponkeys.length; a++) {
+        const weaponDetail = weaponmats[weaponkeys[a]];
+        const weapondates = weaponDetail.weekday;
+
+        for (var b = 0; b < weapondates.length; b++) {
+            if (weapondates[b] === weekday) {
+                resultMap.weapon[weaponkeys[a]] = { name: weaponDetail.name, location: weaponDetail.location };
+            }
+        }
+    }
 
     // get birthday
     return resultMap;

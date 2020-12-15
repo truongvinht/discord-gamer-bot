@@ -80,7 +80,12 @@ const today = (message) => {
     const data = service.getToday();
     for (var i = 0; i < Object.keys(data.talent).length; i++) {
         const talentdata = data.talent[Object.keys(data.talent)[i]];
-        d.addField(`Talent  ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
+        d.addField(`Talent ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
+    }
+
+    for (var j = 0; j < Object.keys(data.weapon).length; j++) {
+        const weapondata = data.weapon[Object.keys(data.weapon)[j]];
+        d.addField(`Waffendrop - ${weapondata.name}`, `in ${weapondata.location}`);
     }
 
     message.channel.send(d);

@@ -443,5 +443,47 @@
     "Einhandschwert",
     "Zweihandschwert",
     "Katalysator"
-  ]
+  ],
+  "dungeon" : {
+    "mittsommerhof" : {
+      "name" : "Mittsommerhof",
+      "location" : "Mondstadt",
+      "set" : [
+        "Donnernder Zorn",
+        "Donner beruhigender Weiser"
+      ]
+    },
+    "taldesgedenks" : {
+      "name" : "Tal des Gedenkens",
+      "location" : "Mondstadt",
+      "set" : [
+        "Grünlicher Schatten",
+        "Im Herz geschlossenes Mädchen"
+      ]
+    },
+    "versteckterpalastvonzhou" : {
+      "name" : "Versteckter Palast von Zhou",
+      "location" : "Liyue",
+      "set" : [
+        "Brennende Pyro-Hexe",
+        "Feuer durchwandender Heiliger"
+      ]
+    },
+    "klareswasserundfelsigerhoehle" : {
+      "name" : "Klares Wasser und felsige Höhle",
+      "location" : "Liyue",
+      "set" : [
+        "Blutiger Weg eines Ritters",
+        "Altes Hofritual"
+      ]
+    },
+    "staettedereinsamenwolken" : {
+      "name" : "Stätte der einsamen Wolken",
+      "location" : "Liyue",
+      "set" : [
+        "Archaischer Fels",
+        "Umgekehrter Meteor"
+      ]
+    }
+  }
 }
