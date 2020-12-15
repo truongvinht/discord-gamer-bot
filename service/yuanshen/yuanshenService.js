@@ -95,6 +95,52 @@ const randomWeapon = (count) => {
     return pickedList;
 };
 
+const findFigureByTalent = (talent) => {
+
+    var figures = [];
+
+    for (var i = 0; i < Object.keys(figure).length; i++) {
+        const fig = Object.keys(figure);
+        const key = fig[i];
+
+        if (talent === figure[key].talent) {
+            const name = figure[key].name;
+            figures.push(name);
+        }
+    }
+
+    return figures;
+};
+
+const today = () => {
+    var resultMap = { talent: {}, weapon: {}, birthday: [] };
+
+    // weekday
+    const d = new Date();
+    var weekday = d.getDay(); // 0-6 Sonntag - Samstag
+
+    const talentbooks = data.talentbooks;
+    const talentkeys = Object.keys(talentbooks);
+
+    for (var i = 0; i < talentkeys.length; i++) {
+        const talentDetail = talentbooks[talentkeys[i]];
+        const bookweekdates = talentDetail.weekday;
+
+        for (var j = 0; j < bookweekdates.length; j++) {
+            if (bookweekdates[j] === weekday) {
+                // find all figures with same talent
+                const figureList = findFigureByTalent(talentDetail.name);
+                resultMap.talent[talentkeys[i]] = { name: talentDetail.name, location: talentDetail.location, figures: figureList };
+            }
+        }
+    }
+
+    // collect all farmable talent books for today
+
+    // get birthday
+    return resultMap;
+};
+
 // export
 module.exports = {
     getFigure: figureData,
@@ -103,5 +149,6 @@ module.exports = {
     getStarrating: rating,
     getElementIconUrl: element,
     getRandomElement: randomElement,
-    getRandomWeapon: randomWeapon
+    getRandomWeapon: randomWeapon,
+    getToday: today
 };

@@ -76,6 +76,13 @@ const today = (message) => {
     const d = new Discord.MessageEmbed();
     d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
     d.setThumbnail(LOGO_URL);
+
+    const data = service.getToday();
+    for (var i = 0; i < Object.keys(data.talent).length; i++) {
+        const talentdata = data.talent[Object.keys(data.talent)[i]];
+        d.addField(`Talent  ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
+    }
+
     message.channel.send(d);
 };
 

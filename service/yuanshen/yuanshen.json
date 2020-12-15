@@ -342,7 +342,7 @@
   },
   "weapondrops" : {
     "shield" : {
-      "name" : "",
+      "name" : "Decabarians zerbrochener Ziegel",
       "location" : "Mondstadt",
       "weekday" : [
         1,
@@ -351,7 +351,7 @@
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/d/d7/Item_Tile_of_Decarabian%27s_Tower.png"
     },
     "tooth" : {
-      "name" : "",
+      "name" : "Milchzahn des borealischen Wolfs",
       "location" : "Mondstadt",
       "weekday" : [
         2,
@@ -360,7 +360,7 @@
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/3/33/Item_Boreal_Wolf%27s_Milk_Tooth.png"
     },
     "gladiator" : {
-      "name" : "",
+      "name" : "Fesseln des Löwenzahnkampfers",
       "location" : "Mondstadt",
       "weekday" : [
         3,
@@ -369,7 +369,7 @@
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/0/05/Item_Fetters_of_the_Dandelion_Gladiator.png"
     },
     "guyun" : {
-      "name" : "",
+      "name" : "Leuchtender Sand von Guyun",
       "location" : "Liyue",
       "weekday" : [
         1,
@@ -378,7 +378,7 @@
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/5/5d/Item_Luminous_Sands_from_Guyun.png"
     },
     "balls" : {
-      "name" : "",
+      "name" : "Bleikugeln des Nebelschleiers",
       "location" : "Liyue",
       "weekday" : [
         2,
@@ -386,8 +386,8 @@
       ],
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/a/a5/Item_Mist_Veiled_Lead_Elixir.png"
     },
-    "Aerosite" : {
-      "name" : "",
+    "aerosite" : {
+      "name" : "Körnchen pechschwarzer Aerosiderit",
       "location" : "Liyue",
       "weekday" : [
         3,

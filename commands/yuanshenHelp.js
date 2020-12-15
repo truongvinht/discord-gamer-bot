@@ -11,7 +11,7 @@ const { Command } = require('discord-akairo');
 class yuanshenHelpCommand extends Command {
     constructor () {
         super('impactHelp', {
-            aliases: ['gihelp', 'imhelp', 'genshinimpacthelp', 'genshinhelp']
+            aliases: ['gihelp', 'ghelp', 'imhelp', 'genshinimpacthelp', 'genshinhelp']
         });
     }
 
