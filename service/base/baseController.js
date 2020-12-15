@@ -13,6 +13,7 @@ const help = (message) => {
         .setTitle('General Commands')
         .setAuthor(`${author}`)
         .setDescription('Following commands are available:')
+        .addField(`${PREFIX}ghelp`, 'Genshin Impact Help')
         .addField(`${PREFIX}achelp`, 'Auto Chess Help')
         .addField(`${PREFIX}pmHelp`, 'Pokemon Masters Help');
 
