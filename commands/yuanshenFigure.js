@@ -15,8 +15,7 @@ class yuanshenFigureCommand extends Command {
     }
 
     exec (message) {
-        return message.channel.send(controller.getFigure(message));
-        // return message.channel.send(controller.getHelpMessage(c.prefix(), message.author.username));
+        controller.sendFigure(message);
     }
 }
 

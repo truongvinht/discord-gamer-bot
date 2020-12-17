@@ -27,15 +27,30 @@ const figureData = (name) => {
 };
 
 const figurelist = () => {
-
     var list = '';
     for (var i = 0; i < Object.keys(figure).length; i++) {
         const figurelist = Object.keys(figure);
         const key = figurelist[i];
         const name = figure[key].name;
-        list = `${list} ${name}\n`;
+
+        var element = '';
+
+        if (figure[key].element !== '') {
+            element = ` [${getServersideString(figure[key].element)}]`;
+        }
+
+        list = `${list} ${name}${element}\n`;
     }
     return list;
+};
+
+const getServersideString = (element) => {
+    // if (element === 'Elektro') {
+    //     return ':VisionElectro:';
+    // }
+
+    // return ` :Vision${element}: `;
+    return element;
 };
 
 const figurecount = () => {
@@ -96,7 +111,6 @@ const randomWeapon = (count) => {
 };
 
 const findFigureByTalent = (talent) => {
-
     var figures = [];
 
     for (var i = 0; i < Object.keys(figure).length; i++) {
@@ -110,6 +124,48 @@ const findFigureByTalent = (talent) => {
     }
 
     return figures;
+};
+
+const findWeeklyBossByDrop = (drop) => {
+    const weeklybossList = data.weeklyboss;
+
+    for (var i = 0; i < Object.keys(weeklybossList).length; i++) {
+        const keyLists = Object.keys(weeklybossList);
+        const key = keyLists[i];
+
+        const bossDrops = weeklybossList[key].drops;
+
+        for (var j = 0; j < bossDrops.length; j++) {
+            if (drop === bossDrops[j]) {
+                return `${weeklybossList[key].name} [${weeklybossList[key].description}]`;
+            }
+        }
+    }
+
+    // not found
+    return 'Unbekannt';
+};
+
+const findDayByTalentbook = (book) => {
+    // collect all farmable talent books for today
+    const talentbooks = data.talentbooks;
+    const talentkeys = Object.keys(talentbooks);
+
+    for (var i = 0; i < talentkeys.length; i++) {
+
+        const talentDetail = talentbooks[talentkeys[i]];
+        if (book === talentDetail.name) {
+            var result = [];
+
+            const datemap = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr', 6: 'Sa', 0: 'So' };
+            for (var j = 0; j < talentDetail.weekday.length; j++) {
+                result.push(datemap[`${talentDetail.weekday[j]}`]);
+            }
+
+            return result;
+        }
+    }
+    return '';
 };
 
 const today = () => {
@@ -164,5 +220,7 @@ module.exports = {
     getElementIconUrl: element,
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
+    findWeeklyBoss: findWeeklyBossByDrop,
+    findTalentWeekday: findDayByTalentbook,
     getToday: today
 };

@@ -1,5 +1,15 @@
 {
   "figure" : {
+    "albedo" : {
+      "name" : "Albedo",
+      "rarity" : 5,
+      "element" : "Geo",
+      "weapon" : "Einhandschwert",
+      "birthday" : "",
+      "talent" : "",
+      "image" : "https://static.wikia.nocookie.net/gensin-impact/images/f/f8/Character_Albedo_Card.png/revision/latest/scale-to-width-down/562?cb=20201217044820",
+      "talent_weekly" : ""
+    },
     "amber" : {
       "name" : "Amber",
       "rarity" : 4,
@@ -76,7 +86,7 @@
       "element" : "Elektro",
       "weapon" : "Bogen",
       "birthday" : "27. Mai",
-      "talent" : "Ballade",
+      "talent" : "Poesie",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/4/48/Character_Fischl_Card.jpg/revision/latest/scale-to-width-down/562?cb=20200331202523",
       "talent_weekly" : "Seele des Nordwinds"
     },
@@ -90,13 +100,23 @@
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/0/0e/Character_Jean_Card.jpg/revision/latest/scale-to-width-down/562?cb=20190703155524",
       "talent_weekly" : "Schwanzfeder des Ostwinds"
     },
+    "ganyu" : {
+      "name" : "Ganyu",
+      "rarity" : 5,
+      "element" : "Kryo",
+      "weapon" : "Bogen",
+      "birthday" : "",
+      "talent" : "",
+      "image" : "https://static.wikia.nocookie.net/gensin-impact/images/a/a0/Character_Ganyu_Portrait.png/revision/latest/scale-to-width-down/620?cb=20201215013006",
+      "talent_weekly" : ""
+    },
     "kaeya" : {
       "name" : "Kaeya",
       "rarity" : 4,
       "element" : "Kryo",
       "weapon" : "Einhandschwert",
       "birthday" : "30. November",
-      "talent" : "Ballade",
+      "talent" : "Poesie",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/6/64/Character_Kaeya_Card.jpg/revision/latest/scale-to-width-down/562?cb=20190704215128",
       "talent_weekly" : "Seele des Nordwinds"
     },
@@ -126,7 +146,7 @@
       "element" : "Elektro",
       "weapon" : "Katalysator",
       "birthday" : "9. Juni",
-      "talent" : "Ballade",
+      "talent" : "Poesie",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/d/dc/Character_Lisa_Card.jpg/revision/latest/scale-to-width-down/562?cb=20201024042621",
       "talent_weekly" : "Klaue des Ostwinds"
     },
@@ -203,10 +223,10 @@
     "traveler" : {
       "name" : "Traveler",
       "rarity" : 5,
-      "element" : "Anemo",
+      "element" : "",
       "weapon" : "Einhandschwert",
-      "birthday" : "Unterschiedlich",
-      "talent" : "Freiheit",
+      "birthday" : "",
+      "talent" : "",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/1/1c/Traveler_Male_Card.jpg/revision/latest/scale-to-width-down/562?cb=20201024043323",
       "talent_weekly" : ""
     },
@@ -216,7 +236,7 @@
       "element" : "Anemo",
       "weapon" : "Bogen ",
       "birthday" : "16. Juni",
-      "talent" : "Ballade",
+      "talent" : "Poesie",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/7/76/Character_Venti_Card.jpg/revision/latest/scale-to-width-down/562?cb=20201024042752",
       "talent_weekly" : "Schwanz des Nordwinds"
     },
@@ -265,7 +285,7 @@
     "dvalin" : {
       "name" : "Dvalin",
       "description" : "Drache",
-      "drop" : [
+      "drops" : [
         "Schwanzfeder des Ostwinds",
         "Klaue des Ostwinds",
         "Atem des Ostwinds"
@@ -274,7 +294,7 @@
     "andrius" : {
       "name" : "Andrius",
       "description" : "Wolf",
-      "drop" : [
+      "drops" : [
         "Schwanz des Nordwinds",
         "Ring des Nordwinds",
         "Seele des Nordwinds"
@@ -283,7 +303,7 @@
     "tartaglia" : {
       "name" : "Tartaglia",
       "description" : "Childe",
-      "drop" : [
+      "drops" : [
         "Hauer des Monoceros Caeli",
         "Dämonengewand - Fragment",
         "-"
@@ -307,8 +327,8 @@
         5
       ]
     },
-    "ballade" : {
-      "name" : "Ballade",
+    "poesie" : {
+      "name" : "Poesie",
       "location" : "Mondstadt",
       "weekday" : [
         3,

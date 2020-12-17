@@ -39,7 +39,10 @@ const figureForMessage = (message) => {
     // collect name list
     for (var i = 0; i < msgArguments.length - 1; i++) {
         const figureinfo = service.getFigure(msgArguments[i + 1]);
-        figureDataList.push(figureinfo);
+
+        if (figureinfo != null) {
+            figureDataList.push(figureinfo);
+        }
     }
 
     sendFigureMessage(message, figureDataList);
@@ -50,7 +53,7 @@ const figurelist = (message) => {
     d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${service.getFiguresCount()}]`);
     d.addField('Verfügbare Figuren', service.getAllFigures());
     d.setThumbnail(LOGO_URL);
-    message.channel.send(d);
+    return d;
 };
 
 function sendFigureMessage (message, figurelist) {
@@ -62,8 +65,31 @@ function sendFigureMessage (message, figurelist) {
         d.setDescription(service.getStarrating(figure.rarity));
         d.setThumbnail(figure.image);
         d.addField('Waffe', figure.weapon);
-        d.addField('Talent Bücher', figure.talent);
-        d.setFooter(`🎂 ${figure.birthday}`, service.getElementIconUrl(figure.element.toLowerCase()));
+
+        if (figure.talent !== '') {
+            d.addField(`Talent Bücher [${service.findTalentWeekday(figure.talent)}]`, figure.talent);
+        }
+
+        // weekly boss drop
+        if (figure.talent_weekly !== '') {
+            d.addField(`Wochenboss - ${service.findWeeklyBoss(figure.talent_weekly)}`, figure.talent_weekly);
+        }
+
+        // footer
+        if (figure.element === '') {
+            if (figure.birthday === '') {
+                // no birthday and no element
+            } else {
+                d.setFooter(`🎂 ${figure.birthday}`);
+            }
+        } else {
+            if (figure.birthday === '') {
+                d.setFooter('🎂 Unbekannt', service.getElementIconUrl(figure.element.toLowerCase()));
+            } else {
+                d.setFooter(`🎂 ${figure.birthday}`, service.getElementIconUrl(figure.element.toLowerCase()));
+            }
+        }
+
         // d.setImage(service.getElementIconUrl(figure.element.toLowerCase()));
         message.channel.send(d).then(async function (message) {
             // write next player
@@ -72,7 +98,7 @@ function sendFigureMessage (message, figurelist) {
     }
 }
 
-const today = (message) => {
+const today = () => {
     const d = new Discord.MessageEmbed();
     d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
     d.setThumbnail(LOGO_URL);
@@ -88,7 +114,7 @@ const today = (message) => {
         d.addField(`Waffendrop - ${weapondata.name}`, `in ${weapondata.location}`);
     }
 
-    message.channel.send(d);
+    return d;
 };
 
 const randomElement = (message) => {
@@ -171,9 +197,9 @@ function writePlayerPick (message, playerPick) {
 // export
 module.exports = {
     getHelpMessage: help,
-    getFigure: figureForMessage,
+    sendFigure: figureForMessage,
     getFigurelist: figurelist,
     getToday: today,
-    getRandomElement: randomElement,
-    getRandomWeapon: randomWeapon
+    sendRandomElement: randomElement,
+    sendRandomWeapon: randomWeapon
 };

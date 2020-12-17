@@ -36,21 +36,21 @@
   "homepage": "https://github.com/truongvinht/discord-gamer-bot#readme",
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
-    "discord-akairo": "^8.0.0",
-    "discord.js": "^12.2.0",
+    "discord-akairo": "^8.1.0",
+    "discord.js": "^12.5.1",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "ytdl-core": "^2.1.7"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-standard": "^4.1.0",
     "jest": "^25.5.4"
   }
 }

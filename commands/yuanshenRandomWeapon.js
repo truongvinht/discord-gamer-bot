@@ -15,7 +15,7 @@ class yuanshenRandomWeaponCommand extends Command {
     }
 
     exec (message) {
-        return message.channel.send(controller.getRandomWeapon(message));
+        controller.sendRandomWeapon(message);
     }
 }
 
