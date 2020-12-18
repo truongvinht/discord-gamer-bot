@@ -279,6 +279,16 @@
       "talent" : "Gold",
       "image" : "https://static.wikia.nocookie.net/gensin-impact/images/d/d8/Character_Zhongli_Card.jpeg/revision/latest/scale-to-width-down/562?cb=20201123123035",
       "talent_weekly" : "Hauer des Monoceros Caeli"
+    },
+    "xiao" : {
+      "name" : "Xiao",
+      "rarity" : 5,
+      "element" : "Anemo",
+      "weapon" : "Speer",
+      "birthday" : "17. April",
+      "talent" : "",
+      "image" : "https://static.wikia.nocookie.net/gensin-impact/images/8/88/Character_Xiao_Card.jpg/revision/latest/scale-to-width-down/562?cb=20200331193542",
+      "talent_weekly" : ""
     }
   },
   "weeklyboss" : {
