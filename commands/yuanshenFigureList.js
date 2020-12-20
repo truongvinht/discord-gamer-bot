@@ -15,7 +15,7 @@ class yuanshenFigureListCommand extends Command {
     }
 
     exec (message) {
-        return message.channel.send(controller.getFigurelist(message));
+        controller.sendFigurelist(message);
     }
 }
 

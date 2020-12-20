@@ -25,77 +25,78 @@ const help = (PREFIX, author) => {
 const figureForMessage = (message) => {
     const msgArguments = message.content.split(' ');
 
-    var figureCounter = msgArguments.length;
-    if (figureCounter > 1) {
-        // more than one figure
-        // ignore first
-        figureCounter--;
-    } else {
-        figureCounter++;
-    }
+    const figureCounter = msgArguments.length - 1;
 
-    var figureDataList = [];
+    if (figureCounter > 0) {
+        const callback = function (entry) {
+            sendFigureMessage(message, entry);
+        };
 
-    // collect name list
-    for (var i = 0; i < msgArguments.length - 1; i++) {
-        const figureinfo = service.getFigure(msgArguments[i + 1]);
+        var name = msgArguments[1];
 
-        if (figureinfo != null) {
-            figureDataList.push(figureinfo);
+        // exception handling
+        if (name.toLowerCase() === 'childe') {
+            name = 'tartaglia';
         }
-    }
+        if (name.toLowerCase() === 'sucrose') {
+            name = 'saccharose';
+        }
 
-    sendFigureMessage(message, figureDataList);
+        service.getFigure(name, callback);
+    } else {
+        // missing argument
+    }
 };
 
 const figurelist = (message) => {
-    const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${service.getFiguresCount()}]`);
-    d.addField('Verfügbare Figuren', service.getAllFigures());
-    d.setThumbnail(LOGO_URL);
-    return d;
+    const callback = function (entry) {
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${service.getFiguresCount()}]`);
+        d.addField('Verfügbare Figuren', entry);
+        d.setThumbnail(LOGO_URL);
+        message.channel.send(d);
+    };
+
+    service.getAllFigures(callback);
 };
 
-function sendFigureMessage (message, figurelist) {
-    if (figurelist.length > 0) {
-        var figure = figurelist.shift();
+function sendFigureMessage (message, figure) {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
+    d.setDescription(service.getStarrating(figure.rarity));
+    d.setThumbnail(figure.image_url);
+    d.addField('Waffe', figure.weapon);
 
-        const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
-        d.setDescription(service.getStarrating(figure.rarity));
-        d.setThumbnail(figure.image);
-        d.addField('Waffe', figure.weapon);
-
-        if (figure.talent !== '') {
-            d.addField(`Talent Bücher [${service.findTalentWeekday(figure.talent)}]`, figure.talent);
-        }
-
-        // weekly boss drop
-        if (figure.talent_weekly !== '') {
-            d.addField(`Wochenboss - ${service.findWeeklyBoss(figure.talent_weekly)}`, figure.talent_weekly);
-        }
-
-        // footer
-        if (figure.element === '') {
-            if (figure.birthday === '') {
-                // no birthday and no element
-            } else {
-                d.setFooter(`🎂 ${figure.birthday}`);
-            }
-        } else {
-            if (figure.birthday === '') {
-                d.setFooter('🎂 Unbekannt', service.getElementIconUrl(figure.element.toLowerCase()));
-            } else {
-                d.setFooter(`🎂 ${figure.birthday}`, service.getElementIconUrl(figure.element.toLowerCase()));
-            }
-        }
-
-        // d.setImage(service.getElementIconUrl(figure.element.toLowerCase()));
-        message.channel.send(d).then(async function (message) {
-            // write next player
-            sendFigureMessage(message, figurelist);
-        });
+    if (figure.talent != null && figure.talent !== '') {
+        d.addField(`Talent Bücher [${service.findTalentWeekday(figure.talent)}]`, figure.talent);
     }
+
+    // weekly boss drop
+    if (figure.boss_drop_id != null && figure.boss_drop_id !== '') {
+        d.addField(`Wochenboss - ${service.findWeeklyBoss(figure.boss_drop)}`, figure.boss_drop);
+    }
+
+    // footer
+    if (figure.element === '') {
+        if (figure.birthday === '') {
+            // no birthday and no element
+        } else {
+            d.setFooter(`🎂 ${figure.birthday}`);
+        }
+    } else {
+        if (figure.birthday == null || figure.birthday === '') {
+            d.setFooter('🎂 Unbekannt', service.getElementIconUrl(figure.element.toLowerCase()));
+        } else {
+            d.setFooter(`🎂 ${figure.birthday}`, service.getElementIconUrl(figure.element.toLowerCase()));
+        }
+    }
+
+    // d.setImage(service.getElementIconUrl(figure.element.toLowerCase()));
+    message.channel.send(d);
+    // .then(async function (message) {
+    //     // write next player
+    //     sendFigureMessage(message, figurelist);
+    // });
 }
 
 const today = () => {
@@ -198,7 +199,7 @@ function writePlayerPick (message, playerPick) {
 module.exports = {
     getHelpMessage: help,
     sendFigure: figureForMessage,
-    getFigurelist: figurelist,
+    sendFigurelist: figurelist,
     getToday: today,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon

@@ -3,45 +3,43 @@
 // ================
 
 const data = require('./yuanshen.json');
+
+var db = require('./yuanshenDBHandler.js');
 const figure = data.figure;
 
-const figureData = (name) => {
+const figureData = (name, callback) => {
     // prevent null data
     if (name == null) {
         return null;
     }
+    const sql = 'select * from Figure f ' +
+    'left join (select eid, name as element from Element) e on f.element_id = e.eid ' +
+    'left join (select wtid, name as weapon from Weapon_Type) wt on f.weapon_type_id = wt.wtid ' +
+    'left join (select tid, name as talent from Talent) t on f.talent_id = t.tid ' +
+    'left join (select lid, name as location from Location) l on f.location_id = l.lid ' +
+    'left join (select bdid, name as boss_drop from Boss_Drop) bd on f.boss_drop_id = bd.bdid ' +
+    'where name = ? collate nocase';
 
-    if (name.toLowerCase() === 'childe') {
-        return figure.tartaglia;
-    }
-
-    if (name.toLowerCase() === 'sucrose') {
-        return figure.saccharose;
-    }
-
-    if (Object.prototype.hasOwnProperty.call(figure, name.toLowerCase())) {
-        return figure[name.toLowerCase()];
-    } else {
-        return null;
-    }
+    db.executeQueryForSingleEntry(sql, [name], callback);
 };
 
-const figurelist = () => {
-    var list = '';
-    for (var i = 0; i < Object.keys(figure).length; i++) {
-        const figurelist = Object.keys(figure);
-        const key = figurelist[i];
-        const name = figure[key].name;
-
-        var element = '';
-
-        if (figure[key].element !== '') {
-            element = ` [${getServersideString(figure[key].element)}]`;
+const figurelist = (callback) => {
+    const resultCallback = function (entries) {
+        var list = '';
+        for (var i = 0; i < entries.length; i++) {
+            const name = entries[i].name;
+            var element = '';
+            if (entries[i].element !== '') {
+                element = ` [${getServersideString(entries[i].element)}]`;
+            }
+            list = `${list} ${name}${element}\n`;
         }
+        callback(list);
+    };
 
-        list = `${list} ${name}${element}\n`;
-    }
-    return list;
+    const sql = 'select name, e.element from Figure f ' +
+    'left join (select eid, name as element from Element) e on f.element_id = e.eid order by name asc';
+    db.executeQuery(sql, [], resultCallback);
 };
 
 const getServersideString = (element) => {
