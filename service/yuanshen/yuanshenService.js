@@ -4,7 +4,10 @@
 
 const data = require('./yuanshen.json');
 
-var db = require('./yuanshenDBHandler.js');
+var sqlite3 = require('sqlite3').verbose();
+const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
+
+//var db = require('service/yuanshen/yuanshenDBHandler.js');
 const figure = data.figure;
 
 const figureData = (name, callback) => {
@@ -20,7 +23,7 @@ const figureData = (name, callback) => {
     'left join (select bdid, name as boss_drop from Boss_Drop) bd on f.boss_drop_id = bd.bdid ' +
     'where name = ? collate nocase';
 
-    db.executeQueryForSingleEntry(sql, [name], callback);
+    executeQueryForSingleEntry(sql, [name], callback);
 };
 
 const figurelist = (callback) => {
@@ -39,7 +42,7 @@ const figurelist = (callback) => {
 
     const sql = 'select name, e.element from Figure f ' +
     'left join (select eid, name as element from Element) e on f.element_id = e.eid order by name asc';
-    db.executeQuery(sql, [], resultCallback);
+    executeQuery(sql, [], resultCallback);
 };
 
 const getServersideString = (element) => {
@@ -207,6 +210,48 @@ const today = () => {
 
     // get birthday
     return resultMap;
+};
+
+const db = new sqlite3.Database(DBSOURCE, (err) => {
+    if (err) {
+        // Cannot open database
+        console.error(err.message);
+        throw err;
+    } else {
+        console.log('Connecting to the SQLite database...');
+        db.run('SELECT *  FROM Figure',
+            (err) => {
+                if (err) {
+                // Table missing
+                    console.log('Cant access SQLite database');
+                }
+            });
+    }
+});
+
+// wrapper for access sqlite
+const executeQuery = (sql, params, callback) => {
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+        callback(rows);
+    });
+};
+
+const executeQueryForSingleEntry = (sql, params, callback) => {
+    const singleCallback = function (entry) {
+        if (entry == null) {
+            callback(null);
+        } else {
+            if (entry.length > 0) {
+                //console.log(entry[0]);
+                callback(entry[0]);
+            }
+        }
+    };
+    executeQuery(sql, params, singleCallback);
 };
 
 // export
