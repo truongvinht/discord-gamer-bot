@@ -49,9 +49,9 @@ const figureForMessage = (message) => {
 };
 
 const figurelist = (message) => {
-    const callback = function (entry) {
+    const callback = function (entry, count) {
         const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${service.getFiguresCount()}]`);
+        d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${count}]`);
         d.addField('Verfügbare Figuren', entry);
         d.setThumbnail(LOGO_URL);
         message.channel.send(d);

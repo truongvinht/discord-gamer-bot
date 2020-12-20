@@ -37,7 +37,7 @@ const figurelist = (callback) => {
             }
             list = `${list} ${name}${element}\n`;
         }
-        callback(list);
+        callback(list, entries.length);
     };
 
     const sql = 'select name, e.element from Figure f ' +
