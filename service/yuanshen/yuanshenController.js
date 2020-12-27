@@ -57,7 +57,20 @@ const figurelist = (message) => {
         message.channel.send(d);
     };
 
-    service.getAllFigures(callback);
+    const resultCallback = function (entries) {
+        var list = '';
+        for (var i = 0; i < entries.length; i++) {
+            const name = entries[i].name;
+            var element = '';
+            if (entries[i].element !== '') {
+                element = ` [${entries[i].element}]`;
+            }
+            list = `${list} ${name}${element}\n`;
+        }
+        callback(list, entries.length);
+    };
+
+    service.getAllFigures(resultCallback);
 };
 
 function sendFigureMessage (message, figure) {
@@ -104,18 +117,63 @@ const today = () => {
     d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
     d.setThumbnail(LOGO_URL);
 
-    const data = service.getToday();
-    for (var i = 0; i < Object.keys(data.talent).length; i++) {
-        const talentdata = data.talent[Object.keys(data.talent)[i]];
-        d.addField(`Talent ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
-    }
+    // const data = service.getToday();
+    // for (var i = 0; i < Object.keys(data.talent).length; i++) {
+    //     const talentdata = data.talent[Object.keys(data.talent)[i]];
+    //     d.addField(`Talent ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
+    // }
 
-    for (var j = 0; j < Object.keys(data.weapon).length; j++) {
-        const weapondata = data.weapon[Object.keys(data.weapon)[j]];
-        d.addField(`Waffendrop - ${weapondata.name}`, `in ${weapondata.location}`);
-    }
+    // for (var j = 0; j < Object.keys(data.weapon).length; j++) {
+    //     const weapondata = data.weapon[Object.keys(data.weapon)[j]];
+    //     d.addField(`Waffendrop - ${weapondata.name}`, `in ${weapondata.location}`);
+    // }
 
     return d;
+};
+
+const sendToday = (message) => {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
+    d.setThumbnail(LOGO_URL);
+
+    const callback = function (locations, figures, talents, weapon_drops) {
+        for (var l = 0; l < locations.length; l++) {
+            for (var t = 0; t < talents.length; t++) {
+                var location = locations[l];
+                var talent = talents[t];
+
+                if (location.lid === talent.lid) {
+
+                    var figureListname = '';
+                    for (var f = 0; f < figures.length; f++) {
+                        if (figures[f].talent_id === talent.tid) {
+                            console.log(figures[f].name);
+                            if (figureListname === '') {
+                                figureListname = figures[f].name;
+                            } else {
+                                figureListname = `${figureListname}\n${figures[f].name}`;
+                            }
+                        }
+                    }
+                    d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
+                }
+            }
+        }
+        for (var lp = 0; lp < locations.length; lp++) {
+            var wpLocation = locations[lp];
+            for (var wp = 0; wp < weapon_drops.length; wp++) {
+                var weapon = weapon_drops[wp];
+
+                if (wpLocation.lid === weapon.location_id) {
+                    d.addField(`Waffendrop - ${weapon.name}`, `in ${wpLocation.name}`);
+                    // d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
+                }
+            }
+        }
+        message.channel.send(d);
+    };
+
+    service.getToday(callback);
 };
 
 const randomElement = (message) => {
@@ -200,6 +258,7 @@ module.exports = {
     getHelpMessage: help,
     sendFigure: figureForMessage,
     sendFigurelist: figurelist,
+    sendToday: sendToday,
     getToday: today,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon

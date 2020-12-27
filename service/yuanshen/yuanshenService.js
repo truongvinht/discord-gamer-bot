@@ -7,7 +7,6 @@ const data = require('./yuanshen.json');
 var sqlite3 = require('sqlite3').verbose();
 const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
 
-//var db = require('service/yuanshen/yuanshenDBHandler.js');
 const figure = data.figure;
 
 const figureData = (name, callback) => {
@@ -27,31 +26,34 @@ const figureData = (name, callback) => {
 };
 
 const figurelist = (callback) => {
-    const resultCallback = function (entries) {
-        var list = '';
-        for (var i = 0; i < entries.length; i++) {
-            const name = entries[i].name;
-            var element = '';
-            if (entries[i].element !== '') {
-                element = ` [${getServersideString(entries[i].element)}]`;
-            }
-            list = `${list} ${name}${element}\n`;
-        }
-        callback(list, entries.length);
-    };
-
-    const sql = 'select name, e.element from Figure f ' +
+    const sql = 'select name, e.element, f.talent_id from Figure f ' +
     'left join (select eid, name as element from Element) e on f.element_id = e.eid order by name asc';
-    executeQuery(sql, [], resultCallback);
+    executeQuery(sql, [], callback);
 };
 
-const getServersideString = (element) => {
-    // if (element === 'Elektro') {
-    //     return ':VisionElectro:';
-    // }
+const talentForWeekday = (weekday, callback) => {
+    const sql = 'select * from Talent_Drop d ' +
+    'left join (select tid,lid,name,location from Talent t ' +
+    'left join (select lid, name as location from Location) l on t.location_id = l.lid ) tl ' +
+    'on d.talent_id = tl.tid ' +
+    'left join (SELECT wid, position,  name as weekday, short_name as weekday_short from Weekday) wd ' +
+    'on d.weekday_id = wd.wid ' +
+    'where position = ?';
+    executeQuery(sql, [weekday], callback);
+};
 
-    // return ` :Vision${element}: `;
-    return element;
+const weaponMaterialForWeekday = (weekday, callback) => {
+    const sql = 'select * from Weapon_Material_Drop d ' +
+    'left join (select wmid,location_id,name from Weapon_Material) wm ' +
+    'on d.weapon_material_id = wmid ' +
+    'left join (select wid, position, name as weekday, short_name as weekday_short from Weekday) w ' +
+    'on w.wid = d.weekday_id where position = ?';
+    executeQuery(sql, [weekday], callback);
+};
+
+const regions = (callback) => {
+    const sql = 'select * from Location';
+    executeQuery(sql, [], callback);
 };
 
 const figurecount = () => {
@@ -169,47 +171,77 @@ const findDayByTalentbook = (book) => {
     return '';
 };
 
-const today = () => {
-    var resultMap = { talent: {}, weapon: {}, birthday: [] };
-
-    // weekday
+const today = (callback) => {
     const d = new Date();
     var weekday = d.getDay(); // 0-6 Sonntag - Samstag
 
-    // collect all farmable talent books for today
-    const talentbooks = data.talentbooks;
-    const talentkeys = Object.keys(talentbooks);
-
-    for (var i = 0; i < talentkeys.length; i++) {
-        const talentDetail = talentbooks[talentkeys[i]];
-        const bookweekdates = talentDetail.weekday;
-
-        for (var j = 0; j < bookweekdates.length; j++) {
-            if (bookweekdates[j] === weekday) {
-                // find all figures with same talent
-                const figureList = findFigureByTalent(talentDetail.name);
-                resultMap.talent[talentkeys[i]] = { name: talentDetail.name, location: talentDetail.location, figures: figureList };
-            }
-        }
+    // override Sunday as 7
+    if (weekday === 0) {
+        weekday = 7;
     }
 
-    // weapons
-    const weaponmats = data.weapondrops;
-    const weaponkeys = Object.keys(weaponmats);
+    // get all regions
+    const regioncallback = function (regions, rcount) {
+        // get all talents for current weekday
+        const talentcallback = function (talents, tcount) {
+            const figurecallback = function (figures, tcount) {
+                const weaponcallback = function (weapons, wpcount) {
+                    callback(regions, figures, talents, weapons);
+                };
+                weaponMaterialForWeekday(weekday, weaponcallback);
+            };
+            figurelist(figurecallback);
+        };
 
-    for (var a = 0; a < weaponkeys.length; a++) {
-        const weaponDetail = weaponmats[weaponkeys[a]];
-        const weapondates = weaponDetail.weekday;
+        talentForWeekday(weekday, talentcallback);
+    };
+    regions(regioncallback);
 
-        for (var b = 0; b < weapondates.length; b++) {
-            if (weapondates[b] === weekday) {
-                resultMap.weapon[weaponkeys[a]] = { name: weaponDetail.name, location: weaponDetail.location };
-            }
-        }
-    }
+    // var resultMap = { talent: {}, weapon: {}, birthday: [] };
 
-    // get birthday
-    return resultMap;
+    // // weekday
+    // const d = new Date();
+    // var weekday = d.getDay(); // 0-6 Sonntag - Samstag
+
+    // // override Sunday as 7
+    // if (weekday === 0) {
+    //     weekday = 7;
+    // }
+
+    // // collect all farmable talent books for today
+    // const talentbooks = data.talentbooks;
+    // const talentkeys = Object.keys(talentbooks);
+
+    // for (var i = 0; i < talentkeys.length; i++) {
+    //     const talentDetail = talentbooks[talentkeys[i]];
+    //     const bookweekdates = talentDetail.weekday;
+
+    //     for (var j = 0; j < bookweekdates.length; j++) {
+    //         if (bookweekdates[j] === weekday) {
+    //             // find all figures with same talent
+    //             const figureList = findFigureByTalent(talentDetail.name);
+    //             resultMap.talent[talentkeys[i]] = { name: talentDetail.name, location: talentDetail.location, figures: figureList };
+    //         }
+    //     }
+    // }
+
+    // // weapons
+    // const weaponmats = data.weapondrops;
+    // const weaponkeys = Object.keys(weaponmats);
+
+    // for (var a = 0; a < weaponkeys.length; a++) {
+    //     const weaponDetail = weaponmats[weaponkeys[a]];
+    //     const weapondates = weaponDetail.weekday;
+
+    //     for (var b = 0; b < weapondates.length; b++) {
+    //         if (weapondates[b] === weekday) {
+    //             resultMap.weapon[weaponkeys[a]] = { name: weaponDetail.name, location: weaponDetail.location };
+    //         }
+    //     }
+    // }
+
+    // // get birthday
+    // return resultMap;
 };
 
 const db = new sqlite3.Database(DBSOURCE, (err) => {
@@ -233,6 +265,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
 const executeQuery = (sql, params, callback) => {
     db.all(sql, params, (err, rows) => {
         if (err) {
+            console.log(`Query: ${sql}`);
             console.log(err.message);
             return;
         }
@@ -246,7 +279,7 @@ const executeQueryForSingleEntry = (sql, params, callback) => {
             callback(null);
         } else {
             if (entry.length > 0) {
-                //console.log(entry[0]);
+                // console.log(entry[0]);
                 callback(entry[0]);
             }
         }

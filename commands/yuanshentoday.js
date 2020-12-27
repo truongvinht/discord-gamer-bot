@@ -15,7 +15,8 @@ class yuanshentodayCommand extends Command {
     }
 
     exec (message) {
-        return message.channel.send(controller.getToday());
+        controller.sendToday(message);
+        // return message.channel.send(controller.getToday());
     }
 }
 
