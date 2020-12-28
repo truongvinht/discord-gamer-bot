@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class yuanshenRandomWeaponCommand extends Command {
     constructor () {
         super('impactWeapon', {
-            aliases: ['gweap', 'gweapon', 'imweapon', 'giweapon']
+            aliases: ['gwp', 'gweap', 'gweapon', 'imweapon', 'giweapon']
         });
     }
 

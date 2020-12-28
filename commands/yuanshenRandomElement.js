@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class yuanshenRandomElementCommand extends Command {
     constructor () {
         super('impactElement', {
-            aliases: ['gelem', 'gelement', 'imelement', 'gielement']
+            aliases: ['gel', 'gelem', 'gelement', 'imelement', 'gielement']
         });
     }
 

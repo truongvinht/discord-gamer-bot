@@ -7,15 +7,13 @@ const data = require('./yuanshen.json');
 var sqlite3 = require('sqlite3').verbose();
 const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
 
-const figure = data.figure;
-
 const figureData = (name, callback) => {
     // prevent null data
     if (name == null) {
         return null;
     }
     const sql = 'select * from Figure f ' +
-    'left join (select eid, name as element from Element) e on f.element_id = e.eid ' +
+    'left join (select eid, name as element, image_url as element_image_url from Element) e on f.element_id = e.eid ' +
     'left join (select wtid, name as weapon from Weapon_Type) wt on f.weapon_type_id = wt.wtid ' +
     'left join (select tid, name as talent from Talent) t on f.talent_id = t.tid ' +
     'left join (select lid, name as location from Location) l on f.location_id = l.lid ' +
@@ -74,8 +72,14 @@ const regions = (callback) => {
     executeQuery(sql, [], callback);
 };
 
-const figurecount = () => {
-    return Object.keys(figure).length;
+const elements = (callback) => {
+    const sql = 'select * from Element';
+    executeQuery(sql, [], callback);
+};
+
+const weapontype = (callback) => {
+    const sql = 'select * from Weapon_Type';
+    executeQuery(sql, [], callback);
 };
 
 const rating = (number) => {
@@ -87,64 +91,34 @@ const rating = (number) => {
     return stars;
 };
 
-const element = (icons) => {
-    if (Object.prototype.hasOwnProperty.call(data.icons, icons)) {
-        return data.icons[icons];
-    } else {
-        return null;
-    }
+const randomElement = (count, callback) => {
+    const elementcallback = function (elements, resultCount) {
+        var pickedList = [];
+
+        for (var i = 0; i < count; i++) {
+            var pickedIndex = Math.floor(Math.random() * Math.floor(elements.length));
+            // prevent Dendro! doesnt exist yet (eid = 3)
+            while (elements[pickedIndex].eid === 3) {
+                pickedIndex = Math.floor(Math.random() * Math.floor(elements.length));
+            }
+            pickedList.push(elements[pickedIndex]);
+        }
+        callback(pickedList);
+    };
+    elements(elementcallback);
 };
 
-const randomElement = (count) => {
-    const element = data.element;
+const randomWeapon = (count, callback) => {
+    const weaponCallback = function (weapons, resultCount) {
+        var pickedList = [];
 
-    var pickedList = [];
-
-    for (var i = 0; i < count; i++) {
-        var pickedIndex = Math.floor(Math.random() * Math.floor(element.length));
-
-        // prevent Dendro! doesnt exist yet
-        while (pickedIndex === 2) {
-            pickedIndex = Math.floor(Math.random() * Math.floor(element.length));
+        for (var i = 0; i < count; i++) {
+            var pickedIndex = Math.floor(Math.random() * Math.floor(weapons.length));
+            pickedList.push(weapons[pickedIndex]);
         }
-
-        pickedList.push(element[pickedIndex]);
-    }
-    return pickedList;
-};
-
-const randomWeapon = (count) => {
-    const element = data.weapons;
-
-    var pickedList = [];
-
-    for (var i = 0; i < count; i++) {
-        var pickedIndex = Math.floor(Math.random() * Math.floor(element.length));
-
-        // prevent Dendro! doesnt exist yet
-        while (pickedIndex === 2) {
-            pickedIndex = Math.floor(Math.random() * Math.floor(element.length));
-        }
-
-        pickedList.push(element[pickedIndex]);
-    }
-    return pickedList;
-};
-
-const findFigureByTalent = (talent) => {
-    var figures = [];
-
-    for (var i = 0; i < Object.keys(figure).length; i++) {
-        const fig = Object.keys(figure);
-        const key = fig[i];
-
-        if (talent === figure[key].talent) {
-            const name = figure[key].name;
-            figures.push(name);
-        }
-    }
-
-    return figures;
+        callback(pickedList);
+    };
+    weapontype(weaponCallback);
 };
 
 const findWeeklyBossByDrop = (drop) => {
@@ -277,9 +251,7 @@ const executeQueryForSingleEntry = (sql, params, callback) => {
 module.exports = {
     getFigure: figureData,
     getAllFigures: figurelist,
-    getFiguresCount: figurecount,
     getStarrating: rating,
-    getElementIconUrl: element,
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
     findWeeklyBoss: findWeeklyBossByDrop,

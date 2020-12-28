@@ -99,18 +99,13 @@ function sendFigureMessage (message, figure) {
         }
     } else {
         if (figure.birthday == null || figure.birthday === '') {
-            d.setFooter('🎂 Unbekannt', service.getElementIconUrl(figure.element.toLowerCase()));
+            d.setFooter('🎂 Unbekannt', figure.element_image_url);
         } else {
-            d.setFooter(`🎂 ${figure.birthday}`, service.getElementIconUrl(figure.element.toLowerCase()));
+            d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
         }
     }
 
-    // d.setImage(service.getElementIconUrl(figure.element.toLowerCase()));
     message.channel.send(d);
-    // .then(async function (message) {
-    //     // write next player
-    //     sendFigureMessage(message, figurelist);
-    // });
 }
 
 const sendToday = (message) => {
@@ -234,9 +229,12 @@ const randomElement = (message) => {
         playerCounter++;
     }
 
+    const callback = function (elements) {
+        sendElementMessages(message, msgArguments, elements);
+    };
+
     // get element
-    const elementList = service.getRandomElement(playerCounter);
-    sendElementMessages(message, msgArguments, elementList);
+    service.getRandomElement(playerCounter, callback);
 };
 
 const randomWeapon = (message) => {
@@ -251,9 +249,16 @@ const randomWeapon = (message) => {
         playerCounter++;
     }
 
+    const callback = function (weapons) {
+        sendElementMessages(message, msgArguments, weapons);
+    };
+
     // get weapon
-    const weaponList = service.getRandomWeapon(playerCounter);
-    sendElementMessages(message, msgArguments, weaponList);
+    service.getRandomWeapon(playerCounter, callback);
+};
+
+const randomDungeon = (message) => {
+
 };
 
 function sendElementMessages (message, msgArguments, elementList) {
@@ -290,8 +295,8 @@ function writePlayerPick (message, playerPick) {
 
         const d = new Discord.MessageEmbed();
         d.setTitle(`${YUANSHEN_TITLE} - Zufallsgenerator`);
-        d.setDescription('$1, spiel mal $2'.replace('$1', player).replace('$2', pick.element));
-        d.setThumbnail(service.getElementIconUrl(pick.element.toLowerCase()));
+        d.setDescription('$1, spiel mal $2'.replace('$1', player).replace('$2', pick.element.name));
+        d.setThumbnail(pick.element.image_url);
         message.channel.send(d).then(async function (message) {
             // write next player
             writePlayerPick(message, playerPick);
@@ -306,6 +311,7 @@ module.exports = {
     sendFigurelist: figurelist,
     sendToday: sendToday,
     sendBoss: boss,
+    sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon
 };
