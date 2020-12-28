@@ -17,6 +17,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gfigure NAME`, 'Figurendetails')
         .addField(`${PREFIX}gelement NAME`, 'Zufallsgenerator Elemente')
         .addField(`${PREFIX}gweapon NAME`, 'Zufallsgenerator Waffe')
+        .addField(`${PREFIX}gboss`, 'Bossdrop für Talente')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -112,25 +113,6 @@ function sendFigureMessage (message, figure) {
     // });
 }
 
-const today = () => {
-    const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
-    d.setThumbnail(LOGO_URL);
-
-    // const data = service.getToday();
-    // for (var i = 0; i < Object.keys(data.talent).length; i++) {
-    //     const talentdata = data.talent[Object.keys(data.talent)[i]];
-    //     d.addField(`Talent ${talentdata.name} - ${talentdata.location}`, talentdata.figures);
-    // }
-
-    // for (var j = 0; j < Object.keys(data.weapon).length; j++) {
-    //     const weapondata = data.weapon[Object.keys(data.weapon)[j]];
-    //     d.addField(`Waffendrop - ${weapondata.name}`, `in ${weapondata.location}`);
-    // }
-
-    return d;
-};
-
 const sendToday = (message) => {
     const d = new Discord.MessageEmbed();
     d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
@@ -147,7 +129,7 @@ const sendToday = (message) => {
                     var figureListname = '';
                     for (var f = 0; f < figures.length; f++) {
                         if (figures[f].talent_id === talent.tid) {
-                            console.log(figures[f].name);
+                            // console.log(figures[f].name);
                             if (figureListname === '') {
                                 figureListname = figures[f].name;
                             } else {
@@ -166,7 +148,6 @@ const sendToday = (message) => {
 
                 if (wpLocation.lid === weapon.location_id) {
                     d.addField(`Waffendrop - ${weapon.name}`, `in ${wpLocation.name}`);
-                    // d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
                 }
             }
         }
@@ -174,6 +155,71 @@ const sendToday = (message) => {
     };
 
     service.getToday(callback);
+};
+
+const boss = (message) => {
+
+    const callback = function (bosslist, bossdrops, figures) {
+        // group all drops together based on boss
+        var bossmap = {};
+        var bossdropNames = {};
+
+        for (var bd = 0; bd < bossdrops.length; bd++) {
+            bossdropNames[bd] = bossdrops[bd].name;
+            const bdkey = `${bossdrops[bd].boss_id}`;
+            var bossdropsforBoss = [];
+            if (Object.prototype.hasOwnProperty.call(bossmap, bdkey)) {
+                bossdropsforBoss = bossmap[bdkey];
+            }
+            bossdropsforBoss.push(bossdrops[bd].bdid);
+
+            bossmap[bdkey] = bossdropsforBoss;
+        }
+
+
+        // group all figures together for displaying (base on drop id)
+        var bossdropfiguremap = {};
+
+        for (var f = 0; f < figures.length; f++) {
+            const key = `${figures[f].bdid}`;
+            var bossdropindex = '';
+            if (Object.prototype.hasOwnProperty.call(bossdropfiguremap, key)) {
+                bossdropindex = bossdropfiguremap[key] + ', ' + figures[f].name;
+            } else {
+                bossdropindex = figures[f].name;
+            }
+
+            bossdropfiguremap[key] = bossdropindex;
+        }
+
+        // send a message for each boss
+        sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossmap, bossdropfiguremap);
+
+    };
+    service.getBoss(callback);
+};
+
+const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
+    if (bosslist.length > 0) {
+        const boss = bosslist.shift();
+
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${boss.name} - ${boss.description}`);
+        d.setFooter(`in ${boss.location}`);
+        d.setThumbnail(boss.image_url);
+
+        const drops = bossdrops[`${boss.bid}`];
+
+        for (var dp = 0; dp < drops.length; dp++) {
+            const dropname = bossdropNames[`${drops[dp] - 1}`];
+            d.addField(dropname, figures[`${drops[dp]}`]);
+        }
+
+        message.channel.send(d).then(async function (message) {
+            // write next player
+            sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossdrops, figures);
+        });
+    }
 };
 
 const randomElement = (message) => {
@@ -259,7 +305,7 @@ module.exports = {
     sendFigure: figureForMessage,
     sendFigurelist: figurelist,
     sendToday: sendToday,
-    getToday: today,
+    sendBoss: boss,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon
 };

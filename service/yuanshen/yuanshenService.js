@@ -31,6 +31,13 @@ const figurelist = (callback) => {
     executeQuery(sql, [], callback);
 };
 
+const figurelistWithBossDrops = (callback) => {
+    const sql = 'select name, bdid, boss_id from Figure f ' +
+    'left join (select bdid, boss_id from Boss_Drop) bd on f.boss_drop_id = bd.bdid ' +
+    'where f.boss_drop_id is not null order by name';
+    executeQuery(sql, [], callback);
+};
+
 const talentForWeekday = (weekday, callback) => {
     const sql = 'select * from Talent_Drop d ' +
     'left join (select tid,lid,name,location from Talent t ' +
@@ -49,6 +56,17 @@ const weaponMaterialForWeekday = (weekday, callback) => {
     'left join (select wid, position, name as weekday, short_name as weekday_short from Weekday) w ' +
     'on w.wid = d.weekday_id where position = ?';
     executeQuery(sql, [weekday], callback);
+};
+
+const bosslist = (callback) => {
+    const sql = 'select * from Boss b ' +
+    'left join (select lid, name as location from Location) l on b.location_id = l.lid';
+    executeQuery(sql, [], callback);
+};
+
+const bossdroplist = (callback) => {
+    const sql = 'select * from Boss_Drop order by boss_id';
+    executeQuery(sql, [], callback);
 };
 
 const regions = (callback) => {
@@ -196,52 +214,20 @@ const today = (callback) => {
         talentForWeekday(weekday, talentcallback);
     };
     regions(regioncallback);
+};
 
-    // var resultMap = { talent: {}, weapon: {}, birthday: [] };
-
-    // // weekday
-    // const d = new Date();
-    // var weekday = d.getDay(); // 0-6 Sonntag - Samstag
-
-    // // override Sunday as 7
-    // if (weekday === 0) {
-    //     weekday = 7;
-    // }
-
-    // // collect all farmable talent books for today
-    // const talentbooks = data.talentbooks;
-    // const talentkeys = Object.keys(talentbooks);
-
-    // for (var i = 0; i < talentkeys.length; i++) {
-    //     const talentDetail = talentbooks[talentkeys[i]];
-    //     const bookweekdates = talentDetail.weekday;
-
-    //     for (var j = 0; j < bookweekdates.length; j++) {
-    //         if (bookweekdates[j] === weekday) {
-    //             // find all figures with same talent
-    //             const figureList = findFigureByTalent(talentDetail.name);
-    //             resultMap.talent[talentkeys[i]] = { name: talentDetail.name, location: talentDetail.location, figures: figureList };
-    //         }
-    //     }
-    // }
-
-    // // weapons
-    // const weaponmats = data.weapondrops;
-    // const weaponkeys = Object.keys(weaponmats);
-
-    // for (var a = 0; a < weaponkeys.length; a++) {
-    //     const weaponDetail = weaponmats[weaponkeys[a]];
-    //     const weapondates = weaponDetail.weekday;
-
-    //     for (var b = 0; b < weapondates.length; b++) {
-    //         if (weapondates[b] === weekday) {
-    //             resultMap.weapon[weaponkeys[a]] = { name: weaponDetail.name, location: weaponDetail.location };
-    //         }
-    //     }
-    // }
-
-    // // get birthday
-    // return resultMap;
+const boss = (callback) => {
+    // get all boss
+    const bosscallback = function (bosslist, rcount) {
+        const bossdropscallback = function (bossdroplist, bdcount) {
+            const figurbossdropcallback = function (figuredroplist, rcount) {
+                callback(bosslist, bossdroplist, figuredroplist);
+            };
+            figurelistWithBossDrops(figurbossdropcallback);
+        };
+        bossdroplist(bossdropscallback);
+    };
+    bosslist(bosscallback);
 };
 
 const db = new sqlite3.Database(DBSOURCE, (err) => {
@@ -298,5 +284,6 @@ module.exports = {
     getRandomWeapon: randomWeapon,
     findWeeklyBoss: findWeeklyBossByDrop,
     findTalentWeekday: findDayByTalentbook,
-    getToday: today
+    getToday: today,
+    getBoss: boss
 };
