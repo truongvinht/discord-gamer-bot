@@ -171,7 +171,6 @@ const boss = (message) => {
             bossmap[bdkey] = bossdropsforBoss;
         }
 
-
         // group all figures together for displaying (base on drop id)
         var bossdropfiguremap = {};
 
@@ -259,6 +258,44 @@ const randomWeapon = (message) => {
 
 const randomDungeon = (message) => {
 
+    const msgArguments = message.content.split(' ');
+
+    if (msgArguments.length > 1) {
+        const callback = function (dungeon) {
+            sendDungeonMessage(message, msgArguments, dungeon);
+        };
+
+        // get weapon
+        service.getRandomDungeon(callback);
+    }
+};
+
+function sendDungeonMessage (message, msgArguments, dungeon) {
+    var playerPick = [];
+
+    const userData = message.mentions.users;
+
+    for (var i = 0; i < msgArguments.length - 1; i++) {
+        var player = msgArguments[i + 1];
+
+        const key = player.replace(/[\\<>@#&!]/g, '');
+        // eslint-disable-next-line no-useless-escape
+        if (player.match(/\<\@.*\>/g)) {
+            player = userData.get(key).username;
+        }
+
+        playerPick.push(player);
+    }
+
+    // player
+    const playername = playerPick.shift();
+
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - Sphäre`);
+    d.setDescription('$1, versuch mal $2'.replace('$1', playername).replace('$2', dungeon.name));
+    d.setThumbnail(dungeon.image_url);
+    d.setFooter(`in ${dungeon.location}`);
+    message.channel.send(d);
 };
 
 function sendElementMessages (message, msgArguments, elementList) {

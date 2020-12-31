@@ -82,6 +82,12 @@ const weapontype = (callback) => {
     executeQuery(sql, [], callback);
 };
 
+const dungeons = (callback) => {
+    const sql = 'select * from Dungeon d ' +
+    'left join (select lid, name as location from Location) l on d.location_id = l.lid';
+    executeQuery(sql, [], callback);
+};
+
 const rating = (number) => {
     var stars = '';
 
@@ -119,6 +125,14 @@ const randomWeapon = (count, callback) => {
         callback(pickedList);
     };
     weapontype(weaponCallback);
+};
+
+const randomDungeon = (callback) => {
+    const dungeonCallback = function (dungeons, resultcount) {
+        const pickedIndex = Math.floor(Math.random() * Math.floor(dungeons.length));
+        callback(dungeons[pickedIndex]);
+    };
+    dungeons(dungeonCallback);
 };
 
 const findWeeklyBossByDrop = (drop) => {
@@ -254,6 +268,7 @@ module.exports = {
     getStarrating: rating,
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
+    getRandomDungeon: randomDungeon,
     findWeeklyBoss: findWeeklyBossByDrop,
     findTalentWeekday: findDayByTalentbook,
     getToday: today,
