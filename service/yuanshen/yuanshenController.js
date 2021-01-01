@@ -18,6 +18,8 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gelement NAME`, 'Zufallsgenerator Elemente')
         .addField(`${PREFIX}gweapon NAME`, 'Zufallsgenerator Waffe')
         .addField(`${PREFIX}gboss`, 'Bossdrop für Talente')
+        .addField(`${PREFIX}gdungeon NAME`, 'Zufallsgenerator Dungeon/Sphäre')
+        .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -298,6 +300,44 @@ function sendDungeonMessage (message, msgArguments, dungeon) {
     message.channel.send(d);
 };
 
+const artifact = (message) => {
+    const callback = function (artifactset) {
+        sendArtifactMessage(message, artifactset);
+    };
+
+    // get weapon
+    service.getArtifactset(callback);
+};
+
+function sendArtifactMessage (message, sets) {
+    if (sets.length > 0) {
+        const pick = sets.shift();
+
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${YUANSHEN_TITLE} - ${pick.name}`);
+        if (pick.dungeon != null) {
+            d.setFooter(pick.dungeon, pick.dungeon_image_url);
+        }
+
+        if (pick.one_set != null) {
+            d.addField('1-Set', pick.one_set);
+        }
+
+        if (pick.two_set != null) {
+            d.addField('2-Set', pick.two_set);
+        }
+
+        if (pick.four_set != null) {
+            d.addField('4-Set', pick.four_set);
+        }
+        // d.setDescription('$1, spiel mal $2'.replace('$1', player).replace('$2', pick.element.name));
+        d.setThumbnail(pick.image_url);
+        message.channel.send(d).then(async function (message) {
+            sendArtifactMessage(message, sets);
+        });
+    }
+};
+
 function sendElementMessages (message, msgArguments, elementList) {
     var playerPick = [];
 
@@ -350,5 +390,6 @@ module.exports = {
     sendBoss: boss,
     sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,
-    sendRandomWeapon: randomWeapon
+    sendRandomWeapon: randomWeapon,
+    sendArtifact: artifact
 };

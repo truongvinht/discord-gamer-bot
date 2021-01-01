@@ -88,6 +88,12 @@ const dungeons = (callback) => {
     executeQuery(sql, [], callback);
 };
 
+const artifactsets = (callback) => {
+    const sql = 'select * from Artifact_Set a ' +
+    'left join (select did, name as dungeon, image_url as dungeon_image_url from Dungeon) d on a.dungeon_id = d.did';
+    executeQuery(sql, [], callback);
+};
+
 const rating = (number) => {
     var stars = '';
 
@@ -218,6 +224,13 @@ const boss = (callback) => {
     bosslist(bosscallback);
 };
 
+const artifact = (callback) => {
+    const afcallback = function (list, rcount) {
+        callback(list);
+    };
+    artifactsets(afcallback);
+};
+
 const db = new sqlite3.Database(DBSOURCE, (err) => {
     if (err) {
         // Cannot open database
@@ -272,5 +285,6 @@ module.exports = {
     findWeeklyBoss: findWeeklyBossByDrop,
     findTalentWeekday: findDayByTalentbook,
     getToday: today,
-    getBoss: boss
+    getBoss: boss,
+    getArtifactset: artifact
 };
