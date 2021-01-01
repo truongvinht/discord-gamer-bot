@@ -2,8 +2,6 @@
 // Service to get Services for Genshin Impact
 // ================
 
-const data = require('./yuanshen.json');
-
 var sqlite3 = require('sqlite3').verbose();
 const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
 
@@ -17,7 +15,7 @@ const figureData = (name, callback) => {
     'left join (select wtid, name as weapon from Weapon_Type) wt on f.weapon_type_id = wt.wtid ' +
     'left join (select tid, name as talent from Talent) t on f.talent_id = t.tid ' +
     'left join (select lid, name as location from Location) l on f.location_id = l.lid ' +
-    'left join (select bdid, name as boss_drop from Boss_Drop) bd on f.boss_drop_id = bd.bdid ' +
+    'left join (select bdid, name as boss_drop, boss, boss_description from Boss_Drop bd left join (select bid, name as boss, description as boss_description, image_url as boss_image_url from Boss) b on bd.boss_id = b.bid) bd on f.boss_drop_id = bd.bdid ' +
     'where name = ? collate nocase';
 
     executeQueryForSingleEntry(sql, [name], callback);
@@ -45,6 +43,17 @@ const talentForWeekday = (weekday, callback) => {
     'on d.weekday_id = wd.wid ' +
     'where position = ?';
     executeQuery(sql, [weekday], callback);
+};
+
+const weekdayForTalent = (talentId, callback) => {
+    const sql = 'select * from Talent_Drop d ' +
+    'left join (select tid,lid,name,location from Talent t ' +
+    'left join (select lid, name as location from Location) l on t.location_id = l.lid ) tl ' +
+    'on d.talent_id = tl.tid ' +
+    'left join (SELECT wid, position,  name as weekday, short_name as weekday_short from Weekday) wd ' +
+    'on d.weekday_id = wd.wid ' +
+    'where tid = ?';
+    executeQuery(sql, [talentId], callback);
 };
 
 const weaponMaterialForWeekday = (weekday, callback) => {
@@ -141,46 +150,11 @@ const randomDungeon = (callback) => {
     dungeons(dungeonCallback);
 };
 
-const findWeeklyBossByDrop = (drop) => {
-    const weeklybossList = data.weeklyboss;
-
-    for (var i = 0; i < Object.keys(weeklybossList).length; i++) {
-        const keyLists = Object.keys(weeklybossList);
-        const key = keyLists[i];
-
-        const bossDrops = weeklybossList[key].drops;
-
-        for (var j = 0; j < bossDrops.length; j++) {
-            if (drop === bossDrops[j]) {
-                return `${weeklybossList[key].name} [${weeklybossList[key].description}]`;
-            }
-        }
-    }
-
-    // not found
-    return 'Unbekannt';
-};
-
-const findDayByTalentbook = (book) => {
-    // collect all farmable talent books for today
-    const talentbooks = data.talentbooks;
-    const talentkeys = Object.keys(talentbooks);
-
-    for (var i = 0; i < talentkeys.length; i++) {
-
-        const talentDetail = talentbooks[talentkeys[i]];
-        if (book === talentDetail.name) {
-            var result = [];
-
-            const datemap = { 1: 'Mo', 2: 'Di', 3: 'Mi', 4: 'Do', 5: 'Fr', 6: 'Sa', 0: 'So' };
-            for (var j = 0; j < talentDetail.weekday.length; j++) {
-                result.push(datemap[`${talentDetail.weekday[j]}`]);
-            }
-
-            return result;
-        }
-    }
-    return '';
+const findDayByTalentbook = (talentId, callback) => {
+    const talentCallback = function (weekdays, resultcount) {
+        callback(weekdays);
+    };
+    weekdayForTalent(talentId, talentCallback);
 };
 
 const today = (callback) => {
@@ -266,7 +240,6 @@ const executeQueryForSingleEntry = (sql, params, callback) => {
             callback(null);
         } else {
             if (entry.length > 0) {
-                // console.log(entry[0]);
                 callback(entry[0]);
             }
         }
@@ -282,8 +255,7 @@ module.exports = {
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
     getRandomDungeon: randomDungeon,
-    findWeeklyBoss: findWeeklyBossByDrop,
-    findTalentWeekday: findDayByTalentbook,
+    getTalentByWeekday: findDayByTalentbook,
     getToday: today,
     getBoss: boss,
     getArtifactset: artifact

@@ -77,38 +77,77 @@ const figurelist = (message) => {
 };
 
 function sendFigureMessage (message, figure) {
-    const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
-    d.setDescription(service.getStarrating(figure.rarity));
-    d.setThumbnail(figure.image_url);
-    d.addField('Waffe', figure.weapon);
-
     if (figure.talent != null && figure.talent !== '') {
-        d.addField(`Talent Bücher [${service.findTalentWeekday(figure.talent)}]`, figure.talent);
-    }
+        const talentCallback = function (weekdays) {
+            const d = new Discord.MessageEmbed();
+            d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
+            d.setDescription(service.getStarrating(figure.rarity));
+            d.setThumbnail(figure.image_url);
+            d.addField('Waffe', figure.weapon);
 
-    // weekly boss drop
-    if (figure.boss_drop_id != null && figure.boss_drop_id !== '') {
-        d.addField(`Wochenboss - ${service.findWeeklyBoss(figure.boss_drop)}`, figure.boss_drop);
-    }
+            if (weekdays != null && weekdays.length > 0) {
+                var weekdaysnames = null;
 
-    // footer
-    if (figure.element === '') {
-        if (figure.birthday === '') {
-            // no birthday and no element
-        } else {
-            d.setFooter(`🎂 ${figure.birthday}`);
-        }
+                for (var days = 0; days < weekdays.length; days++) {
+                    if (weekdaysnames == null) {
+                        weekdaysnames = weekdays[days].weekday_short;
+                    } else {
+                        weekdaysnames = `${weekdaysnames}, ${weekdays[days].weekday_short}`;
+                    }
+                }
+                d.addField(`Talent Bücher [${weekdaysnames}]`, figure.talent);
+            }
+            // weekly boss drop
+            if (figure.boss_drop_id != null && figure.boss_drop_id !== '') {
+                d.addField(`Wochenboss - ${figure.boss}/${figure.boss_description}`, figure.boss_drop);
+            }
+
+            // footer
+            if (figure.element === '') {
+                if (figure.birthday === '') {
+                    // no birthday and no element
+                } else {
+                    d.setFooter(`🎂 ${figure.birthday}`);
+                }
+            } else {
+                if (figure.birthday == null || figure.birthday === '') {
+                    d.setFooter('🎂 Unbekannt', figure.element_image_url);
+                } else {
+                    d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
+                }
+            }
+            message.channel.send(d);
+        };
+        service.getTalentByWeekday(figure.tid, talentCallback);
     } else {
-        if (figure.birthday == null || figure.birthday === '') {
-            d.setFooter('🎂 Unbekannt', figure.element_image_url);
-        } else {
-            d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
-        }
-    }
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
+        d.setDescription(service.getStarrating(figure.rarity));
+        d.setThumbnail(figure.image_url);
+        d.addField('Waffe', figure.weapon);
 
-    message.channel.send(d);
-}
+        // weekly boss drop
+        if (figure.boss_drop_id != null && figure.boss_drop_id !== '') {
+            d.addField(`Wochenboss - ${figure.boss}/${figure.boss_description}`, figure.boss_drop);
+        }
+
+        // footer
+        if (figure.element === '') {
+            if (figure.birthday === '') {
+                // no birthday and no element
+            } else {
+                d.setFooter(`🎂 ${figure.birthday}`);
+            }
+        } else {
+            if (figure.birthday == null || figure.birthday === '') {
+                d.setFooter('🎂 Unbekannt', figure.element_image_url);
+            } else {
+                d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
+            }
+        }
+        message.channel.send(d);
+    }
+};
 
 const sendToday = (message) => {
     const d = new Discord.MessageEmbed();
@@ -330,7 +369,6 @@ function sendArtifactMessage (message, sets) {
         if (pick.four_set != null) {
             d.addField('4-Set', pick.four_set);
         }
-        // d.setDescription('$1, spiel mal $2'.replace('$1', player).replace('$2', pick.element.name));
         d.setThumbnail(pick.image_url);
         message.channel.send(d).then(async function (message) {
             sendArtifactMessage(message, sets);
