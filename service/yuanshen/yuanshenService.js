@@ -166,6 +166,10 @@ const today = (callback) => {
         weekday = 7;
     }
 
+    selectedDay(weekday, callback);
+};
+
+const selectedDay = (weekday, callback) => {
     // get all regions
     const regioncallback = function (regions, rcount) {
         // get all talents for current weekday
@@ -215,7 +219,7 @@ const db = new sqlite3.Database(DBSOURCE, (err) => {
         db.run('SELECT *  FROM Figure',
             (err) => {
                 if (err) {
-                // Table missing
+                    // Table missing
                     console.log('Cant access SQLite database');
                 }
             });
@@ -257,6 +261,7 @@ module.exports = {
     getRandomDungeon: randomDungeon,
     getTalentByWeekday: findDayByTalentbook,
     getToday: today,
+    getSelectedDay: selectedDay,
     getBoss: boss,
     getArtifactset: artifact
 };

@@ -154,47 +154,86 @@ const sendToday = (message) => {
     d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
     d.setThumbnail(LOGO_URL);
 
-    const callback = function (locations, figures, talents, weapon_drops) {
-        for (var l = 0; l < locations.length; l++) {
-            for (var t = 0; t < talents.length; t++) {
-                var location = locations[l];
-                var talent = talents[t];
-
-                if (location.lid === talent.lid) {
-
-                    var figureListname = '';
-                    for (var f = 0; f < figures.length; f++) {
-                        if (figures[f].talent_id === talent.tid) {
-                            // console.log(figures[f].name);
-                            if (figureListname === '') {
-                                figureListname = figures[f].name;
-                            } else {
-                                figureListname = `${figureListname}\n${figures[f].name}`;
-                            }
-                        }
-                    }
-                    d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
-                }
-            }
-        }
-        for (var lp = 0; lp < locations.length; lp++) {
-            var wpLocation = locations[lp];
-            for (var wp = 0; wp < weapon_drops.length; wp++) {
-                var weapon = weapon_drops[wp];
-
-                if (wpLocation.lid === weapon.location_id) {
-                    d.addField(`Waffendrop - ${weapon.name}`, `in ${wpLocation.name}`);
-                }
-            }
-        }
+    const callback = function (locations, figures, talents, weaponDrops) {
+        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
         message.channel.send(d);
     };
 
     service.getToday(callback);
 };
 
-const boss = (message) => {
+const sendYesterday = (message) => {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - Gestern verfügbar`);
+    d.setThumbnail(LOGO_URL);
 
+    const callback = function (locations, figures, talents, weaponDrops) {
+        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
+        message.channel.send(d);
+    };
+    const date = new Date();
+    var weekday = date.getDay(); // 0-6 Sonntag - Samstag
+
+    // override Sunday as 7
+    if (weekday === 0) {
+        weekday = 6;
+    } else if (weekday === 1) {
+        weekday = 7;
+    } else {
+        weekday = weekday - 1;
+    }
+
+    service.getSelectedDay(weekday, callback);
+};
+
+const sendTomorrow = (message) => {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - Morgen verfügbar`);
+    d.setThumbnail(LOGO_URL);
+
+    const callback = function (locations, figures, talents, weaponDrops) {
+        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
+        message.channel.send(d);
+    };
+    const date = new Date();
+    var weekday = date.getDay() + 1; // 0-6 Sonntag - Samstag
+    service.getSelectedDay(weekday, callback);
+};
+
+function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
+    for (var l = 0; l < locations.length; l++) {
+        for (var t = 0; t < talents.length; t++) {
+            var location = locations[l];
+            var talent = talents[t];
+
+            if (location.lid === talent.lid) {
+                var figureListname = '';
+                for (var f = 0; f < figures.length; f++) {
+                    if (figures[f].talent_id === talent.tid) {
+                        if (figureListname === '') {
+                            figureListname = figures[f].name;
+                        } else {
+                            figureListname = `${figureListname}\n${figures[f].name}`;
+                        }
+                    }
+                }
+                d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
+            }
+        }
+    }
+    for (var lp = 0; lp < locations.length; lp++) {
+        var wpLocation = locations[lp];
+        for (var wp = 0; wp < weaponDrops.length; wp++) {
+            var weapon = weaponDrops[wp];
+
+            if (wpLocation.lid === weapon.location_id) {
+                d.addField(`Waffendrop - ${weapon.name}`, `in ${wpLocation.name}`);
+            }
+        }
+    }
+}
+
+const boss = (message) => {
     const callback = function (bosslist, bossdrops, figures) {
         // group all drops together based on boss
         var bossmap = {};
@@ -229,7 +268,6 @@ const boss = (message) => {
 
         // send a message for each boss
         sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossmap, bossdropfiguremap);
-
     };
     service.getBoss(callback);
 };
@@ -259,54 +297,57 @@ const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, f
 
 const randomElement = (message) => {
     const msgArguments = message.content.split(' ');
-
-    var playerCounter = msgArguments.length;
-    if (playerCounter > 1) {
+    if (msgArguments.length > 1) {
         // more than one player
         // ignore first
-        playerCounter--;
+
+        const callback = function (elements) {
+            sendElementMessages(message, msgArguments, elements);
+        };
+
+        // get element
+        service.getRandomElement(1, callback);
     } else {
-        playerCounter++;
+        const callback = function (elements) {
+            sendElementMessages(message, [message.author.username, message.author.username], elements);
+        };
+
+        // get element
+        service.getRandomElement(1, callback);
     }
-
-    const callback = function (elements) {
-        sendElementMessages(message, msgArguments, elements);
-    };
-
-    // get element
-    service.getRandomElement(playerCounter, callback);
 };
 
 const randomWeapon = (message) => {
     const msgArguments = message.content.split(' ');
-
-    var playerCounter = msgArguments.length;
-    if (playerCounter > 1) {
+    if (msgArguments.length > 1) {
         // more than one player
         // ignore first
-        playerCounter--;
+        const callback = function (weapons) {
+            sendElementMessages(message, msgArguments, weapons);
+        };
+        // get weapon
+        service.getRandomWeapon(1, callback);
     } else {
-        playerCounter++;
+        const callback = function (weapons) {
+            sendElementMessages(message, [message.author.username, message.author.username], weapons);
+        };
+        // get weapon
+        service.getRandomWeapon(1, callback);
     }
-
-    const callback = function (weapons) {
-        sendElementMessages(message, msgArguments, weapons);
-    };
-
-    // get weapon
-    service.getRandomWeapon(playerCounter, callback);
 };
 
 const randomDungeon = (message) => {
-
     const msgArguments = message.content.split(' ');
 
     if (msgArguments.length > 1) {
         const callback = function (dungeon) {
             sendDungeonMessage(message, msgArguments, dungeon);
         };
-
-        // get weapon
+        service.getRandomDungeon(callback);
+    } else {
+        const callback = function (dungeon) {
+            sendDungeonMessage(message, [message.author.username, message.author.username], dungeon);
+        };
         service.getRandomDungeon(callback);
     }
 };
@@ -425,6 +466,8 @@ module.exports = {
     sendFigure: figureForMessage,
     sendFigurelist: figurelist,
     sendToday: sendToday,
+    sendYesterday: sendYesterday,
+    sendTomorrow: sendTomorrow,
     sendBoss: boss,
     sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,

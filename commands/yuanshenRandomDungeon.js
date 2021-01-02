@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class yuanshenRandomDungeonCommand extends Command {
     constructor () {
         super('impactDungeon', {
-            aliases: ['gdun', 'gdung', 'gdungeon', 'imdungeon', 'gidungeon']
+            aliases: ['gdg', 'gdun', 'gdung', 'gdungeon', 'imdungeon', 'gidungeon']
         });
     }
 
