@@ -9,7 +9,7 @@ Discord Bot for displaying game related details and interact with players.
 - Discord Server (Token)
 - Server for deploying bot (NPM/NodeJs)
 
-
+# Installation
 
 # License
 MIT License (MIT)
