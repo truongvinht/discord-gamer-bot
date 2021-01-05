@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class generalHelpCommand extends Command {
     constructor () {
         super('help', {
-            aliases: ['help', 'command']
+            aliases: ['?', 'h', 'hilfe']
         });
     }
 

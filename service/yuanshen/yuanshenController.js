@@ -306,7 +306,7 @@ const randomElement = (message) => {
         };
 
         // get element
-        service.getRandomElement(1, callback);
+        service.getRandomElement(msgArguments.length, callback);
     } else {
         const callback = function (elements) {
             sendElementMessages(message, [message.author.username, message.author.username], elements);
@@ -315,6 +315,11 @@ const randomElement = (message) => {
         // get element
         service.getRandomElement(1, callback);
     }
+};
+
+const random = (message) => {
+    randomElement(message);
+    randomWeapon(message);
 };
 
 const randomWeapon = (message) => {
@@ -326,7 +331,7 @@ const randomWeapon = (message) => {
             sendElementMessages(message, msgArguments, weapons);
         };
         // get weapon
-        service.getRandomWeapon(1, callback);
+        service.getRandomWeapon(msgArguments.length, callback);
     } else {
         const callback = function (weapons) {
             sendElementMessages(message, [message.author.username, message.author.username], weapons);
@@ -381,40 +386,55 @@ function sendDungeonMessage (message, msgArguments, dungeon) {
 };
 
 const artifact = (message) => {
+    // arguments
+    const msgArguments = message.content.split(' ');
     const callback = function (artifactset) {
-        sendArtifactMessage(message, artifactset);
+        if (msgArguments.length > 1) {
+            sendArtifactMessage(message, msgArguments[1], artifactset);
+        } else {
+            sendArtifactListMessage(message, artifactset);
+        }
     };
 
     // get weapon
     service.getArtifactset(callback);
 };
-
-function sendArtifactMessage (message, sets) {
-    if (sets.length > 0) {
-        const pick = sets.shift();
-
-        const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - ${pick.name}`);
-        if (pick.dungeon != null) {
-            d.setFooter(pick.dungeon, pick.dungeon_image_url);
+function sendArtifactListMessage (message, list) {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - Liste der Artifakte`);
+    for (var a = 0; a < list.length; a++) {
+        const af = list[a];
+        if (af.dungeon == null) {
+            d.addField(`${a + 1}: ${af.name}`, '-');
+        } else {
+            d.addField(`${a + 1}: ${af.name}`, af.dungeon);
         }
-
-        if (pick.one_set != null) {
-            d.addField('1-Set', pick.one_set);
-        }
-
-        if (pick.two_set != null) {
-            d.addField('2-Set', pick.two_set);
-        }
-
-        if (pick.four_set != null) {
-            d.addField('4-Set', pick.four_set);
-        }
-        d.setThumbnail(pick.image_url);
-        message.channel.send(d).then(async function (message) {
-            sendArtifactMessage(message, sets);
-        });
     }
+    message.channel.send(d);
+}
+
+function sendArtifactMessage (message, index, sets) {
+    const position = parseInt(index) - 1;
+    if (Object.keys(sets).length < position) {
+        return;
+    }
+    const pick = sets[position];
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${YUANSHEN_TITLE} - ${pick.name}`);
+    if (pick.dungeon != null) {
+        d.setFooter(pick.dungeon, pick.dungeon_image_url);
+    }
+    if (pick.one_set != null) {
+        d.addField('1-Set', pick.one_set);
+    }
+    if (pick.two_set != null) {
+        d.addField('2-Set', pick.two_set);
+    }
+    if (pick.four_set != null) {
+        d.addField('4-Set', pick.four_set);
+    }
+    d.setThumbnail(pick.image_url);
+    message.channel.send(d);
 };
 
 function sendElementMessages (message, msgArguments, elementList) {
@@ -472,5 +492,6 @@ module.exports = {
     sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon,
+    sendRandom: random,
     sendArtifact: artifact
 };

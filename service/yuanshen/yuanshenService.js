@@ -99,7 +99,7 @@ const dungeons = (callback) => {
 
 const artifactsets = (callback) => {
     const sql = 'select * from Artifact_Set a ' +
-    'left join (select did, name as dungeon, image_url as dungeon_image_url from Dungeon) d on a.dungeon_id = d.did';
+    'left join (select did, name as dungeon, image_url as dungeon_image_url from Dungeon) d on a.dungeon_id = d.did order by asid';
     executeQuery(sql, [], callback);
 };
 
@@ -107,7 +107,8 @@ const rating = (number) => {
     var stars = '';
 
     for (var i = 0; i < number; i++) {
-        stars = stars + '★';
+        const newLocal = '★';
+        stars = stars + newLocal;
     }
     return stars;
 };
