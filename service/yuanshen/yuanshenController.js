@@ -47,15 +47,29 @@ const figureForMessage = (message) => {
 
         service.getFigure(name, callback);
     } else {
-        // missing argument
+        // missing argument: random figure
+        const resultCallback = function (entries) {
+            const pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
+            const figure = entries[pickedIndex].name;
+
+            const callback = function (entry) {
+                message.channel.send(`Zufallsfigur für ${message.author.username}`).then(async function (message) {
+                    sendFigureMessage(message, entry);
+                });
+            };
+
+            service.getFigure(figure, callback);
+        };
+        service.getAllFigures(resultCallback);
     }
 };
 
 const figurelist = (message) => {
     const callback = function (entry, count) {
         const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - Figurenliste [${count}]`);
+        d.setTitle(`Figurenliste [${count}]`);
         d.addField('Verfügbare Figuren', entry);
+        d.setFooter(YUANSHEN_TITLE);
         d.setThumbnail(LOGO_URL);
         message.channel.send(d);
     };
@@ -80,7 +94,7 @@ function sendFigureMessage (message, figure) {
     if (figure.talent != null && figure.talent !== '') {
         const talentCallback = function (weekdays) {
             const d = new Discord.MessageEmbed();
-            d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
+            d.setTitle(`${figure.name}`);
             d.setDescription(service.getStarrating(figure.rarity));
             d.setThumbnail(figure.image_url);
             d.addField('Waffe', figure.weapon);
@@ -107,13 +121,13 @@ function sendFigureMessage (message, figure) {
                 if (figure.birthday === '') {
                     // no birthday and no element
                 } else {
-                    d.setFooter(`🎂 ${figure.birthday}`);
+                    d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`);
                 }
             } else {
                 if (figure.birthday == null || figure.birthday === '') {
-                    d.setFooter('🎂 Unbekannt', figure.element_image_url);
+                    d.setFooter(`🎂 Unbekannt - ${YUANSHEN_TITLE}`, figure.element_image_url);
                 } else {
-                    d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
+                    d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`, figure.element_image_url);
                 }
             }
             message.channel.send(d);
@@ -121,7 +135,7 @@ function sendFigureMessage (message, figure) {
         service.getTalentByWeekday(figure.tid, talentCallback);
     } else {
         const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - ${figure.name}`);
+        d.setTitle(`${figure.name}`);
         d.setDescription(service.getStarrating(figure.rarity));
         d.setThumbnail(figure.image_url);
         d.addField('Waffe', figure.weapon);
@@ -136,13 +150,13 @@ function sendFigureMessage (message, figure) {
             if (figure.birthday === '') {
                 // no birthday and no element
             } else {
-                d.setFooter(`🎂 ${figure.birthday}`);
+                d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`);
             }
         } else {
             if (figure.birthday == null || figure.birthday === '') {
-                d.setFooter('🎂 Unbekannt', figure.element_image_url);
+                d.setFooter(`🎂 Unbekannt - ${YUANSHEN_TITLE}`, figure.element_image_url);
             } else {
-                d.setFooter(`🎂 ${figure.birthday}`, figure.element_image_url);
+                d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`, figure.element_image_url);
             }
         }
         message.channel.send(d);
@@ -151,8 +165,9 @@ function sendFigureMessage (message, figure) {
 
 const sendToday = (message) => {
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Heute verfügbar`);
+    d.setTitle('Heute verfügbar');
     d.setThumbnail(LOGO_URL);
+    d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
@@ -164,8 +179,9 @@ const sendToday = (message) => {
 
 const sendYesterday = (message) => {
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Gestern verfügbar`);
+    d.setTitle('Gestern verfügbar');
     d.setThumbnail(LOGO_URL);
+    d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
@@ -188,8 +204,9 @@ const sendYesterday = (message) => {
 
 const sendTomorrow = (message) => {
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Morgen verfügbar`);
+    d.setTitle('Morgen verfügbar');
     d.setThumbnail(LOGO_URL);
+    d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
@@ -378,10 +395,10 @@ function sendDungeonMessage (message, msgArguments, dungeon) {
     const playername = playerPick.shift();
 
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Sphäre`);
+    d.setTitle('Sphäre');
     d.setDescription('$1, versuch mal $2'.replace('$1', playername).replace('$2', dungeon.name));
     d.setThumbnail(dungeon.image_url);
-    d.setFooter(`in ${dungeon.location}`);
+    d.setFooter(`in ${dungeon.location} - ${YUANSHEN_TITLE}`);
     message.channel.send(d);
 };
 
@@ -401,7 +418,7 @@ const artifact = (message) => {
 };
 function sendArtifactListMessage (message, list) {
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - Liste der Artifakte`);
+    d.setTitle('Liste der Artifakte');
     for (var a = 0; a < list.length; a++) {
         const af = list[a];
         if (af.dungeon == null) {
@@ -410,6 +427,7 @@ function sendArtifactListMessage (message, list) {
             d.addField(`${a + 1}: ${af.name}`, af.dungeon);
         }
     }
+    d.setFooter(YUANSHEN_TITLE);
     message.channel.send(d);
 }
 
@@ -420,9 +438,11 @@ function sendArtifactMessage (message, index, sets) {
     }
     const pick = sets[position];
     const d = new Discord.MessageEmbed();
-    d.setTitle(`${YUANSHEN_TITLE} - ${pick.name}`);
+    d.setTitle(`${pick.name}`);
     if (pick.dungeon != null) {
-        d.setFooter(pick.dungeon, pick.dungeon_image_url);
+        d.setFooter(`${pick.dungeon} - ${YUANSHEN_TITLE}`, pick.dungeon_image_url);
+    } else {
+        d.setFooter(YUANSHEN_TITLE);
     }
     if (pick.one_set != null) {
         d.addField('1-Set', pick.one_set);
@@ -470,7 +490,8 @@ function writePlayerPick (message, playerPick) {
         var player = pick.player;
 
         const d = new Discord.MessageEmbed();
-        d.setTitle(`${YUANSHEN_TITLE} - Zufallsgenerator`);
+        d.setTitle('Zufallsgenerator');
+        d.setFooter(YUANSHEN_TITLE);
         d.setDescription('$1, spiel mal $2'.replace('$1', player).replace('$2', pick.element.name));
         d.setThumbnail(pick.element.image_url);
         message.channel.send(d).then(async function (message) {
