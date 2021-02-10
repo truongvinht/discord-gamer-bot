@@ -71,6 +71,11 @@ const bosslist = (callback) => {
     executeQuery(sql, [], callback);
 };
 
+const bannerlist = (callback) => {
+    const sql = 'select * from Gatcha_Banner b ';
+    executeQuery(sql, [], callback);
+};
+
 const bossdroplist = (callback) => {
     const sql = 'select * from Boss_Drop order by boss_id';
     executeQuery(sql, [], callback);
@@ -203,6 +208,15 @@ const boss = (callback) => {
     bosslist(bosscallback);
 };
 
+const banner = (callback) => {
+
+    // get all boss
+    const bannerCallback = function (bannerList, bcount) {
+        callback(bannerList);
+    };
+    bannerlist(bannerCallback);
+};
+
 const artifact = (callback) => {
     const afcallback = function (list, rcount) {
         callback(list);
@@ -264,5 +278,6 @@ module.exports = {
     getToday: today,
     getSelectedDay: selectedDay,
     getBoss: boss,
+    getBanner: banner,
     getArtifactset: artifact
 };

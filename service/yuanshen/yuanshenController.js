@@ -289,6 +289,22 @@ const boss = (message) => {
     service.getBoss(callback);
 };
 
+const banner = (message) => {
+
+    const callback = function (bannerlist) {
+
+        const b = bannerlist[bannerlist.length-1];
+
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${b.title}`);
+        //d.setThumbnail(b.image_url);
+        d.setImage(b.image_url);
+
+        message.channel.send(d);
+    };
+    service.getBanner(callback);
+};
+
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
     if (bosslist.length > 0) {
         const boss = bosslist.shift();
@@ -510,6 +526,7 @@ module.exports = {
     sendYesterday: sendYesterday,
     sendTomorrow: sendTomorrow,
     sendBoss: boss,
+    sendBanner: banner,
     sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon,
