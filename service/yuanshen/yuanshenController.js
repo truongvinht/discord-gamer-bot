@@ -4,6 +4,7 @@
 
 const Discord = require('discord.js');
 const service = require('./yuanshenService');
+const draft = require('./yuanshenDraftHandler');
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
 
@@ -20,6 +21,8 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gboss`, 'Bossdrop für Talente')
         .addField(`${PREFIX}gdungeon NAME`, 'Zufallsgenerator Dungeon/Sphäre')
         .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
+        .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
+        .addField(`${PREFIX}gbanner`, 'Zeigt den letzten Banner an')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -88,6 +91,101 @@ const figurelist = (message) => {
     };
 
     service.getAllFigures(resultCallback);
+};
+
+const figureDraft = (message) => {
+    // select 2 out of 10 for banning and then next 10 will shown until 8 are left
+
+    const resultCallback = function (entries) {
+        var list = [];
+        for (var i = 0; i < entries.length; i++) {
+            const name = entries[i].name;
+
+            if (name !== 'Traveler') {
+                list.push(name);
+            }
+        }
+
+        // 1. fill draft list
+        draft.resetFigures(list);
+
+        // 2. get draft list (10 entries)
+        const batch = draft.getDraftBatch(10);
+
+        const d = new Discord.MessageEmbed();
+        d.setTitle('Figuren Draft Modus');
+        d.setColor('#008000');
+        d.setDescription(`${list.length} Figuren verfügbar`);
+
+        for (var dr = 0; dr < batch.length; dr++) {
+            const name = batch[dr];
+            d.addField(name, '\u200B');
+        }
+
+        d.setFooter(YUANSHEN_TITLE);
+        d.setThumbnail(LOGO_URL);
+        message.channel.send(d);
+    };
+
+    // 0. init draft list
+    service.getAllFigures(resultCallback);
+};
+
+const figureTalent = (message) => {
+    const callback = function (talents, figures, schedule) {
+
+        // prepare list of entries
+        var talentList = [];
+
+        for (var i = 0; i < talents.length; i++) {
+            var t = {};
+            const talent = talents[i];
+            t["name"] = talent["name"];
+            t["location"] = talent["location"];
+            t["image_url"] = talent["image_url"];
+
+            var names = [];
+            for (var j = 0; j < figures.length; j++) {
+                const fig = figures[j];
+                if (talent["tid"] == fig["talent_id"]) {
+                    names.push(fig["name"]);
+                }
+            }
+            t["figures"] = names;
+            var schedules = [];
+
+            for (var k = 0; k < schedule.length; k++) {
+                const s = schedule[k];
+                if (talent["tid"] == s["talent_id"]) {
+                    schedules.push(s["day"]);
+                }
+            }
+            t["schedules"] = schedules;
+            talentList.push(t);
+        }
+        sendMessageForTalents(message, talentList);
+    };
+
+    service.getTalent(callback);
+};
+
+
+const sendMessageForTalents = (message, talentList) => {
+    if (talentList.length > 0) {
+        const talent = talentList.shift();
+
+        const d = new Discord.MessageEmbed();
+        d.setTitle(`${talent.name} in ${talent.location}`);
+
+        d.setDescription(talent.schedules.join())
+        d.addField(`Figuren (${talent.figures.length})`,talent.figures.join())
+        d.setThumbnail(talent.image_url);
+
+        message.channel.send(d).then(async function (message) {
+            // write next player
+            sendMessageForTalents(message, talentList);
+        });
+    }
 };
 
 function sendFigureMessage (message, figure) {
@@ -292,12 +390,12 @@ const boss = (message) => {
 const banner = (message) => {
 
     const callback = function (bannerlist) {
-
-        const b = bannerlist[bannerlist.length-1];
+        // last banner
+        const b = bannerlist[bannerlist.length - 1];
 
         const d = new Discord.MessageEmbed();
         d.setTitle(`${b.title}`);
-        //d.setThumbnail(b.image_url);
+        // d.setThumbnail(b.image_url);
         d.setImage(b.image_url);
 
         message.channel.send(d);
@@ -521,6 +619,8 @@ function writePlayerPick (message, playerPick) {
 module.exports = {
     getHelpMessage: help,
     sendFigure: figureForMessage,
+    sendFigureDraft: figureDraft,
+    sendFigureTalent: figureTalent,
     sendFigurelist: figurelist,
     sendToday: sendToday,
     sendYesterday: sendYesterday,

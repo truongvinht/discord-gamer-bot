@@ -65,6 +65,19 @@ const weaponMaterialForWeekday = (weekday, callback) => {
     executeQuery(sql, [weekday], callback);
 };
 
+
+const talentScheduleList = (callback) => {
+    const sql = 'select * from Talent_Drop t ' +
+    'left join (select wid,name as day from Weekday) w on t.weekday_id = w.wid';
+    executeQuery(sql, [], callback);
+};
+
+const talentList = (callback) => {
+    const sql = 'select * from Talent t ' +
+    'left join (select lid, name as location from Location) l on t.location_id = l.lid';
+    executeQuery(sql, [], callback);
+};
+
 const bosslist = (callback) => {
     const sql = 'select * from Boss b ' +
     'left join (select lid, name as location from Location) l on b.location_id = l.lid';
@@ -208,8 +221,20 @@ const boss = (callback) => {
     bosslist(bosscallback);
 };
 
-const banner = (callback) => {
+const talent = (callback) => {
+    const talentCallback = function (talents, count) {
+        const figurecallback = function (figures, tcount) {
+            const weekdayCallback = function (weekdays, tcount) {
+                callback(talents, figures,weekdays);
+            };
+            talentScheduleList(weekdayCallback);
+        };
+        figurelist(figurecallback);
+    };
+    talentList(talentCallback);
+};
 
+const banner = (callback) => {
     // get all boss
     const bannerCallback = function (bannerList, bcount) {
         callback(bannerList);
@@ -278,6 +303,7 @@ module.exports = {
     getToday: today,
     getSelectedDay: selectedDay,
     getBoss: boss,
+    getTalent: talent,
     getBanner: banner,
     getArtifactset: artifact
 };
