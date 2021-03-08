@@ -47,6 +47,12 @@ const figureForMessage = (message) => {
         if (name.toLowerCase() === 'sucrose') {
             name = 'saccharose';
         }
+        if (msgArguments.length == 3) {
+            const secondName = msgArguments[2];
+            if (name.toLowerCase() === 'hu' && secondName.toLowerCase() === 'tao') {
+                name = 'hu tao';
+            }
+        }
 
         service.getFigure(name, callback);
     } else {
