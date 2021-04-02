@@ -83,7 +83,7 @@ const figurelist = (message) => {
         message.channel.send(d);
     };
 
-    const resultCallback = function (entries) {
+    const resultCallback = function (entries, err) {
         var list = '';
         for (var i = 0; i < entries.length; i++) {
             const name = entries[i].name;
@@ -96,7 +96,7 @@ const figurelist = (message) => {
         callback(list, entries.length);
     };
 
-    service.getAllFigures(resultCallback);
+    service.allFigures(resultCallback);
 };
 
 const figureDraft = (message) => {

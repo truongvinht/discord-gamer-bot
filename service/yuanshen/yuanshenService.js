@@ -2,6 +2,71 @@
 // Service to get Services for Genshin Impact
 // ================
 
+// import
+const https = require('https');
+const c = require('../../helper/envHandler');
+
+const YUANSHEN_API_URL = 'yuanshen-api.herokuapp.com';
+
+function getRequestApi(callback, path, param) {
+
+    // token for api access
+    const TOKEN = c.yuanshenToken;
+
+    let header = {};
+
+    if (param == null) {
+        header = { 'authorization': TOKEN };
+    } else {
+        header = param;
+        header['authorization'] = TOKEN;
+    }
+
+    const options = {
+        host: YUANSHEN_API_URL,
+        path: path,
+        method: 'GET',
+        headers: header
+    };
+
+    https.get(options, res => {
+        let data = [];
+
+        res.on('data', chunk => {
+            data.push(chunk);
+        });
+
+        res.on('end', () => {
+            const responseData = JSON.parse(Buffer.concat(data).toString());
+            callback(responseData, null);
+        });
+    }).on('error', err => {
+        console.log('Error: ', err.message);
+        callback(null, err);
+    });
+}
+
+// GET all figures
+const allFigures = (callback) => {
+    getRequestApi(callback, '/api/v1/figures', null);
+};
+
+// GET all locations
+const allLocations = (callback) => {
+    getRequestApi(callback, '/api/v1/location', null);
+};
+
+// GET talents for weekday
+const allTalentsForWeekday = (callback, weekday) => {
+    getRequestApi(callback, '/api/v1/talents', {'weekday': weekday});
+};
+
+// GET weapon material for weekday
+const allWeaponMaterialForWeekday = (callback, weekday) => {
+    getRequestApi(callback, '/api/v1/weapon_material_drop', {'weekday': weekday});
+};
+
+
 var sqlite3 = require('sqlite3').verbose();
 const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
 
@@ -190,21 +255,34 @@ const today = (callback) => {
 
 const selectedDay = (weekday, callback) => {
     // get all regions
-    const regioncallback = function (regions, rcount) {
-        // get all talents for current weekday
-        const talentcallback = function (talents, tcount) {
-            const figurecallback = function (figures, tcount) {
-                const weaponcallback = function (weapons, wpcount) {
+    // const regioncallback = function (regions, rcount) {
+    //     // get all talents for current weekday
+    //     const talentcallback = function (talents, tcount) {
+    //         const figurecallback = function (figures, tcount) {
+    //             const weaponcallback = function (weapons, wpcount) {
+    //                 callback(regions, figures, talents, weapons);
+    //             };
+    //             weaponMaterialForWeekday(weekday, weaponcallback);
+    //         };
+    //         figurelist(figurecallback);
+    //     };
+
+    //     talentForWeekday(weekday, talentcallback);
+    // };
+    // regions(regioncallback);
+    const regioncallback = function (regions, err_reg) {
+        const talentcallback = function (talents, err_tal) {
+            const figurecallback = function (figures, err_fig) {
+                const weaponcallback = function (weapons, err_weap) {
                     callback(regions, figures, talents, weapons);
                 };
-                weaponMaterialForWeekday(weekday, weaponcallback);
+                allWeaponMaterialForWeekday(weaponcallback, weekday);
             };
-            figurelist(figurecallback);
+            allFigures(figurecallback);
         };
-
-        talentForWeekday(weekday, talentcallback);
+        allTalentsForWeekday(talentcallback, weekday);
     };
-    regions(regioncallback);
+    allLocations(regioncallback);
 };
 
 const boss = (callback) => {
@@ -249,23 +327,6 @@ const artifact = (callback) => {
     artifactsets(afcallback);
 };
 
-const db = new sqlite3.Database(DBSOURCE, (err) => {
-    if (err) {
-        // Cannot open database
-        console.error(err.message);
-        throw err;
-    } else {
-        console.log('Connecting to the SQLite database...');
-        db.run('SELECT *  FROM Figure',
-            (err) => {
-                if (err) {
-                    // Table missing
-                    console.log('Cant access SQLite database');
-                }
-            });
-    }
-});
-
 // wrapper for access sqlite
 const executeQuery = (sql, params, callback) => {
     db.all(sql, params, (err, rows) => {
@@ -293,6 +354,7 @@ const executeQueryForSingleEntry = (sql, params, callback) => {
 
 // export
 module.exports = {
+    allFigures,
     getFigure: figureData,
     getAllFigures: figurelist,
     getStarrating: rating,

@@ -22,6 +22,13 @@ if (botToken === '') {
     botToken = process.env.BOT_TOKEN;
 }
 
+// Bot Token
+let yuanshenToken = botSettings.yuanshen_api_token;
+if (yuanshenToken === '') {
+    // Heroku ENV token
+    yuanshenToken = process.env.YUANSHEN_API_TOKEN;
+}
+
 // command prefix
 const prefix = process.env.PREFIX || botSettings.prefix;
 
@@ -53,6 +60,7 @@ module.exports = {
     botToken: getBotToken,
     prefix: getPrefix,
     roles: getRoles,
+    yuanshenToken,
     author: author,
     version: getVersion
 };
