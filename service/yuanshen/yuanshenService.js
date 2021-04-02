@@ -37,7 +37,8 @@ function getRequestApi(callback, path, param) {
         });
 
         res.on('end', () => {
-            const responseData = JSON.parse(Buffer.concat(data).toString());
+            const content = Buffer.concat(data).toString();
+            const responseData = JSON.parse(content);
             callback(responseData, null);
         });
     }).on('error', err => {
@@ -51,6 +52,11 @@ const allFigures = (callback) => {
     getRequestApi(callback, '/api/v1/figures', null);
 };
 
+// GET figure by name
+const singleFigure = (callback, name) => {
+    getRequestApi(callback, '/api/v1/figure', {'name': name});
+};
+
 // GET all locations
 const allLocations = (callback) => {
     getRequestApi(callback, '/api/v1/location', null);
@@ -61,130 +67,66 @@ const allTalentsForWeekday = (callback, weekday) => {
     getRequestApi(callback, '/api/v1/talents', {'weekday': weekday});
 };
 
+// GET weekdays for talent id
+const allWeekdaysForTalent = (callback, talent_id) => {
+    getRequestApi(callback, '/api/v1/talents', {'talent_id': talent_id});
+};
+
+// GET weekdays for talent id
+const allTalents = (callback) => {
+    getRequestApi(callback, '/api/v1/talents', null);
+};
+
+// GET talent scheduler
+const allTalentSchedules = (callback) => {
+    getRequestApi(callback, '/api/v1/talentSchedule', null);
+};
+
 // GET weapon material for weekday
 const allWeaponMaterialForWeekday = (callback, weekday) => {
     getRequestApi(callback, '/api/v1/weapon_material_drop', {'weekday': weekday});
 };
 
-
-var sqlite3 = require('sqlite3').verbose();
-const DBSOURCE = './service/yuanshen/data/yuanshen.sqlite';
-
-const figureData = (name, callback) => {
-    // prevent null data
-    if (name == null) {
-        return null;
-    }
-    const sql = 'select * from Figure f ' +
-    'left join (select eid, name as element, image_url as element_image_url from Element) e on f.element_id = e.eid ' +
-    'left join (select wtid, name as weapon from Weapon_Type) wt on f.weapon_type_id = wt.wtid ' +
-    'left join (select tid, name as talent from Talent) t on f.talent_id = t.tid ' +
-    'left join (select lid, name as location from Location) l on f.location_id = l.lid ' +
-    'left join (select bdid, name as boss_drop, boss, boss_description from Boss_Drop bd left join (select bid, name as boss, description as boss_description, image_url as boss_image_url from Boss) b on bd.boss_id = b.bid) bd on f.boss_drop_id = bd.bdid ' +
-    'where name = ? collate nocase';
-
-    executeQueryForSingleEntry(sql, [name], callback);
+// GET all elements
+const allElements = (callback) => {
+    getRequestApi(callback, '/api/v1/elements', null);
 };
 
-const figurelist = (callback) => {
-    const sql = 'select name, e.element, f.talent_id from Figure f ' +
-    'left join (select eid, name as element from Element) e on f.element_id = e.eid order by name asc';
-    executeQuery(sql, [], callback);
+// GET all weapon types
+const allWeapontypes = (callback) => {
+    getRequestApi(callback, '/api/v1/weapon_type', null);
 };
 
-const figurelistWithBossDrops = (callback) => {
-    const sql = 'select name, bdid, boss_id from Figure f ' +
-    'left join (select bdid, boss_id from Boss_Drop) bd on f.boss_drop_id = bd.bdid ' +
-    'where f.boss_drop_id is not null order by name';
-    executeQuery(sql, [], callback);
+// GET all dungeons
+const allDungeons = (callback) => {
+    getRequestApi(callback, '/api/v1/dungeons', null);
 };
 
-const talentForWeekday = (weekday, callback) => {
-    const sql = 'select * from Talent_Drop d ' +
-    'left join (select tid,lid,name,location from Talent t ' +
-    'left join (select lid, name as location from Location) l on t.location_id = l.lid ) tl ' +
-    'on d.talent_id = tl.tid ' +
-    'left join (SELECT wid, position,  name as weekday, short_name as weekday_short from Weekday) wd ' +
-    'on d.weekday_id = wd.wid ' +
-    'where position = ?';
-    executeQuery(sql, [weekday], callback);
+// GET all artifacts
+const allArtifacts = (callback) => {
+    getRequestApi(callback, '/api/v1/artifact', null);
 };
 
-const weekdayForTalent = (talentId, callback) => {
-    const sql = 'select * from Talent_Drop d ' +
-    'left join (select tid,lid,name,location from Talent t ' +
-    'left join (select lid, name as location from Location) l on t.location_id = l.lid ) tl ' +
-    'on d.talent_id = tl.tid ' +
-    'left join (SELECT wid, position,  name as weekday, short_name as weekday_short from Weekday) wd ' +
-    'on d.weekday_id = wd.wid ' +
-    'where tid = ?';
-    executeQuery(sql, [talentId], callback);
+// GET all bosses
+const allBosses = (callback) => {
+    getRequestApi(callback, '/api/v1/boss', null);
 };
 
-const weaponMaterialForWeekday = (weekday, callback) => {
-    const sql = 'select * from Weapon_Material_Drop d ' +
-    'left join (select wmid,location_id,name from Weapon_Material) wm ' +
-    'on d.weapon_material_id = wmid ' +
-    'left join (select wid, position, name as weekday, short_name as weekday_short from Weekday) w ' +
-    'on w.wid = d.weekday_id where position = ?';
-    executeQuery(sql, [weekday], callback);
+// GET all boss drops
+const allBossDrops = (callback) => {
+    getRequestApi(callback, '/api/v1/bossdrops', null);
 };
 
-
-const talentScheduleList = (callback) => {
-    const sql = 'select * from Talent_Drop t ' +
-    'left join (select wid,name as day from Weekday) w on t.weekday_id = w.wid';
-    executeQuery(sql, [], callback);
+// GET all figures with boss drops
+const allFiguresWithBossDrops = (callback) => {
+    getRequestApi(callback, '/api/v1/figuresWithBossDrops', null);
 };
 
-const talentList = (callback) => {
-    const sql = 'select * from Talent t ' +
-    'left join (select lid, name as location from Location) l on t.location_id = l.lid';
-    executeQuery(sql, [], callback);
+// GET all banner
+const allBanner = (callback) => {
+    getRequestApi(callback, '/api/v1/banner', null);
 };
 
-const bosslist = (callback) => {
-    const sql = 'select * from Boss b ' +
-    'left join (select lid, name as location from Location) l on b.location_id = l.lid';
-    executeQuery(sql, [], callback);
-};
-
-const bannerlist = (callback) => {
-    const sql = 'select * from Gatcha_Banner b ';
-    executeQuery(sql, [], callback);
-};
-
-const bossdroplist = (callback) => {
-    const sql = 'select * from Boss_Drop order by boss_id';
-    executeQuery(sql, [], callback);
-};
-
-const regions = (callback) => {
-    const sql = 'select * from Location';
-    executeQuery(sql, [], callback);
-};
-
-const elements = (callback) => {
-    const sql = 'select * from Element';
-    executeQuery(sql, [], callback);
-};
-
-const weapontype = (callback) => {
-    const sql = 'select * from Weapon_Type';
-    executeQuery(sql, [], callback);
-};
-
-const dungeons = (callback) => {
-    const sql = 'select * from Dungeon d ' +
-    'left join (select lid, name as location from Location) l on d.location_id = l.lid';
-    executeQuery(sql, [], callback);
-};
-
-const artifactsets = (callback) => {
-    const sql = 'select * from Artifact_Set a ' +
-    'left join (select did, name as dungeon, image_url as dungeon_image_url from Dungeon) d on a.dungeon_id = d.did order by asid';
-    executeQuery(sql, [], callback);
-};
 
 const rating = (number) => {
     var stars = '';
@@ -197,7 +139,7 @@ const rating = (number) => {
 };
 
 const randomElement = (count, callback) => {
-    const elementcallback = function (elements, resultCount) {
+    const elementcallback = function (elements, err_el) {
         var pickedList = [];
 
         for (var i = 0; i < count; i++) {
@@ -210,11 +152,11 @@ const randomElement = (count, callback) => {
         }
         callback(pickedList);
     };
-    elements(elementcallback);
+    allElements(elementcallback);
 };
 
 const randomWeapon = (count, callback) => {
-    const weaponCallback = function (weapons, resultCount) {
+    const weaponCallback = function (weapons, err_wp) {
         var pickedList = [];
 
         for (var i = 0; i < count; i++) {
@@ -223,22 +165,15 @@ const randomWeapon = (count, callback) => {
         }
         callback(pickedList);
     };
-    weapontype(weaponCallback);
+    allWeapontypes(weaponCallback);
 };
 
 const randomDungeon = (callback) => {
-    const dungeonCallback = function (dungeons, resultcount) {
+    const dungeonCallback = function (dungeons, err_dng) {
         const pickedIndex = Math.floor(Math.random() * Math.floor(dungeons.length));
         callback(dungeons[pickedIndex]);
     };
-    dungeons(dungeonCallback);
-};
-
-const findDayByTalentbook = (talentId, callback) => {
-    const talentCallback = function (weekdays, resultcount) {
-        callback(weekdays);
-    };
-    weekdayForTalent(talentId, talentCallback);
+    allDungeons(dungeonCallback);
 };
 
 const today = (callback) => {
@@ -254,22 +189,6 @@ const today = (callback) => {
 };
 
 const selectedDay = (weekday, callback) => {
-    // get all regions
-    // const regioncallback = function (regions, rcount) {
-    //     // get all talents for current weekday
-    //     const talentcallback = function (talents, tcount) {
-    //         const figurecallback = function (figures, tcount) {
-    //             const weaponcallback = function (weapons, wpcount) {
-    //                 callback(regions, figures, talents, weapons);
-    //             };
-    //             weaponMaterialForWeekday(weekday, weaponcallback);
-    //         };
-    //         figurelist(figurecallback);
-    //     };
-
-    //     talentForWeekday(weekday, talentcallback);
-    // };
-    // regions(regioncallback);
     const regioncallback = function (regions, err_reg) {
         const talentcallback = function (talents, err_tal) {
             const figurecallback = function (figures, err_fig) {
@@ -287,81 +206,59 @@ const selectedDay = (weekday, callback) => {
 
 const boss = (callback) => {
     // get all boss
-    const bosscallback = function (bosslist, rcount) {
-        const bossdropscallback = function (bossdroplist, bdcount) {
-            const figurbossdropcallback = function (figuredroplist, rcount) {
+    const bosscallback = function (bosslist, _) {
+        const bossdropscallback = function (bossdroplist, _) {
+            const figurbossdropcallback = function (figuredroplist, _) {
                 callback(bosslist, bossdroplist, figuredroplist);
             };
-            figurelistWithBossDrops(figurbossdropcallback);
+            allFiguresWithBossDrops(figurbossdropcallback);
         };
-        bossdroplist(bossdropscallback);
+        allBossDrops(bossdropscallback);
     };
-    bosslist(bosscallback);
+    allBosses(bosscallback);
 };
 
 const talent = (callback) => {
-    const talentCallback = function (talents, count) {
-        const figurecallback = function (figures, tcount) {
-            const weekdayCallback = function (weekdays, tcount) {
-                callback(talents, figures,weekdays);
+    const talentCallback = function (talents, err_talent) {
+        const figurecallback = function (figures, err_fig) {
+            const weekdayCallback = function (weekdays, err_sched) {
+                callback(talents, figures, weekdays);
             };
-            talentScheduleList(weekdayCallback);
+            allTalentSchedules(weekdayCallback);
         };
-        figurelist(figurecallback);
+        allFigures(figurecallback);
     };
-    talentList(talentCallback);
+    allTalents(talentCallback);
 };
 
 const banner = (callback) => {
     // get all boss
-    const bannerCallback = function (bannerList, bcount) {
+    const bannerCallback = function (bannerList, _) {
         callback(bannerList);
     };
-    bannerlist(bannerCallback);
+    allBanner(bannerCallback);
 };
 
 const artifact = (callback) => {
-    const afcallback = function (list, rcount) {
+    const afcallback = function (list, _) {
         callback(list);
     };
-    artifactsets(afcallback);
-};
-
-// wrapper for access sqlite
-const executeQuery = (sql, params, callback) => {
-    db.all(sql, params, (err, rows) => {
-        if (err) {
-            console.log(`Query: ${sql}`);
-            console.log(err.message);
-            return;
-        }
-        callback(rows);
-    });
-};
-
-const executeQueryForSingleEntry = (sql, params, callback) => {
-    const singleCallback = function (entry) {
-        if (entry == null) {
-            callback(null);
-        } else {
-            if (entry.length > 0) {
-                callback(entry[0]);
-            }
-        }
-    };
-    executeQuery(sql, params, singleCallback);
+    allArtifacts(afcallback);
 };
 
 // export
 module.exports = {
     allFigures,
-    getFigure: figureData,
-    getAllFigures: figurelist,
+    singleFigure,
+    allWeekdaysForTalent,
+    allTalents,
+    allElements,
+    allWeapontypes,
+    allDungeons,
     getStarrating: rating,
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
     getRandomDungeon: randomDungeon,
-    getTalentByWeekday: findDayByTalentbook,
     getToday: today,
     getSelectedDay: selectedDay,
     getBoss: boss,

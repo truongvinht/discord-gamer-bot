@@ -34,8 +34,10 @@ const figureForMessage = (message) => {
     const figureCounter = msgArguments.length - 1;
 
     if (figureCounter > 0) {
-        const callback = function (entry) {
-            sendFigureMessage(message, entry);
+        const callback = function (entry, _) {
+            if (entry !== null && Object.prototype.hasOwnProperty.call(entry, 'entry')) {
+                sendFigureMessage(message, entry.entry);
+            }
         };
 
         var name = msgArguments[1];
@@ -47,29 +49,29 @@ const figureForMessage = (message) => {
         if (name.toLowerCase() === 'sucrose') {
             name = 'saccharose';
         }
-        if (msgArguments.length == 3) {
+        if (msgArguments.length === 3) {
             const secondName = msgArguments[2];
             if (name.toLowerCase() === 'hu' && secondName.toLowerCase() === 'tao') {
                 name = 'hu tao';
             }
         }
 
-        service.getFigure(name, callback);
+        service.singleFigure(callback, name);
     } else {
         // missing argument: random figure
-        const resultCallback = function (entries) {
+        const resultCallback = function (entries, err) {
             const pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
             const figure = entries[pickedIndex].name;
 
-            const callback = function (entry) {
+            const callback = function (entry, _) {
                 message.channel.send(`Zufallsfigur für ${message.author.username}`).then(async function (message) {
                     sendFigureMessage(message, entry);
                 });
             };
 
-            service.getFigure(figure, callback);
+            service.singleFigure(callback, figure);
         };
-        service.getAllFigures(resultCallback);
+        service.allFigures(resultCallback);
     }
 };
 
@@ -153,7 +155,7 @@ const figureTalent = (message) => {
             var names = [];
             for (var j = 0; j < figures.length; j++) {
                 const fig = figures[j];
-                if (talent["tid"] == fig["talent_id"]) {
+                if (talent["tid"] === fig["talent_id"]) {
                     names.push(fig["name"]);
                 }
             }
@@ -162,7 +164,7 @@ const figureTalent = (message) => {
 
             for (var k = 0; k < schedule.length; k++) {
                 const s = schedule[k];
-                if (talent["tid"] == s["talent_id"]) {
+                if (talent["tid"] === s["talent_id"]) {
                     schedules.push(s["day"]);
                 }
             }
@@ -174,7 +176,6 @@ const figureTalent = (message) => {
 
     service.getTalent(callback);
 };
-
 
 const sendMessageForTalents = (message, talentList) => {
     if (talentList.length > 0) {
@@ -196,7 +197,7 @@ const sendMessageForTalents = (message, talentList) => {
 
 function sendFigureMessage (message, figure) {
     if (figure.talent != null && figure.talent !== '') {
-        const talentCallback = function (weekdays) {
+        const talentCallback = function (weekdays,_) {
             const d = new Discord.MessageEmbed();
             d.setTitle(`${figure.name}`);
             d.setDescription(service.getStarrating(figure.rarity));
@@ -236,7 +237,7 @@ function sendFigureMessage (message, figure) {
             }
             message.channel.send(d);
         };
-        service.getTalentByWeekday(figure.tid, talentCallback);
+        service.allWeekdaysForTalent(talentCallback, figure.tid);
     } else {
         const d = new Discord.MessageEmbed();
         d.setTitle(`${figure.name}`);
