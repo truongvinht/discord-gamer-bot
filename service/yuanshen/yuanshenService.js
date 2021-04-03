@@ -127,7 +127,6 @@ const allBanner = (callback) => {
     getRequestApi(callback, '/api/v1/banner', null);
 };
 
-
 const rating = (number) => {
     var stars = '';
 

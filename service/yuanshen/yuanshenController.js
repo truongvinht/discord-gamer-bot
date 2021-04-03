@@ -22,7 +22,6 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gdungeon NAME`, 'Zufallsgenerator Dungeon/Sphäre')
         .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
-        .addField(`${PREFIX}gbanner`, 'Zeigt den letzten Banner an')
         .setThumbnail(LOGO_URL);
 
     return embed;
