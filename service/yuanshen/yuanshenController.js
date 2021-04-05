@@ -28,6 +28,7 @@ const help = (PREFIX, author) => {
 };
 
 const figureForMessage = (message) => {
+    message.channel.startTyping();
     const msgArguments = message.content.split(' ');
 
     const figureCounter = msgArguments.length - 1;
@@ -48,6 +49,11 @@ const figureForMessage = (message) => {
         if (name.toLowerCase() === 'sucrose') {
             name = 'saccharose';
         }
+
+        if (name.toLowerCase() === 'hutao') {
+            name = 'hu tao';
+        }
+
         if (msgArguments.length === 3) {
             const secondName = msgArguments[2];
             if (name.toLowerCase() === 'hu' && secondName.toLowerCase() === 'tao') {
@@ -64,7 +70,8 @@ const figureForMessage = (message) => {
 
             const callback = function (entry, _) {
                 message.channel.send(`Zufallsfigur für ${message.author.username}`).then(async function (message) {
-                    sendFigureMessage(message, entry);
+                    const object = entry.entry;
+                    sendFigureMessage(message, object);
                 });
             };
 
@@ -75,13 +82,16 @@ const figureForMessage = (message) => {
 };
 
 const figurelist = (message) => {
+    message.channel.startTyping();
     const callback = function (entry, count) {
         const d = new Discord.MessageEmbed();
         d.setTitle(`Figurenliste [${count}]`);
         d.addField('Verfügbare Figuren', entry);
         d.setFooter(YUANSHEN_TITLE);
         d.setThumbnail(LOGO_URL);
-        message.channel.send(d);
+        message.channel.send(d).then(async function (msg) {
+            msg.channel.stopTyping();
+        });
     };
 
     const resultCallback = function (entries, err) {
@@ -102,6 +112,7 @@ const figurelist = (message) => {
 
 const figureDraft = (message) => {
     // select 2 out of 10 for banning and then next 10 will shown until 8 are left
+    message.channel.startTyping();
 
     const resultCallback = function (entries) {
         var list = [];
@@ -139,6 +150,7 @@ const figureDraft = (message) => {
 };
 
 const figureTalent = (message) => {
+    message.channel.startTyping();
     const callback = function (talents, figures, schedule) {
 
         // prepare list of entries
@@ -191,6 +203,8 @@ const sendMessageForTalents = (message, talentList) => {
             // write next player
             sendMessageForTalents(message, talentList);
         });
+    } else {
+        message.channel.stopTyping();
     }
 };
 
@@ -234,7 +248,9 @@ function sendFigureMessage (message, figure) {
                     d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`, figure.element_image_url);
                 }
             }
-            message.channel.send(d);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         };
         service.allWeekdaysForTalent(talentCallback, figure.tid);
     } else {
@@ -263,11 +279,14 @@ function sendFigureMessage (message, figure) {
                 d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`, figure.element_image_url);
             }
         }
-        message.channel.send(d);
+        message.channel.send(d).then(async function (msg) {
+            msg.channel.stopTyping();
+        });
     }
 };
 
 const sendToday = (message) => {
+    message.channel.startTyping();
     const d = new Discord.MessageEmbed();
     d.setTitle('Heute verfügbar');
     d.setThumbnail(LOGO_URL);
@@ -275,13 +294,16 @@ const sendToday = (message) => {
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d);
+        message.channel.send(d).then(async function (msg) {
+            msg.channel.stopTyping();
+        });
     };
 
     service.getToday(callback);
 };
 
 const sendYesterday = (message) => {
+    message.channel.startTyping();
     const d = new Discord.MessageEmbed();
     d.setTitle('Gestern verfügbar');
     d.setThumbnail(LOGO_URL);
@@ -289,7 +311,9 @@ const sendYesterday = (message) => {
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d);
+        message.channel.send(d).then(async function (msg) {
+            msg.channel.stopTyping();
+        });
     };
     const date = new Date();
     var weekday = date.getDay(); // 0-6 Sonntag - Samstag
@@ -307,6 +331,7 @@ const sendYesterday = (message) => {
 };
 
 const sendTomorrow = (message) => {
+    message.channel.startTyping();
     const d = new Discord.MessageEmbed();
     d.setTitle('Morgen verfügbar');
     d.setThumbnail(LOGO_URL);
@@ -314,7 +339,9 @@ const sendTomorrow = (message) => {
 
     const callback = function (locations, figures, talents, weaponDrops) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d);
+        message.channel.send(d).then(async function (msg) {
+            msg.channel.stopTyping();
+        });
     };
     const date = new Date();
     var weekday = date.getDay() + 1; // 0-6 Sonntag - Samstag
@@ -355,6 +382,7 @@ function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
 }
 
 const boss = (message) => {
+    message.channel.startTyping();
     const callback = function (bosslist, bossdrops, figures) {
         // group all drops together based on boss
         var bossmap = {};
@@ -393,22 +421,6 @@ const boss = (message) => {
     service.getBoss(callback);
 };
 
-const banner = (message) => {
-
-    const callback = function (bannerlist) {
-        // last banner
-        const b = bannerlist[bannerlist.length - 1];
-
-        const d = new Discord.MessageEmbed();
-        d.setTitle(`${b.title}`);
-        // d.setThumbnail(b.image_url);
-        d.setImage(b.image_url);
-
-        message.channel.send(d);
-    };
-    service.getBanner(callback);
-};
-
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
     if (bosslist.length > 0) {
         const boss = bosslist.shift();
@@ -429,10 +441,13 @@ const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, f
             // write next player
             sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossdrops, figures);
         });
+    } else {
+        message.channel.stopTyping();
     }
 };
 
 const randomElement = (message) => {
+    message.channel.startTyping();
     const msgArguments = message.content.split(' ');
     if (msgArguments.length > 1) {
         // more than one player
@@ -460,6 +475,7 @@ const random = (message) => {
 };
 
 const randomWeapon = (message) => {
+    message.channel.startTyping();
     const msgArguments = message.content.split(' ');
     if (msgArguments.length > 1) {
         // more than one player
@@ -519,7 +535,9 @@ function sendDungeonMessage (message, msgArguments, dungeon) {
     d.setDescription('$1, versuch mal $2'.replace('$1', playername).replace('$2', dungeon.name));
     d.setThumbnail(dungeon.image_url);
     d.setFooter(`in ${dungeon.location} - ${YUANSHEN_TITLE}`);
-    message.channel.send(d);
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+    });
 };
 
 const artifact = (message) => {
@@ -548,7 +566,9 @@ function sendArtifactListMessage (message, list) {
         }
     }
     d.setFooter(YUANSHEN_TITLE);
-    message.channel.send(d);
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+    });
 }
 
 function sendArtifactMessage (message, index, sets) {
@@ -574,7 +594,9 @@ function sendArtifactMessage (message, index, sets) {
         d.addField('4-Set', pick.four_set);
     }
     d.setThumbnail(pick.image_url);
-    message.channel.send(d);
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+    });
 };
 
 function sendElementMessages (message, msgArguments, elementList) {
@@ -618,6 +640,8 @@ function writePlayerPick (message, playerPick) {
             // write next player
             writePlayerPick(message, playerPick);
         });
+    } else {
+        message.channel.stopTyping();
     }
 }
 
@@ -632,7 +656,6 @@ module.exports = {
     sendYesterday: sendYesterday,
     sendTomorrow: sendTomorrow,
     sendBoss: boss,
-    sendBanner: banner,
     sendRandomDungeon: randomDungeon,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon,

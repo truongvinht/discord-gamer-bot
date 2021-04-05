@@ -8,18 +8,17 @@ const c = require('../../helper/envHandler');
 
 const YUANSHEN_API_URL = 'yuanshen-api.herokuapp.com';
 
-function getRequestApi(callback, path, param) {
-
+function getRequestApi (callback, path, param) {
     // token for api access
     const TOKEN = c.yuanshenToken;
 
     let header = {};
 
     if (param == null) {
-        header = { 'authorization': TOKEN };
+        header = { authorization: TOKEN };
     } else {
         header = param;
-        header['authorization'] = TOKEN;
+        header.authorization = TOKEN;
     }
 
     const options = {
@@ -30,7 +29,7 @@ function getRequestApi(callback, path, param) {
     };
 
     https.get(options, res => {
-        let data = [];
+        const data = [];
 
         res.on('data', chunk => {
             data.push(chunk);
@@ -54,7 +53,7 @@ const allFigures = (callback) => {
 
 // GET figure by name
 const singleFigure = (callback, name) => {
-    getRequestApi(callback, '/api/v1/figure', {'name': name});
+    getRequestApi(callback, '/api/v1/figure', { 'name': name });
 };
 
 // GET all locations
@@ -64,12 +63,12 @@ const allLocations = (callback) => {
 
 // GET talents for weekday
 const allTalentsForWeekday = (callback, weekday) => {
-    getRequestApi(callback, '/api/v1/talents', {'weekday': weekday});
+    getRequestApi(callback, '/api/v1/talents', { 'weekday': weekday });
 };
 
 // GET weekdays for talent id
-const allWeekdaysForTalent = (callback, talent_id) => {
-    getRequestApi(callback, '/api/v1/talents', {'talent_id': talent_id});
+const allWeekdaysForTalent = (callback, talentId) => {
+    getRequestApi(callback, '/api/v1/talents', { 'talent_id': talentId });
 };
 
 // GET weekdays for talent id
@@ -155,7 +154,7 @@ const randomElement = (count, callback) => {
 };
 
 const randomWeapon = (count, callback) => {
-    const weaponCallback = function (weapons, err_wp) {
+    const weaponCallback = function (weapons, _) {
         var pickedList = [];
 
         for (var i = 0; i < count; i++) {
