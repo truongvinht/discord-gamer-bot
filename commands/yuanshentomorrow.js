@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class yuanshentomorrowCommand extends Command {
     constructor () {
         super('impacttomorrow', {
-            aliases: ['gtom', 'gtomorrow', 'imtomorrow', 'gitomorrow']
+            aliases: ['gtom', 'gtomorrow', 'imtomorrow', 'gitomorrow', 'gmorgen']
         });
     }
 

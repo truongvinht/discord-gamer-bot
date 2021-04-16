@@ -10,7 +10,7 @@ const { Command } = require('discord-akairo');
 class yuanshentodayCommand extends Command {
     constructor () {
         super('impacttoday', {
-            aliases: ['gtoday', 'imtoday', 'gitoday']
+            aliases: ['gtoday', 'imtoday', 'gitoday', 'gheute']
         });
     }
 

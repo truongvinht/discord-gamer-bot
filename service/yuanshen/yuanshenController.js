@@ -3,8 +3,10 @@
 // ================
 
 const Discord = require('discord.js');
+const nodeHtmlToImage = require('node-html-to-image')
 const service = require('./yuanshenService');
 const draft = require('./yuanshenDraftHandler');
+const imgGen = require('./yuanshenImgGenerator');
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
 
@@ -16,8 +18,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gtoday`, 'Heute farmbar')
         .addField(`${PREFIX}glist`, 'Liste aller Figuren')
         .addField(`${PREFIX}gfigure NAME`, 'Figurendetails')
-        .addField(`${PREFIX}gelement NAME`, 'Zufallsgenerator Elemente')
-        .addField(`${PREFIX}gweapon NAME`, 'Zufallsgenerator Waffe')
+        .addField(`${PREFIX}grandom SPIELER-NAME`, 'Zufallsgenerator für SPIELER-NAME (Element/Waffe)')
         .addField(`${PREFIX}gboss`, 'Bossdrop für Talente')
         .addField(`${PREFIX}gdungeon NAME`, 'Zufallsgenerator Dungeon/Sphäre')
         .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
@@ -208,14 +209,63 @@ const sendMessageForTalents = (message, talentList) => {
     }
 };
 
+async function sendAsyncMessage (message, figure, weekdays) {
+
+    const figureContentPage = imgGen.generateFigureImgHtml(figure, weekdays);
+
+    const myImage = await nodeHtmlToImage({
+        html: figureContentPage,
+        quality: 100,
+        type: 'jpeg',
+        puppeteerArgs: {
+            args: ['--no-sandbox']
+        },
+        encoding: 'buffer'
+    });
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${figure.name}`);
+    //d.setAuthor(`${figure.name}`, figure.wp_type_image_url, null);
+    d.setDescription(service.getStarrating(figure.rarity));
+    d.setThumbnail(figure.image_url);
+
+    const name = figure.name;
+
+    const attachment = new Discord.MessageAttachment(myImage, `${name}.jpg`);
+    d.attachFiles(attachment);
+    d.setImage(`attachment://${name}.jpg`);
+    // d.setImage(myImage);
+
+    // footer
+    if (figure.element === '') {
+        if (figure.birthday === '') {
+            // no birthday and no element
+        } else {
+            d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`);
+        }
+    } else {
+        if (figure.birthday == null || figure.birthday === '') {
+            d.setFooter(`🎂 Unbekannt - ${YUANSHEN_TITLE}`, figure.element_image_url);
+        } else {
+            d.setFooter(`🎂 ${figure.birthday} - ${YUANSHEN_TITLE}`, figure.element_image_url);
+        }
+    }
+
+    message.channel.send(d);
+    message.channel.stopTyping();
+}
+
 function sendFigureMessage (message, figure) {
     if (figure.talent != null && figure.talent !== '') {
-        const talentCallback = function (weekdays,_) {
+        const talentCallback = function (weekdays, _) {
+            sendAsyncMessage(message, figure, weekdays);
+            return;
             const d = new Discord.MessageEmbed();
-            d.setTitle(`${figure.name}`);
+             d.setTitle(`${figure.name}`);
+            //d.setAuthor(`${figure.name}`, figure.wp_type_image_url, null);
             d.setDescription(service.getStarrating(figure.rarity));
             d.setThumbnail(figure.image_url);
-            d.addField('Waffe', figure.weapon);
+            // d.setImage(myImage);
+             d.addField('Waffe', figure.weapon);
 
             if (weekdays != null && weekdays.length > 0) {
                 var weekdaysnames = null;
@@ -250,6 +300,64 @@ function sendFigureMessage (message, figure) {
             }
             message.channel.send(d).then(async function (msg) {
                 msg.channel.stopTyping();
+
+                const test = "Peter";
+
+                const _htmlTemplate = `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+                    <style>
+                    body {
+                        font-family: "Poppins", Arial, Helvetica, sans-serif;
+                        background: rgb(22, 22, 22);
+                        color: #fff;
+                        max-width: 300px;
+                    }
+                
+                    .app {
+                        max-width: 300px;
+                        padding: 20px;
+                        display: flex;
+                        flex-direction: row;
+                        border-top: 3px solid rgb(16, 180, 209);
+                        background: rgb(31, 31, 31);
+                        align-items: center;
+                    }
+                
+                    img {
+                        width: 50px;
+                        height: 50px;
+                        margin-right: 20px;
+                        border-radius: 50%;
+                        border: 1px solid #fff;
+                        padding: 5px;
+                    }
+                    </style>
+                </head>
+                <body>
+                    <div class="app">
+                    <img src="https://avatars.dicebear.com/4.5/api/avataaars/${test}.svg" />
+                
+                    <h4>Welcome ${test}</h4>
+                    </div>
+                </body>
+                </html>
+                `;
+                const images = await nodeHtmlToImage({
+                    html: _htmlTemplate,
+                    quality: 100,
+                    type: 'jpeg',
+                    puppeteerArgs: {
+                    args: ['--no-sandbox']
+                    },
+                    encoding: 'buffer'
+                });
+                // for more configuration options refer to the library
+                
+                // msg.channel.send(new Discord.MessageAttachment(images, `${test}.jpeg`));
             });
         };
         service.allWeekdaysForTalent(talentCallback, figure.tid);
@@ -335,6 +443,7 @@ const sendTomorrow = (message) => {
     const d = new Discord.MessageEmbed();
     d.setTitle('Morgen verfügbar');
     d.setThumbnail(LOGO_URL);
+    d.setImage(LOGO_URL);
     d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, figures, talents, weaponDrops) {
