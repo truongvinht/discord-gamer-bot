@@ -53,6 +53,25 @@ function generateBodyContent (content) {
 }
 
 const generateFigureImgHtml = (figure, weekdays) => {
+    const materialName = figure.material_name;
+
+    var materialContent = '';
+    if (materialName !== undefined && materialName !== '') {
+        const materialImageUrl = figure.material_image_url;
+
+        materialContent = `
+        <tr>
+            <td colspan="4">
+                <a class="head_title">Material</a>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            <img class="img_logo" src="${materialImageUrl}" />
+            </td>
+            <td class="text_content">${materialName}</td>
+        </tr>`;
+    }
 
     const weaponType = figure.weapon;
     const weaponTypeImg = figure.wp_type_image_url;
@@ -131,6 +150,7 @@ const generateFigureImgHtml = (figure, weekdays) => {
         ${weaponTypeContent}
         ${talentContent}
     </tr>
+    ${materialContent}
     ${weeklyBossContent}
     </table>`;
 
