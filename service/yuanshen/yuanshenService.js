@@ -110,6 +110,10 @@ const allArtifacts = (callback) => {
 const allBosses = (callback) => {
     getRequestApi(callback, '/api/v1/boss', null);
 };
+// GET all normal bosses
+const allNormalBoss = (callback) => {
+    getRequestApi(callback, '/api/v1/normalboss', null);
+};
 
 // GET all boss drops
 const allBossDrops = (callback) => {
@@ -172,6 +176,14 @@ const randomDungeon = (callback) => {
         callback(dungeons[pickedIndex]);
     };
     allDungeons(dungeonCallback);
+};
+
+const randomNormalBoss = (callback) => {
+    const dungeonCallback = function (boss, err_boss) {
+        const pickedIndex = Math.floor(Math.random() * Math.floor(boss.length));
+        callback(boss[pickedIndex]);
+    };
+    allNormalBoss(dungeonCallback);
 };
 
 const today = (callback) => {
@@ -257,6 +269,7 @@ module.exports = {
     getRandomElement: randomElement,
     getRandomWeapon: randomWeapon,
     getRandomDungeon: randomDungeon,
+    getRandomNormalBoss: randomNormalBoss,
     getToday: today,
     getSelectedDay: selectedDay,
     getBoss: boss,

@@ -255,6 +255,17 @@ async function sendAsyncMessage (message, figure, weekdays) {
     message.channel.stopTyping();
 }
 
+function sendMinFigureMessage (message, figure) {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${figure.name}`);
+    d.setDescription(service.getStarrating(figure.rarity));
+    d.setThumbnail(figure.image_url);
+    
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+    });
+};
+
 function sendFigureMessage (message, figure) {
     if (figure.talent != null && figure.talent !== '') {
         const talentCallback = function (weekdays, _) {
@@ -519,6 +530,108 @@ const randomDungeon = (message) => {
     }
 };
 
+const randomChallenge = (message) => {
+    const msgArguments = message.content.split(' ');
+
+    if (msgArguments.length > 1) {
+
+        const args = msgArguments.length - 1;
+
+        message.channel.startTyping();
+        // no arguments => show only random boss
+        const callback = function (dungeon) {
+            sendNormalBossMessage(message, dungeon);
+            message.channel.startTyping();
+
+            // missing argument: random figure
+            const resultCallback = function (entries, err) {
+                let list = [];
+                for (let playerCount = 0; playerCount < args; playerCount++) {
+                    let pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
+                    while (list.includes(pickedIndex)) {
+                        pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
+                    }
+                    list.push(pickedIndex);
+                    const figure = entries[pickedIndex].name;
+
+                    const figCallback = function (entry, _) {
+                        const object = entry.entry;
+                        sendMinFigureMessage(message, object);
+                    };
+
+                    service.singleFigure(figCallback, figure);
+                }
+            };
+            service.allFigures(resultCallback);
+        };
+        service.getRandomNormalBoss(callback);
+    } else {
+        message.channel.startTyping();
+        // no arguments => show only random boss
+        const callback = function (dungeon) {
+            sendNormalBossMessage(message, dungeon);
+        };
+        service.getRandomNormalBoss(callback);
+    }
+};
+
+const randomLowChallenge = (message) => {
+    const msgArguments = message.content.split(' ');
+
+    if (msgArguments.length > 1) {
+        const args = msgArguments.length - 1;
+
+        message.channel.startTyping();
+        // no arguments => show only random boss
+        const callback = function (dungeon) {
+            sendNormalBossMessage(message, dungeon);
+            message.channel.startTyping();
+
+            // missing argument: random figure
+            const resultCallback = function (entries, err) {
+                let list = [];
+                for (let playerCount = 0; playerCount < args; playerCount++) {
+                    let pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
+                    let figure = entries[pickedIndex];
+                    while (list.includes(pickedIndex) || figure.rarity > 4) {
+                        pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
+                        figure = entries[pickedIndex];
+                    }
+
+                    list.push(pickedIndex);
+                    const figCallback = function (entry, _) {
+                        const object = entry.entry;
+                        sendMinFigureMessage(message, object);
+                    };
+
+                    service.singleFigure(figCallback, figure.name);
+                }
+            };
+            service.allFigures(resultCallback);
+        };
+        service.getRandomNormalBoss(callback);
+    } else {
+        message.channel.startTyping();
+        // no arguments => show only random boss
+        const callback = function (dungeon) {
+            sendNormalBossMessage(message, dungeon);
+        };
+        service.getRandomNormalBoss(callback);
+    }
+};
+
+function sendNormalBossMessage (message, boss) {
+
+    const d = new Discord.MessageEmbed();
+    d.setTitle('Challenge - Gegner');
+    d.setDescription('Versucht es mal mit $1'.replace('$1', boss.name));
+    d.setThumbnail(boss.image_url);
+    d.setFooter(`in ${boss.location} - ${YUANSHEN_TITLE}`);
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+    });
+};
+
 function sendDungeonMessage (message, msgArguments, dungeon) {
     var playerPick = [];
 
@@ -666,6 +779,8 @@ module.exports = {
     sendTomorrow: sendTomorrow,
     sendBoss: boss,
     sendRandomDungeon: randomDungeon,
+    sendRandomChallenge: randomChallenge,
+    sendRandomLowChallenge: randomLowChallenge,
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon,
     sendRandom: random,
