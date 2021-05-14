@@ -1,16 +1,16 @@
-// yuanshenFigure.js
-// Command for getting details about a figure in Yuan Shen
+// showFigureList.js
+// Command for getting a list with all figures in Yuan Shen
 // ================
 
 // import
-const controller = require('../service/yuanshen/yuanshenController');
+const controller = require('../../service/yuanshen/yuanshenController');
 
 const { Command } = require('discord-akairo');
 
 class yuanshenFigureListCommand extends Command {
     constructor () {
-        super('impactlist', {
-            aliases: ['glist', 'imlist', 'genshinlist']
+        super('yuanshenlist', {
+            aliases: ['glist', 'genshinlist']
         });
     }
 

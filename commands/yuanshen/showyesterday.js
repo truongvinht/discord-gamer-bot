@@ -3,14 +3,14 @@
 // ================
 
 // import
-const controller = require('../service/yuanshen/yuanshenController');
+const controller = require('../../service/yuanshen/yuanshenController');
 
 const { Command } = require('discord-akairo');
 
 class yuanshenyesterdayCommand extends Command {
     constructor () {
-        super('impactyesterday', {
-            aliases: ['gyest', 'gyesterday', 'imyesterday', 'giyesterday', 'ggestern']
+        super('yuanshenyesterday', {
+            aliases: ['gyest', 'gyesterday', 'ggestern']
         });
     }
 

@@ -22,11 +22,17 @@ if (botToken === '') {
     botToken = process.env.BOT_TOKEN;
 }
 
-// Bot Token
+// Yuan Shen DB Server Token
 let yuanshenToken = botSettings.yuanshen_api_token;
 if (yuanshenToken === '') {
     // Heroku ENV token
     yuanshenToken = process.env.YUANSHEN_API_TOKEN;
+}
+
+// Yuan Shen DB Server Address
+let yuanshenServer = botSettings.yuanshen_api_server;
+if (yuanshenServer === '') {
+    yuanshenServer = process.env.YUANSHEN_API_SERVER;
 }
 
 // command prefix
@@ -61,6 +67,7 @@ module.exports = {
     prefix: getPrefix,
     roles: getRoles,
     yuanshenToken,
+    yuanshenServer,
     author: author,
     version: getVersion
 };

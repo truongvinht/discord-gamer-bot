@@ -3,12 +3,24 @@
 // ================
 
 const Discord = require('discord.js');
-const nodeHtmlToImage = require('node-html-to-image')
-const service = require('./yuanshenService');
+const nodeHtmlToImage = require('node-html-to-image');
+const ApiService = require('./service/yuanshenService');
+
 const draft = require('./yuanshenDraftHandler');
-const imgGen = require('./yuanshenImgGenerator');
+const imgGen = require('./service/imageGeneratorService');
+const c = require('../../helper/envHandler');
+
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
+
+let yuanshenApiService = null;
+
+function getApiService () {
+    if (yuanshenApiService == null) {
+        yuanshenApiService = new ApiService(c.yuanshenServer, c.yuanshenToken);
+    }
+    return yuanshenApiService;
+}
 
 const help = (PREFIX, author) => {
     const embed = new Discord.MessageEmbed()
@@ -43,18 +55,6 @@ const figureForMessage = (message) => {
 
         var name = msgArguments[1];
 
-        // exception handling
-        if (name.toLowerCase() === 'childe') {
-            name = 'tartaglia';
-        }
-        if (name.toLowerCase() === 'sucrose') {
-            name = 'saccharose';
-        }
-
-        if (name.toLowerCase() === 'hutao') {
-            name = 'hu tao';
-        }
-
         if (msgArguments.length === 3) {
             const secondName = msgArguments[2];
             if (name.toLowerCase() === 'hu' && secondName.toLowerCase() === 'tao') {
@@ -62,7 +62,7 @@ const figureForMessage = (message) => {
             }
         }
 
-        service.singleFigure(callback, name);
+        getApiService().singleFigure(callback, name);
     } else {
         // missing argument: random figure
         const resultCallback = function (entries, err) {
@@ -76,9 +76,9 @@ const figureForMessage = (message) => {
                 });
             };
 
-            service.singleFigure(callback, figure);
+            getApiService().singleFigure(callback, figure);
         };
-        service.allFigures(resultCallback);
+        getApiService().allFigures(resultCallback);
     }
 };
 
@@ -107,8 +107,7 @@ const figurelist = (message) => {
         }
         callback(list, entries.length);
     };
-
-    service.allFigures(resultCallback);
+    getApiService().allFigures(resultCallback);
 };
 
 const figureDraft = (message) => {
@@ -147,28 +146,27 @@ const figureDraft = (message) => {
     };
 
     // 0. init draft list
-    service.getAllFigures(resultCallback);
+    getApiService.allFigures(resultCallback);
 };
 
 const figureTalent = (message) => {
     message.channel.startTyping();
     const callback = function (talents, figures, schedule) {
-
         // prepare list of entries
         var talentList = [];
 
         for (var i = 0; i < talents.length; i++) {
             var t = {};
             const talent = talents[i];
-            t["name"] = talent["name"];
-            t["location"] = talent["location"];
-            t["image_url"] = talent["image_url"];
+            t['name'] = talent.name;
+            t['location'] = talent.location;
+            t['image_url'] = talent.image_url;
 
             var names = [];
             for (var j = 0; j < figures.length; j++) {
                 const fig = figures[j];
                 if (talent["tid"] === fig["talent_id"]) {
-                    names.push(fig["name"]);
+                    names.push(fig.name);
                 }
             }
             t["figures"] = names;
@@ -177,7 +175,7 @@ const figureTalent = (message) => {
             for (var k = 0; k < schedule.length; k++) {
                 const s = schedule[k];
                 if (talent["tid"] === s["talent_id"]) {
-                    schedules.push(s["day"]);
+                    schedules.push(s.day);
                 }
             }
             t["schedules"] = schedules;
@@ -186,7 +184,7 @@ const figureTalent = (message) => {
         sendMessageForTalents(message, talentList);
     };
 
-    service.getTalent(callback);
+    getApiService().getTalent(callback);
 };
 
 const sendMessageForTalents = (message, talentList) => {
@@ -211,7 +209,7 @@ const sendMessageForTalents = (message, talentList) => {
 
 async function sendAsyncMessage (message, figure, weekdays) {
 
-    const figureContentPage = imgGen.generateFigureImgHtml(figure, weekdays);
+    const figureContentPage = imgGen.generateFigureContentPage(figure, weekdays);
 
     const myImage = await nodeHtmlToImage({
         html: figureContentPage,
@@ -224,17 +222,16 @@ async function sendAsyncMessage (message, figure, weekdays) {
     });
     const d = new Discord.MessageEmbed();
     d.setTitle(`${figure.name}`);
-    //d.setAuthor(`${figure.name}`, figure.wp_type_image_url, null);
-    d.setDescription(service.getStarrating(figure.rarity));
+    d.setDescription(getRating(figure.rarity));
     d.setThumbnail(figure.image_url);
 
-    const name = figure.name;
+    let name = figure.name;
+    name = name.split(' ').join('_');
 
     const attachment = new Discord.MessageAttachment(myImage, `${name}.jpg`);
     d.attachFiles(attachment);
 
     d.setImage(`attachment://${name}.jpg`);
-    // d.setImage(myImage);
 
     // footer
     if (figure.element === '') {
@@ -258,9 +255,9 @@ async function sendAsyncMessage (message, figure, weekdays) {
 function sendMinFigureMessage (message, figure) {
     const d = new Discord.MessageEmbed();
     d.setTitle(`${figure.name}`);
-    d.setDescription(service.getStarrating(figure.rarity));
+    d.setDescription(getRating(figure.rarity));
     d.setThumbnail(figure.image_url);
-    
+
     message.channel.send(d).then(async function (msg) {
         msg.channel.stopTyping();
     });
@@ -271,11 +268,11 @@ function sendFigureMessage (message, figure) {
         const talentCallback = function (weekdays, _) {
             sendAsyncMessage(message, figure, weekdays);
         };
-        service.allWeekdaysForTalent(talentCallback, figure.tid);
+        getApiService().allWeekdaysForTalent(talentCallback, figure.tid);
     } else {
         const d = new Discord.MessageEmbed();
         d.setTitle(`${figure.name}`);
-        d.setDescription(service.getStarrating(figure.rarity));
+        d.setDescription(getRating(figure.rarity));
         d.setThumbnail(figure.image_url);
         d.addField('Waffe', figure.weapon);
 
@@ -318,7 +315,7 @@ const sendToday = (message) => {
         });
     };
 
-    service.getToday(callback);
+    getApiService().getToday(callback);
 };
 
 const sendYesterday = (message) => {
@@ -328,7 +325,7 @@ const sendYesterday = (message) => {
     d.setThumbnail(LOGO_URL);
     d.setFooter(`${YUANSHEN_TITLE}`);
 
-    const callback = function (locations, figures, talents, weaponDrops) {
+    const callback = function (locations, talents, figures, weaponDrops, error) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
         message.channel.send(d).then(async function (msg) {
             msg.channel.stopTyping();
@@ -346,7 +343,7 @@ const sendYesterday = (message) => {
         weekday = weekday - 1;
     }
 
-    service.getSelectedDay(weekday, callback);
+    getApiService().ressourcesForWeekday(callback, weekday);
 };
 
 const sendTomorrow = (message) => {
@@ -354,18 +351,17 @@ const sendTomorrow = (message) => {
     const d = new Discord.MessageEmbed();
     d.setTitle('Morgen verfügbar');
     d.setThumbnail(LOGO_URL);
-    d.setImage(LOGO_URL);
     d.setFooter(`${YUANSHEN_TITLE}`);
 
-    const callback = function (locations, figures, talents, weaponDrops) {
+    const callback = function (locations, talents, figures, weaponDrops, error) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
         message.channel.send(d).then(async function (msg) {
             msg.channel.stopTyping();
         });
     };
     const date = new Date();
-    var weekday = date.getDay() + 1; // 0-6 Sonntag - Samstag
-    service.getSelectedDay(weekday, callback);
+    const weekday = (date.getDay() + 1) % 7; // 0-6 Sonntag - Samstag
+    getApiService().ressourcesForWeekday(callback, weekday);
 };
 
 function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
@@ -438,7 +434,7 @@ const boss = (message) => {
         // send a message for each boss
         sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossmap, bossdropfiguremap);
     };
-    service.getBoss(callback);
+    getApiService().getBoss(callback);
 };
 
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
@@ -478,14 +474,14 @@ const randomElement = (message) => {
         };
 
         // get element
-        service.getRandomElement(msgArguments.length, callback);
+        getApiService().randomElement(callback, msgArguments.length);
     } else {
         const callback = function (elements) {
             sendElementMessages(message, [message.author.username, message.author.username], elements);
         };
 
         // get element
-        service.getRandomElement(1, callback);
+        getApiService().randomElement(callback, 1);
     }
 };
 
@@ -504,13 +500,13 @@ const randomWeapon = (message) => {
             sendElementMessages(message, msgArguments, weapons);
         };
         // get weapon
-        service.getRandomWeapon(msgArguments.length, callback);
+        getApiService().randomWeapon(callback, msgArguments.length);
     } else {
         const callback = function (weapons) {
             sendElementMessages(message, [message.author.username, message.author.username], weapons);
         };
         // get weapon
-        service.getRandomWeapon(1, callback);
+        getApiService().randomWeapon(callback, 1);
     }
 };
 
@@ -521,12 +517,12 @@ const randomDungeon = (message) => {
         const callback = function (dungeon) {
             sendDungeonMessage(message, msgArguments, dungeon);
         };
-        service.getRandomDungeon(callback);
+        getApiService().randomDungeon(callback);
     } else {
         const callback = function (dungeon) {
             sendDungeonMessage(message, [message.author.username, message.author.username], dungeon);
         };
-        service.getRandomDungeon(callback);
+        getApiService().randomDungeon(callback);
     }
 };
 
@@ -545,7 +541,7 @@ const randomChallenge = (message) => {
 
             // missing argument: random figure
             const resultCallback = function (entries, err) {
-                let list = [];
+                const list = [];
                 for (let playerCount = 0; playerCount < args; playerCount++) {
                     let pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
                     while (list.includes(pickedIndex)) {
@@ -559,19 +555,19 @@ const randomChallenge = (message) => {
                         sendMinFigureMessage(message, object);
                     };
 
-                    service.singleFigure(figCallback, figure);
+                    getApiService().singleFigure(figCallback, figure);
                 }
             };
-            service.allFigures(resultCallback);
+            getApiService().allFigures(resultCallback);
         };
-        service.getRandomNormalBoss(callback);
+        getApiService().randomNormalBoss(callback);
     } else {
         message.channel.startTyping();
         // no arguments => show only random boss
         const callback = function (dungeon) {
             sendNormalBossMessage(message, dungeon);
         };
-        service.getRandomNormalBoss(callback);
+        getApiService().randomNormalBoss(callback);
     }
 };
 
@@ -589,7 +585,7 @@ const randomLowChallenge = (message) => {
 
             // missing argument: random figure
             const resultCallback = function (entries, err) {
-                let list = [];
+                const list = [];
                 for (let playerCount = 0; playerCount < args; playerCount++) {
                     let pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
                     let figure = entries[pickedIndex];
@@ -604,19 +600,19 @@ const randomLowChallenge = (message) => {
                         sendMinFigureMessage(message, object);
                     };
 
-                    service.singleFigure(figCallback, figure.name);
+                    getApiService().singleFigure(figCallback, figure.name);
                 }
             };
-            service.allFigures(resultCallback);
+            getApiService().allFigures(resultCallback);
         };
-        service.getRandomNormalBoss(callback);
+        getApiService().randomNormalBoss(callback);
     } else {
         message.channel.startTyping();
         // no arguments => show only random boss
         const callback = function (dungeon) {
             sendNormalBossMessage(message, dungeon);
         };
-        service.getRandomNormalBoss(callback);
+        getApiService().randomNormalBoss(callback);
     }
 };
 
@@ -674,7 +670,7 @@ const artifact = (message) => {
     };
 
     // get weapon
-    service.getArtifactset(callback);
+    getApiService().allArtifacts(callback);
 };
 function sendArtifactListMessage (message, list) {
     const d = new Discord.MessageEmbed();
@@ -766,6 +762,15 @@ function writePlayerPick (message, playerPick) {
         message.channel.stopTyping();
     }
 }
+function getRating (number) {
+    var stars = '';
+
+    for (var i = 0; i < number; i++) {
+        const newLocal = '★';
+        stars = stars + newLocal;
+    }
+    return stars;
+};
 
 // export
 module.exports = {

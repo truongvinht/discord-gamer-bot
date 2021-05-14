@@ -1,16 +1,16 @@
-// yuanshenRandomElement.js
+// startRandom.js
 // Command for getting random element in Yuan Shen
 // ================
 
 // import
-const controller = require('../service/yuanshen/yuanshenController');
+const controller = require('../../service/yuanshen/yuanshenController');
 
 const { Command } = require('discord-akairo');
 
 class yuanshenRandomCommand extends Command {
     constructor () {
-        super('impactRandom', {
-            aliases: ['gr', 'grand', 'grandom', 'imrandom', 'girandom']
+        super('yuanshenrandom', {
+            aliases: ['gr', 'grand', 'grandom']
         });
     }
 

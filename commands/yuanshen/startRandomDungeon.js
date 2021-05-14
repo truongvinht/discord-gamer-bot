@@ -1,16 +1,16 @@
-// yuanshenRandomDungeon.js
+// startRandomDungeon.js
 // Command for getting random dungeon in Yuan Shen
 // ================
 
 // import
-const controller = require('../service/yuanshen/yuanshenController');
+const controller = require('../../service/yuanshen/yuanshenController');
 
 const { Command } = require('discord-akairo');
 
 class yuanshenRandomDungeonCommand extends Command {
     constructor () {
-        super('impactDungeon', {
-            aliases: ['gdg', 'gdun', 'gdung', 'gdungeon', 'imdungeon', 'gidungeon']
+        super('yuanshenDungeon', {
+            aliases: ['gdg', 'gdun', 'gdung', 'gdungeon']
         });
     }
 

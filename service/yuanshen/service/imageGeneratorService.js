@@ -1,5 +1,5 @@
-// yuanshenImgGenerator.js
-// create an img for displaying content
+// imageGeneratorService.js
+// create an html page for displaying content
 // ==================
 
 const HTML_HEAD = `
@@ -52,7 +52,7 @@ function generateBodyContent (content) {
     return BODY_BEGIN + content + BODY_END;
 }
 
-const generateFigureImgHtml = (figure, weekdays) => {
+const generateFigureContentPage = (figure, weekdays) => {
     const materialName = figure.material_name;
 
     var materialContent = '';
@@ -159,5 +159,5 @@ const generateFigureImgHtml = (figure, weekdays) => {
 
 // export
 module.exports = {
-    generateFigureImgHtml
+    generateFigureContentPage
 };

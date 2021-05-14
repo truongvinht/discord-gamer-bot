@@ -1,18 +1,18 @@
-// autochessHelp.js
+// showHelp.js
 // Help Command for Autochess
 // show available commands for Auto Chess
 // ================
 
 // import
-const controller = require('../service/autochess/autochessController');
-const c = require('../helper/envHandler');
+const controller = require('../../service/autochess/autochessController');
+const c = require('../../helper/envHandler');
 
 const { Command } = require('discord-akairo');
 
 class autochessHelpCommand extends Command {
     constructor () {
         super('autochessHelp', {
-            aliases: ['achelp']
+            aliases: ['achelp', 'ahelp']
         });
     }
 

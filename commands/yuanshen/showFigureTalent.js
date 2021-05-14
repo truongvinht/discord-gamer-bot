@@ -1,16 +1,16 @@
-// yuanshenFigureTalents.js
+// showFigureTalent.js
 // Command for figure talents in Yuan Shen
 // ================
 
 // import
-const controller = require('../service/yuanshen/yuanshenController');
+const controller = require('../../service/yuanshen/yuanshenController');
 
 const { Command } = require('discord-akairo');
 
 class yuanshenFigureTalentCommand extends Command {
     constructor () {
-        super('impactfiguretalent', {
-            aliases: ['gtal', 'gtalent', 'imtalent', 'imta']
+        super('yuanshentalent', {
+            aliases: ['gtal', 'gtalent']
         });
     }
 
