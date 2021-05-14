@@ -1,6 +1,7 @@
 {
   "token" : "",
   "yuanshen_api_token":"",
+  "yuanshen_api_server":"",
   "prefix":"!",
   "roles":[],
   "author":"C4CW",
