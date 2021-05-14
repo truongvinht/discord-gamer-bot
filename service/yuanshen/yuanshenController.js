@@ -308,14 +308,16 @@ const sendToday = (message) => {
     d.setThumbnail(LOGO_URL);
     d.setFooter(`${YUANSHEN_TITLE}`);
 
-    const callback = function (locations, figures, talents, weaponDrops) {
+    const callback = function (locations, talents, figures, weaponDrops, error) {
         summarizedDataForDate(d, locations, figures, talents, weaponDrops);
         message.channel.send(d).then(async function (msg) {
             msg.channel.stopTyping();
         });
     };
 
-    getApiService().getToday(callback);
+    const date = new Date();
+    const weekday = date.getDay(); // 0-6 Sonntag - Samstag
+    getApiService().ressourcesForWeekday(callback, weekday);
 };
 
 const sendYesterday = (message) => {
