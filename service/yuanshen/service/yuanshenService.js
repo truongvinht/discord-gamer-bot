@@ -155,6 +155,68 @@ class YuanShenService extends ApiAccessService {
         };
         super.allLocations(regioncallback);
     }
+
+    /**
+     * GET boss details
+     * @param {requestCallback} callback callback to handle result/error
+     */
+    boss (callback) {
+        const service = this;
+        const bosscallback = function (bosslist, bossError) {
+            if (bossError == null) {
+                const bossdropscallback = function (bossdroplist, dropError) {
+                    if (dropError == null) {
+                        const figurbossdropcallback = function (figuredroplist, figureError) {
+                            if (figureError == null) {
+                                callback(bosslist, bossdroplist, figuredroplist, null);
+                            } else {
+                                callback(bosslist, bossdroplist, null, figureError);
+                            }
+                        };
+                        service.allFiguresWithBossDrops(figurbossdropcallback);
+                    } else {
+                        callback(bosslist, null, null, dropError);
+                    }
+                };
+                service.allBossDrops(bossdropscallback);
+            } else {
+                // failed fetching boss
+                callback(null, null, null, bossError);
+            }
+        };
+        super.allBosses(bosscallback);
+    }
+
+    /**
+     * GET all talents
+     * @param {requestCallback} callback callback to handle result/error
+     */
+    talent (callback) {
+        const service = this;
+        const talentCallback = function (talents, talentError) {
+            if (talentError == null) {
+                const figurecallback = function (figures, figureError) {
+                    if (figureError == null) {
+                        const weekdayCallback = function (weekdays, weekdayError) {
+                            if (figureError == null) {
+                                callback(talents, figures, weekdays, null);
+                            } else {
+                                callback(talents, figures, null, weekdayError);
+                            }
+                        };
+                        service.allTalentSchedules(weekdayCallback);
+                    } else {
+                        callback(talents, null, null, figureError);
+                    }
+                };
+                service.allFigures(figurecallback);
+            } else {
+                // failed fetching boss
+                callback(null, null, null, null, talentError);
+            }
+        };
+        super.allTalents(talentCallback);
+    }
 };
 
 module.exports = YuanShenService;

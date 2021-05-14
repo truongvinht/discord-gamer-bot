@@ -27,14 +27,15 @@ const help = (PREFIX, author) => {
         .setTitle(`${YUANSHEN_TITLE} - Commands`)
         .setAuthor(`${author}`)
         .setDescription('Folgende Befehle sind verfügbar:')
-        .addField(`${PREFIX}gtoday`, 'Heute farmbar')
+        .addField(`${PREFIX}gtoday / ${PREFIX}gtomorrow`, 'Heute/Morgen farmbar')
         .addField(`${PREFIX}glist`, 'Liste aller Figuren')
         .addField(`${PREFIX}gfigure NAME`, 'Figurendetails')
         .addField(`${PREFIX}grandom SPIELER-NAME`, 'Zufallsgenerator für SPIELER-NAME (Element/Waffe)')
         .addField(`${PREFIX}gboss`, 'Bossdrop für Talente')
-        .addField(`${PREFIX}gdungeon NAME`, 'Zufallsgenerator Dungeon/Sphäre')
+        .addField(`${PREFIX}gdungeon`, 'Zufallsgenerator Dungeon/Sphäre')
         .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
+        .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -184,7 +185,7 @@ const figureTalent = (message) => {
         sendMessageForTalents(message, talentList);
     };
 
-    getApiService().getTalent(callback);
+    getApiService().talent(callback);
 };
 
 const sendMessageForTalents = (message, talentList) => {
@@ -436,7 +437,7 @@ const boss = (message) => {
         // send a message for each boss
         sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossmap, bossdropfiguremap);
     };
-    getApiService().allBosses(callback);
+    getApiService().boss(callback);
 };
 
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {

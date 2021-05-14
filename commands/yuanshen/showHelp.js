@@ -11,7 +11,7 @@ const { Command } = require('discord-akairo');
 class yuanshenHelpCommand extends Command {
     constructor () {
         super('yuanshenhelp', {
-            aliases: ['gihelp', 'ghelp']
+            aliases: ['gihelp', 'ghelp', 'ghilfe']
         });
     }
 
