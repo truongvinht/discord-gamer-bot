@@ -436,7 +436,7 @@ const boss = (message) => {
         // send a message for each boss
         sendMessageForWeeklyBoss(message, bosslist, bossdropNames, bossmap, bossdropfiguremap);
     };
-    getApiService().getBoss(callback);
+    getApiService().allBosses(callback);
 };
 
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
