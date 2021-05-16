@@ -154,7 +154,39 @@ class YuanShenService extends ApiAccessService {
             }
         };
         super.allLocations(regioncallback);
-    }
+    };
+
+    /**
+     * GET banner details for selected date 
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} time date in format YYYYMMDD
+     */
+    bannerforTime (callback, time) {
+        const service = this;
+        const bannerCallback = function (banner, bannerError) {
+            if (bannerError == null && bannerError !== undefined) {
+                if (banner != null && banner.entry != null) {
+                    const bannerObj = banner.entry[0];
+                    const figureCallback = function (figure, figureError) {
+                        if (figureError == null) {
+                            callback(bannerObj, figure);
+                        } else {
+                            callback(null, null, 'Invalid request for figure banner.');
+                        }
+                    };
+
+                    service.allFiguresForSelectedBanner(figureCallback, bannerObj.gbid);
+                } else {
+                    callback(null, null, 'Invalid number of banner.');
+                }
+            } else {
+                callback(null, null, bannerError);
+            }
+        };
+
+        super.targetBannerInTime(bannerCallback, time);
+    };
+
 
     /**
      * GET boss details

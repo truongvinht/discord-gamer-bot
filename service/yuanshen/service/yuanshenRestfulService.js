@@ -141,6 +141,49 @@ class YuanShenRestFulService extends ApiAccessService {
     allFiguresWithBossDrops (callback) {
         super.getRequest(callback, '/api/v1/figuresWithBossDrops', null);
     }
+
+    /**
+     * GET all wish banner
+     * @param {requestCallback} callback callback to handle result/error
+     */
+    allBanners (callback) {
+        super.getRequest(callback, '/api/v1/banner', null);
+    }
+
+    /**
+     * GET wish banner for a time
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} time date in YYYYMMDD
+     */
+    targetBannerInTime (callback, time) {
+        super.getRequest(callback, '/api/v1/banner', { time: time });
+    }
+
+    /**
+     * GET all wish banner for figure appearance
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} fid figure ID
+     */
+    allBannerForSelectedFigure (callback, fid) {
+        super.getRequest(callback, '/api/v1/banner', { fid: fid });
+    }
+
+    /**
+     * GET all figures for selected banner
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} gbid gatcha banner ID
+     */
+    allFiguresForSelectedBanner (callback, gbid) {
+        super.getRequest(callback, '/api/v1/banner', { gbid: gbid });
+    }
+
+    /**
+     * GET all wish banner with all figure details
+     * @param {requestCallback} callback callback to handle result/error
+     */
+    allBannerWithFiguresDetails (callback) {
+        super.getRequest(callback, '/api/v1/banners', null);
+    }
 };
 
 module.exports = YuanShenRestFulService;

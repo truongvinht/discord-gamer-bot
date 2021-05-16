@@ -9,6 +9,7 @@ const ApiService = require('./service/yuanshenService');
 const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
 const c = require('../../helper/envHandler');
+const DateExtension = require('../../helper/dateExtension');
 
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
@@ -35,6 +36,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gdungeon`, 'Zufallsgenerator Dungeon/Sphäre')
         .addField(`${PREFIX}gartifactset`, 'Liste aller Artifaktsets (5 Sterne)')
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
+        .addField(`${PREFIX}gbanner`, 'Zeigt den aktuellen Banner an')
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
         .setThumbnail(LOGO_URL);
 
@@ -209,7 +211,6 @@ const sendMessageForTalents = (message, talentList) => {
 };
 
 async function sendAsyncMessage (message, figure, weekdays) {
-
     const figureContentPage = imgGen.generateFigureContentPage(figure, weekdays);
 
     const myImage = await nodeHtmlToImage({
@@ -440,6 +441,43 @@ const boss = (message) => {
     getApiService().boss(callback);
 };
 
+const banner = (message) => {
+    // current banner
+    message.channel.startTyping();
+
+    const callback = function (banner, figure, error) {
+        const d = new Discord.MessageEmbed();
+        // check for error
+        if (error == null) {
+            d.setTitle(`Aktueller Banner - ${banner.title}`);
+            d.setDescription(`Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`);
+            d.setImage(banner.image_url);
+            d.setFooter(`${YUANSHEN_TITLE}`);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+
+                const figList = figure.entry;
+                for (const figIndex in figList) {
+                    const figCallback = function (entry, _) {
+                        const object = entry.entry;
+                        sendMinFigureMessage(message, object);
+                    };
+                    const fig = figList[figIndex];
+                    getApiService().singleFigure(figCallback, fig.name);
+                }
+            });
+        } else {
+            d.setTitle('Kein Banner gefunden!');
+            d.setThumbnail(LOGO_URL);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        }
+    };
+    const now = new DateExtension();
+    getApiService().bannerforTime(callback, parseInt(`${now.dateToYMD()}`));
+};
+
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {
     if (bosslist.length > 0) {
         const boss = bosslist.shift();
@@ -533,7 +571,6 @@ const randomChallenge = (message) => {
     const msgArguments = message.content.split(' ');
 
     if (msgArguments.length > 1) {
-
         const args = msgArguments.length - 1;
 
         message.channel.startTyping();
@@ -620,7 +657,6 @@ const randomLowChallenge = (message) => {
 };
 
 function sendNormalBossMessage (message, boss) {
-
     const d = new Discord.MessageEmbed();
     d.setTitle('Challenge - Gegner');
     d.setDescription('Versucht es mal mit $1'.replace('$1', boss.name));
@@ -786,6 +822,7 @@ module.exports = {
     sendYesterday: sendYesterday,
     sendTomorrow: sendTomorrow,
     sendBoss: boss,
+    sendBanner: banner,
     sendRandomDungeon: randomDungeon,
     sendRandomChallenge: randomChallenge,
     sendRandomLowChallenge: randomLowChallenge,
