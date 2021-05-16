@@ -24,10 +24,30 @@ const HTML_HEAD = `
         font-weight: bold;
         font-size:0.9rem;
     }
+    .head_subtitle {
+        font-weight: normal;
+        color: #FACB34;
+        font-size:0.65rem;
+    }
     .img_logo {
         width: 25px;
         height: 25px;
         margin-right: 10px;
+    }
+    .img_sym_left {
+        width: 20px;
+        height: 20px;
+        margin-left: 5px;
+    }
+    .img_sym_right {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+    .img_figure {
+        height: 80px;
+        margin-left: 5px;
+        margin-right: 5px;
     }
     .text_content {
         font-size:0.75rem;
@@ -51,11 +71,61 @@ function generateBodyContent (content) {
 
     return BODY_BEGIN + content + BODY_END;
 }
+function generateTableContent (rows) {
+    const TABLE_BEGIN = '<table>\n';
+    const TABLE_END = '</table>\n';
+
+    return TABLE_BEGIN + rows + TABLE_END;
+}
+
+function generateTableRowContent (rows) {
+    const TABLE_BEGIN = '<tr>';
+    const TABLE_END = '</tr>';
+
+    return TABLE_BEGIN + rows + TABLE_END;
+}
+
+function generateColumnTextWith (colspan, classname, content) {
+    return `<td colspan="${colspan}"><a class="${classname}">${content}</a></td>`;
+}
+
+function generateColumnImgWith (colspan, classname, content) {
+    return `<td colspan="${colspan}"><img class="${classname}" src="${content}" /></td>`;
+}
+
+function getRating (number) {
+    let stars = '';
+
+    for (let i = 0; i < number; i++) {
+        const newLocal = '★';
+        stars = stars + newLocal;
+    }
+    return stars;
+};
+
+const generateFigureOverviewPage = (figureList) => {
+    let titles = '';
+    let ratings = '';
+    let figures = '';
+
+    let footer = '';
+
+    for (let index = 0; index < figureList.length; index++) {
+        const fig = figureList[index];
+        titles = titles + generateColumnTextWith(2, 'head_title', fig.name) + '\n';
+        ratings = ratings + generateColumnTextWith(2, 'head_subtitle', getRating(fig.rarity)) + '\n';
+        figures = figures + generateColumnImgWith(2, 'img_figure', fig.image_url) + '\n';
+
+        footer = footer + generateColumnImgWith(1, 'img_sym_left', fig.element_image_url) + '\n' + generateColumnImgWith(1, 'img_sym_right', fig.weapon_type_image_url) + '\n';
+    }
+
+    return generateHtmlContent(generateBodyContent(generateTableContent(generateTableRowContent(titles) + generateTableRowContent(ratings) + generateTableRowContent(figures) + generateTableRowContent(footer))));
+};
 
 const generateFigureContentPage = (figure, weekdays) => {
     const materialName = figure.material_name;
 
-    var materialContent = '';
+    let materialContent = '';
     if (materialName !== undefined && materialName !== '') {
         const materialImageUrl = figure.material_image_url;
 
@@ -87,12 +157,12 @@ const generateFigureContentPage = (figure, weekdays) => {
     }
 
     const talent = figure.talent;
-    var talentDays = '';
+    let talentDays = '';
 
     if (weekdays != null && weekdays.length > 0) {
-        var weekdaysnames = null;
+        let weekdaysnames = null;
 
-        for (var days = 0; days < weekdays.length; days++) {
+        for (let days = 0; days < weekdays.length; days++) {
             if (weekdaysnames == null) {
                 weekdaysnames = weekdays[days].weekday_short;
             } else {
@@ -159,5 +229,6 @@ const generateFigureContentPage = (figure, weekdays) => {
 
 // export
 module.exports = {
-    generateFigureContentPage
+    generateFigureContentPage,
+    generateFigureOverviewPage
 };

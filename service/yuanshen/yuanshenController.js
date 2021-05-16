@@ -56,7 +56,7 @@ const figureForMessage = (message) => {
             }
         };
 
-        var name = msgArguments[1];
+        let name = msgArguments[1];
 
         if (msgArguments.length === 3) {
             const secondName = msgArguments[2];
@@ -197,8 +197,8 @@ const sendMessageForTalents = (message, talentList) => {
         const d = new Discord.MessageEmbed();
         d.setTitle(`${talent.name} in ${talent.location}`);
 
-        d.setDescription(talent.schedules.join())
-        d.addField(`Figuren (${talent.figures.length})`,talent.figures.join())
+        d.setDescription(talent.schedules.join());
+        d.addField(`Figuren (${talent.figures.length})`, talent.figures.join());
         d.setThumbnail(talent.image_url);
 
         message.channel.send(d).then(async function (message) {
@@ -264,6 +264,30 @@ function sendMinFigureMessage (message, figure) {
         msg.channel.stopTyping();
     });
 };
+
+async function sendAsyncFigureMessage (message, footer, figures) {
+    const figureContentPage = imgGen.generateFigureOverviewPage(figures);
+
+    const myImage = await nodeHtmlToImage({
+        html: figureContentPage,
+        quality: 100,
+        type: 'jpeg',
+        puppeteerArgs: {
+            args: ['--no-sandbox']
+        },
+        encoding: 'buffer'
+    });
+    const d = new Discord.MessageEmbed();
+    d.setTitle('Figurenbanner: Featured');
+
+    const attachment = new Discord.MessageAttachment(myImage, 'overview.jpg');
+    d.attachFiles(attachment);
+
+    d.setImage('attachment://overview.jpg');
+    d.setFooter(footer);
+
+    message.channel.send(d);
+}
 
 function sendFigureMessage (message, figure) {
     if (figure.talent != null && figure.talent !== '') {
@@ -455,16 +479,7 @@ const banner = (message) => {
             d.setFooter(`${YUANSHEN_TITLE}`);
             message.channel.send(d).then(async function (msg) {
                 msg.channel.stopTyping();
-
-                const figList = figure.entry;
-                for (const figIndex in figList) {
-                    const figCallback = function (entry, _) {
-                        const object = entry.entry;
-                        sendMinFigureMessage(message, object);
-                    };
-                    const fig = figList[figIndex];
-                    getApiService().singleFigure(figCallback, fig.name);
-                }
+                sendAsyncFigureMessage(msg, `Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`, figure.entry);
             });
         } else {
             d.setTitle('Kein Banner gefunden!');
@@ -802,9 +817,9 @@ function writePlayerPick (message, playerPick) {
     }
 }
 function getRating (number) {
-    var stars = '';
+    let stars = '';
 
-    for (var i = 0; i < number; i++) {
+    for (let i = 0; i < number; i++) {
         const newLocal = '★';
         stars = stars + newLocal;
     }
