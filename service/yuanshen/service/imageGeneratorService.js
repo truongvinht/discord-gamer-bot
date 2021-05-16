@@ -211,6 +211,7 @@ const generateFigureContentPage = (figure, weekdays) => {
         </tr>`;
     }
 
+    // combine all items
     const content = `<table>
     <tr>
         ${weaponTypeHeader}

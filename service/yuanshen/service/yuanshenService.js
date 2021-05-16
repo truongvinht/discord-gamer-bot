@@ -187,7 +187,6 @@ class YuanShenService extends ApiAccessService {
         super.targetBannerInTime(bannerCallback, time);
     };
 
-
     /**
      * GET boss details
      * @param {requestCallback} callback callback to handle result/error
@@ -248,6 +247,36 @@ class YuanShenService extends ApiAccessService {
             }
         };
         super.allTalents(talentCallback);
+    }
+
+    /**
+     * GET a Figure and banner by figure name
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {string} name figure name
+     */
+    singleFigureWithBanner (callback, name) {
+        const service = this;
+
+        const figureCallback = function (figures, figureError) {
+            if (figureError == null && figures != null && Object.prototype.hasOwnProperty.call(figures, 'entry')) {
+                const figure = figures.entry;
+                // request banner information
+                const bannerCallback = function (banners, bannerError) {
+                    if (bannerError == null) {
+                        callback(figures.entry, banners, null);
+                    } else {
+                        callback(figures.entry, null, bannerError);
+                    }
+                };
+
+                service.allBannerForSelectedFigure(bannerCallback, figure.fid);
+            } else {
+                // error occured
+                callback(null, null, figureError);
+            }
+        };
+
+        this.singleFigure(figureCallback, name);
     }
 };
 

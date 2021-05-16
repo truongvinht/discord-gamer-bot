@@ -33,6 +33,20 @@ class DateExtension extends Date {
             return undefined;
         }
     }
+
+    // convert 20210101 -> formated date 01. Jan 2021
+    static shortCustomFormatter (date) {
+        // between 2000 and 3000
+        if (date > 20000000 && date < 30000000) {
+            const dateString = `${date}`;
+            const yearString = dateString.substr(0, 4);
+            const monthString = dateString.substr(4, 2);
+            const dayString = dateString.substr(6, 2);
+            return `${parseInt(dayString)}.${monthString}.${yearString}`;
+        } else {
+            return undefined;
+        }
+    }
 };
 
 module.exports = DateExtension;

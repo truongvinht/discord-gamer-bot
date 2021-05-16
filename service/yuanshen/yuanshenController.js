@@ -50,9 +50,11 @@ const figureForMessage = (message) => {
     const figureCounter = msgArguments.length - 1;
 
     if (figureCounter > 0) {
-        const callback = function (entry, _) {
-            if (entry !== null && Object.prototype.hasOwnProperty.call(entry, 'entry')) {
-                sendFigureMessage(message, entry.entry);
+        const callback = function (fig, banners, error) {
+            if (error == null) {
+                sendFigureMessage(message, fig, banners);
+            } else {
+                message.channel.send('Anfrage konnte nicht ausgeführt werden. Bitte versuche es erneut.');
             }
         };
 
@@ -65,18 +67,21 @@ const figureForMessage = (message) => {
             }
         }
 
-        getApiService().singleFigure(callback, name);
+        getApiService().singleFigureWithBanner(callback, name);
     } else {
         // missing argument: random figure
         const resultCallback = function (entries, err) {
             const pickedIndex = Math.floor(Math.random() * Math.floor(entries.length));
             const figure = entries[pickedIndex].name;
 
-            const callback = function (entry, _) {
-                message.channel.send(`Zufallsfigur für ${message.author.username}`).then(async function (message) {
-                    const object = entry.entry;
-                    sendFigureMessage(message, object);
-                });
+            const callback = function (fig, banners, error) {
+                if (error == null) {
+                    message.channel.send(`Zufallsfigur für ${message.author.username}`).then(async function (message) {
+                        sendFigureMessage(message, fig, banners);
+                    });
+                } else {
+                    message.channel.send('Anfrage konnte nicht ausgeführt werden. Bitte versuche es erneut.');
+                }
             };
 
             getApiService().singleFigure(callback, figure);
@@ -210,7 +215,7 @@ const sendMessageForTalents = (message, talentList) => {
     }
 };
 
-async function sendAsyncMessage (message, figure, weekdays) {
+async function sendAsyncMessage (message, figure, banners, weekdays) {
     const figureContentPage = imgGen.generateFigureContentPage(figure, weekdays);
 
     const myImage = await nodeHtmlToImage({
@@ -234,6 +239,15 @@ async function sendAsyncMessage (message, figure, weekdays) {
     d.attachFiles(attachment);
 
     d.setImage(`attachment://${name}.jpg`);
+
+    // add banner information only for 5 Star
+    if (banners != null && figure.rarity == 5) {
+        const bannerList = banners.entry;
+        for (const b in bannerList) {
+            const banner = bannerList[b];
+            d.addField(banner.title, `${DateExtension.shortCustomFormatter(banner.started_at)} - ${DateExtension.shortCustomFormatter(banner.ended_at)}`);
+        }
+    }
 
     // footer
     if (figure.element === '') {
@@ -289,10 +303,10 @@ async function sendAsyncFigureMessage (message, footer, figures) {
     message.channel.send(d);
 }
 
-function sendFigureMessage (message, figure) {
+function sendFigureMessage (message, figure, banners) {
     if (figure.talent != null && figure.talent !== '') {
         const talentCallback = function (weekdays, _) {
-            sendAsyncMessage(message, figure, weekdays);
+            sendAsyncMessage(message, figure, banners, weekdays);
         };
         getApiService().allWeekdaysForTalent(talentCallback, figure.tid);
     } else {
