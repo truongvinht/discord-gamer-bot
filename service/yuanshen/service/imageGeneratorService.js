@@ -2,19 +2,25 @@
 // create an html page for displaying content
 // ==================
 
+const PAGE_WIDTH = 500;
+
 const HTML_HEAD = `
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <style>
+
+    table, th, td {
+        border: 0px solid black;
+    }
     body {
         background: rgb(51, 53, 58);
         color: #fff;
-        max-width: 300px;
+        max-width: ${PAGE_WIDTH}px;
     }
     .app {
-        max-width: 300px;
+        max-width: ${PAGE_WIDTH}px;
         padding-left: 5px;
         display: flex;
         flex-direction: row;
@@ -22,35 +28,35 @@ const HTML_HEAD = `
     }
     .head_title {
         font-weight: bold;
-        font-size:0.9rem;
+        font-size:1.4rem;
     }
     .head_subtitle {
         font-weight: normal;
         color: #FACB34;
-        font-size:0.65rem;
+        font-size:1.2rem;
     }
     .img_logo {
-        width: 25px;
-        height: 25px;
+        width: 44px;
+        height: 44px;
         margin-right: 10px;
     }
     .img_sym_left {
-        width: 20px;
-        height: 20px;
+        width: 44px;
+        height: 44px;
         margin-left: 5px;
     }
     .img_sym_right {
-        width: 20px;
-        height: 20px;
+        width: 44px;
+        height: 44px;
         margin-right: 5px;
     }
     .img_figure {
-        height: 80px;
+        height: 200px;
         margin-left: 5px;
         margin-right: 5px;
     }
     .text_content {
-        font-size:0.75rem;
+        font-size:1.2rem;
     }
     </style>
 </head>`;
@@ -125,6 +131,7 @@ const generateFigureOverviewPage = (figureList) => {
 const generateFigureContentPage = (figure, weekdays) => {
     const materialName = figure.material_name;
 
+    // MATERIAL
     let materialContent = '';
     if (materialName !== undefined && materialName !== '') {
         const materialImageUrl = figure.material_image_url;
@@ -143,19 +150,21 @@ const generateFigureContentPage = (figure, weekdays) => {
         </tr>`;
     }
 
+    // WEAPON
     const weaponType = figure.weapon;
     const weaponTypeImg = figure.wp_type_image_url;
 
     let weaponTypeHeader = '';
     let weaponTypeContent = '';
     if (weaponType !== undefined && weaponType !== '') {
-        weaponTypeHeader = '<td colspan="2"><a class="head_title">Waffe</a></td>';
+        weaponTypeHeader = '<td width="50%" colspan="2"><a class="head_title">Waffe</a></td>';
 
         if (weaponTypeImg !== undefined && weaponTypeImg !== '') {
             weaponTypeContent = `<td><img class="img_logo" src="${weaponTypeImg}" /></td><td class="text_content">${weaponType}</td>`;
         }
     }
 
+    // TALENT
     const talent = figure.talent;
     let talentDays = '';
 
@@ -177,13 +186,14 @@ const generateFigureContentPage = (figure, weekdays) => {
 
     if (talent !== undefined && talent !== '') {
         const talentImg = figure.talent_image_url;
-        talentHeader = `<td colspan="2"><a class="head_title">Talent [${talentDays}]</a></td>`;
+        talentHeader = `<td width="50%" colspan="2"><a class="head_title">Talent [${talentDays}]</a></td>`;
 
         if (weaponTypeImg !== undefined && weaponTypeImg !== '') {
             talentContent = `<td><img class="img_logo" src="${talentImg}" /></td><td class="text_content">${talent}</td>`;
         }
     }
 
+    // WEEKLY BOSS
     let weeklyBossContent = '';
 
     if (figure.boss !== undefined && figure.boss !== '') {
