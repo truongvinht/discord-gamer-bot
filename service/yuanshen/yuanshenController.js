@@ -38,6 +38,8 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
         .addField(`${PREFIX}gbanner`, 'Zeigt den aktuellen Banner an')
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
+        .addField(`${PREFIX}glv FIG [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren')
+        // .addField(`${PREFIX}glv WP [1-89] [2-90] [4/5]`, 'Berechnet die Kosten bei Level up von Waffen [4 oder 5 Sterne]')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -785,6 +787,86 @@ function sendArtifactMessage (message, index, sets) {
     });
 };
 
+const levelup = (message) => {
+    const msgArguments = message.content.split(' ');
+
+    const paramCounter = msgArguments.length - 1;
+
+    if (paramCounter <= 4 && paramCounter >= 3) {
+        const type = msgArguments[1].toLowerCase();
+        const start = msgArguments[2];
+        const end = msgArguments[3];
+
+        if (isNaN(start) || isNaN(end)) {
+            message.channel.send('Ungültige Parameter für Level Up Befehl.');
+        } else {
+            const startValue = parseInt(start);
+            const endValue = parseInt(end);
+            if (startValue === endValue || startValue > endValue || startValue < 1 || endValue > 90) {
+                // invalid input
+                message.channel.send('Ungültige Parameter für Level Up Befehl. ');
+            } else {
+                if (type === 'fig') {
+                    // figure command
+                    sendFigureLevelupExpMessage(message, startValue, endValue);
+                } else if (type === 'wp' && paramCounter === 5) {
+                    // weapon command
+                    message.channel.send('Noch in Implementierung.');
+                } else {
+                    message.channel.send('Ungültige Parameter für Level Up Befehl. ' + type);
+                }
+            }
+        }
+    } else {
+        message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+    }
+};
+
+function sendFigureLevelupExpMessage (message, start, end) {
+    const callback = function (expList, levelupEntries, moraList, error) {
+        const exp = expList[0].exp;
+        if (error == null) {
+            const d = new Discord.MessageEmbed();
+            d.setThumbnail(LOGO_URL);
+            d.setTitle(`Übersicht Kosten beim Leveln der Figur: ${start} - ${end}`);
+            d.setFooter(YUANSHEN_TITLE);
+            d.addField('Erforderliche Erfahrungspunkte', `${exp.toLocaleString('de-de')} EXP`);
+
+            // let moraCost = 0;
+
+            // for (let m in moraList) {
+            //     const entry = moraList[m];
+            //     if (entry.level < start) {
+            //         //skip
+            //     } else {
+            //         if (entry.level > end) {
+            //             // skip
+            //         } else {
+            //             const startRounded = parseInt(Math.ceil(parseFloat(start) / 10) * 10);
+            //             const endRounded = parseInt(Math.ceil(parseFloat(end) / 10) * 10);
+            //         }
+            //     }
+            // }
+            let moraCostString = '';
+            let moraSum = 0;
+            for (const m in moraList) {
+                const entry = moraList[m];
+                if (start < entry.level && end >= entry.level) {
+                    moraSum = moraSum + entry.mora;
+                    moraCostString = `${moraCostString}Bis Level ${entry.level}: ${entry.mora.toLocaleString('de-de')} Mora\n`;
+                }
+            }
+            d.addField('Erforderliches Mora', `${moraCostString}\nInsgesamt: ca. ${moraSum.toLocaleString('de-de')} Mora`);
+            message.channel.send(d);
+        } else {
+            // error occured
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+        }
+    };
+
+    getApiService().levelupFigure(callback, start, end);
+}
+
 function sendElementMessages (message, msgArguments, elementList) {
     var playerPick = [];
 
@@ -858,5 +940,6 @@ module.exports = {
     sendRandomElement: randomElement,
     sendRandomWeapon: randomWeapon,
     sendRandom: random,
-    sendArtifact: artifact
+    sendArtifact: artifact,
+    sendLevelup: levelup
 };

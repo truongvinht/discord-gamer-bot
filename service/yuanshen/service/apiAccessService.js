@@ -55,7 +55,6 @@ class ApiAccessService {
 
         // fire request
         https.get(options, res => {
-
             // collect data for callback
             const data = [];
 

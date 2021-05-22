@@ -184,6 +184,34 @@ class YuanShenRestFulService extends ApiAccessService {
     allBannerWithFiguresDetails (callback) {
         super.getRequest(callback, '/api/v1/banners', null);
     }
+
+    /**
+     * GET all figure level up entries for given input
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} start start level
+     * @param {number} end end/target level
+     */
+    allLevelupFigureEntries (callback, start, end) {
+        super.getRequest(callback, '/api/v1/levelup_figures', { start: start, end: end });
+    }
+
+    /**
+     * GET total required exp for figure level up
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} start start level
+     * @param {number} end end/target level
+     */
+    levelupFigureExp (callback, start, end) {
+        super.getRequest(callback, '/api/v1/levelup_figure_exp_required', { start: start, end: end });
+    }
+
+    /**
+     * GET required mora for figure level up
+     * @param {requestCallback} callback callback to handle result/error
+     */
+    allLevelupFigureMora (callback) {
+        super.getRequest(callback, '/api/v1/levelup_figure_mora', null);
+    }
 };
 
 module.exports = YuanShenRestFulService;
