@@ -866,7 +866,7 @@ function sendFigureLevelupExpMessage (message, start, end) {
                 }
             }
 
-            d.addField(`Erforderliche Erfahrungspunkte [${exp.toLocaleString('de-de')} EP ]`, `${countSmallBooks} Grün | ${countMediumBooks} Blau | ${countLargeBooks} Lila`);
+            d.addField(`Erforderliche Erfahrungspunkte [${exp.toLocaleString('de-de')} EP]`, `${countSmallBooks} Grün | ${countMediumBooks} Blau | ${countLargeBooks} Lila`);
             d.addField('Erforderliches Mora', `${moraSum.toLocaleString('de-de')} Mora`);
             if (totalAscensionMora > 0) {
                 d.addField(`Kosten für Aufstieg [${totalAscensionMora.toLocaleString('de-de')} Mora]`, ascensionString);
