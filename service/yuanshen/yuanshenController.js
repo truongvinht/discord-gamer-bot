@@ -833,9 +833,9 @@ function sendFigureLevelupExpMessage (message, start, end) {
             d.setTitle(`Übersicht Kosten beim Leveln der Figur: ${start} - ${end}`);
             d.setFooter(YUANSHEN_TITLE);
 
-            // 1000 exp = 200 Mora
-            // 5000 exp = 1000 Mora
-            // 20 000 exp = 4000 Mora
+            // 1000 exp = 200 Mora: Gruen
+            // 5000 exp = 1000 Mora: Blau
+            // 20 000 exp = 4000 Mora: Lila
 
             let moraSum = 0;
             let calculateExp = exp;
@@ -866,7 +866,7 @@ function sendFigureLevelupExpMessage (message, start, end) {
                 }
             }
 
-            d.addField('Erforderliche Erfahrungspunkte [L/M/S]', `${exp.toLocaleString('de-de')} EP [${countLargeBooks}/${countMediumBooks}/${countSmallBooks}]`);
+            d.addField(`Erforderliche Erfahrungspunkte [${exp.toLocaleString('de-de')} EP ]`, `${countSmallBooks} Grün | ${countMediumBooks} Blau | ${countLargeBooks} Lila`);
             d.addField('Erforderliches Mora', `${moraSum.toLocaleString('de-de')} Mora`);
             if (totalAscensionMora > 0) {
                 d.addField(`Kosten für Aufstieg [${totalAscensionMora.toLocaleString('de-de')} Mora]`, ascensionString);
@@ -891,9 +891,9 @@ function sendWeaponLevelupExpMessage (message, start, end) {
             d.setTitle(`Übersicht Kosten beim Leveln der Waffe: ${start} - ${end}`);
             d.setFooter(YUANSHEN_TITLE);
 
-            // 400 exp = 40 Mora
-            // 2000 exp = 200 Mora
-            // 10 000 exp = 1000 Mora
+            // 400 exp = 40 Mora: Grau
+            // 2000 exp = 200 Mora: Gruen
+            // 10 000 exp = 1000 Mora: Blau
 
             let moraSum = 0;
             let calculateExp = fourExp;
@@ -911,7 +911,7 @@ function sendWeaponLevelupExpMessage (message, start, end) {
             }
             moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
 
-            d.addField('Erfahrungspunkte bei 4-Sterne Waffe [L/M/S]', `${fourExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
+            d.addField(`Erfahrungspunkte bei 4-Sterne Waffe [${fourExp.toLocaleString('de-de')} EP]`, `${countSmallChunk} Grau | ${countMediumChunk} Grün | ${countLargeChunk} Blau`);
             d.addField('Mora bei 4-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
 
             // five star weapon
@@ -930,7 +930,7 @@ function sendWeaponLevelupExpMessage (message, start, end) {
                 countSmallChunk = countSmallChunk + 1;
             }
             moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
-            d.addField('Erfahrungspunkte bei 5-Sterne Waffe [L/M/S]', `${fiveExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
+            d.addField(`Erfahrungspunkte bei 5-Sterne Waffe [${fiveExp.toLocaleString('de-de')} EP]`, `${countSmallChunk} Grau | ${countMediumChunk} Grün | ${countLargeChunk} Blau`);
             d.addField('Mora bei 5-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
             message.channel.send(d);
         } else {
