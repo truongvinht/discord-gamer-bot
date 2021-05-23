@@ -38,9 +38,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
         .addField(`${PREFIX}gbanner`, 'Zeigt den aktuellen Banner an')
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
-        .addField(`${PREFIX}glv FIG [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren')
-        .addField(`${PREFIX}glv WP [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Waffen')
-        .addField(`${PREFIX}glv TL [1-9] [2-10]`, 'Berechnet die Kosten bei Level up von Talenten')
+        .addField(`${PREFIX}glv [FIG/WP/TL] [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren/Waffen/Talenten')
         .setThumbnail(LOGO_URL);
 
     return embed;
