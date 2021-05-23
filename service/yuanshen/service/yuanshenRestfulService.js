@@ -240,6 +240,16 @@ class YuanShenRestFulService extends ApiAccessService {
     allLevelupWeaponMora (callback) {
         super.getRequest(callback, '/api/v1/levelup_weapon_mora', null);
     }
+
+    /**
+     * GET required information for talent level up
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} start start level
+     * @param {number} end end/target level
+     */
+    levelupTalent (callback, start, end) {
+        super.getRequest(callback, '/api/v1/levelup_talent', { start: start, end: end });
+    }
 };
 
 module.exports = YuanShenRestFulService;

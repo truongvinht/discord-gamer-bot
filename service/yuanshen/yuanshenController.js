@@ -40,6 +40,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
         .addField(`${PREFIX}glv FIG [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren')
         .addField(`${PREFIX}glv WP [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Waffen')
+        .addField(`${PREFIX}glv TL [1-9] [2-10]`, 'Berechnet die Kosten bei Level up von Talenten')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -812,6 +813,9 @@ const levelup = (message) => {
                 } else if (type === 'wp' || type === 'w') {
                     // weapon command
                     sendWeaponLevelupExpMessage(message, startValue, endValue);
+                } else if (type === 't' || type === 'tl' || type === 'tal') {
+                    // talent command
+                    sendTalentLevelupMessage(message, startValue, endValue);
                 } else {
                     message.channel.send('Ungültige Parameter für Level Up Befehl. ' + type);
                 }
@@ -889,7 +893,6 @@ function sendWeaponLevelupExpMessage (message, start, end) {
             d.setTitle(`Übersicht Kosten beim Leveln der Waffe: ${start} - ${end}`);
             d.setFooter(YUANSHEN_TITLE);
 
-
             // 400 exp = 40 Mora
             // 2000 exp = 200 Mora
             // 10 000 exp = 1000 Mora
@@ -939,6 +942,51 @@ function sendWeaponLevelupExpMessage (message, start, end) {
     };
 
     getApiService().levelupWeapon(callback, start, end);
+}
+function sendTalentLevelupMessage (message, start, end) {
+    // invalid input
+    if (start < 1 || end > 10 || start >= end) {
+        // error occured
+        message.channel.send('Befehl für Talent Level Up ist fehlgeschlagen.');
+        return;
+    }
+
+    const callback = function (talentList, error) {
+        if (error == null) {
+            const d = new Discord.MessageEmbed();
+            d.setThumbnail(LOGO_URL);
+            d.setTitle(`Übersicht Kosten beim Leveln der Talenten: ${start} auf ${end}`);
+            d.setFooter(YUANSHEN_TITLE);
+
+            let moraSum = 0;
+            let book1Sum = 0;
+            let book2Sum = 0;
+            let book3Sum = 0;
+
+            for (const t in talentList) {
+                const talent = talentList[t];
+
+                let color = '';
+
+                switch (talent.book_rarity) {
+                case 1: color = 'Grün'; book1Sum = book1Sum + talent.count_books; break;
+                case 2: color = 'Blau'; book2Sum = book2Sum + talent.count_books; break;
+                case 3: color = 'Lila'; book3Sum = book3Sum + talent.count_books; break;
+                default: color = '';
+                }
+
+                moraSum = moraSum + talent.mora;
+                // d.addField(`Talent auf ${talent.target_level}: ${talent.mora.toLocaleString('de-de')} Mora`, `${talent.count_books} Talentbücher [${color}]`);
+            }
+            d.addField('Insgesamt in Mora', `${moraSum.toLocaleString('de-de')} Mora`);
+            d.addField('Anzahl der Bücher', `${book1Sum} Grün | ${book2Sum} Blau | ${book3Sum} Lila`);
+            message.channel.send(d);
+        } else {
+            // error occured
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+        }
+    };
+    getApiService().levelupTalent(callback, start, end);
 }
 
 function sendElementMessages (message, msgArguments, elementList) {
