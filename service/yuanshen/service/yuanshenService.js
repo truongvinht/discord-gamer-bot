@@ -307,6 +307,35 @@ class YuanShenService extends ApiAccessService {
 
         this.levelupFigureExp(expCallback, start, end);
     }
+
+    levelupWeapon (callback, start, end) {
+        const service = this;
+
+        const expCallback = function (exps, expError) {
+            if (expError == null) {
+                const levelupEntries = function (levelupEntries, lvUpError) {
+                    if (lvUpError == null) {
+                        const moraCallback = function (moraList, moraError) {
+                            if (moraError == null) {
+                                callback(exps, levelupEntries, moraList, null);
+                            } else {
+                                callback(exps, levelupEntries, null, moraError);
+                            }
+                        };
+                        service.allLevelupWeaponMora(moraCallback);
+                    } else {
+                        callback(exps, null, null, lvUpError);
+                    }
+                };
+                service.allLevelupWeaponEntries(levelupEntries, start, end);
+            } else {
+                // error occured
+                callback(null, null, null, expError);
+            }
+        };
+
+        this.levelupWeaponExp(expCallback, start, end);
+    }
 };
 
 module.exports = YuanShenService;

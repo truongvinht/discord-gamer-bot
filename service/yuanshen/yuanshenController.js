@@ -39,7 +39,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gbanner`, 'Zeigt den aktuellen Banner an')
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
         .addField(`${PREFIX}glv FIG [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren')
-        // .addField(`${PREFIX}glv WP [1-89] [2-90] [4/5]`, 'Berechnet die Kosten bei Level up von Waffen [4 oder 5 Sterne]')
+        .addField(`${PREFIX}glv WP [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Waffen')
         .setThumbnail(LOGO_URL);
 
     return embed;
@@ -792,7 +792,7 @@ const levelup = (message) => {
 
     const paramCounter = msgArguments.length - 1;
 
-    if (paramCounter <= 4 && paramCounter >= 3) {
+    if (paramCounter >= 3) {
         const type = msgArguments[1].toLowerCase();
         const start = msgArguments[2];
         const end = msgArguments[3];
@@ -806,12 +806,12 @@ const levelup = (message) => {
                 // invalid input
                 message.channel.send('Ungültige Parameter für Level Up Befehl. ');
             } else {
-                if (type === 'fig') {
+                if (type === 'fig' || type === 'f') {
                     // figure command
                     sendFigureLevelupExpMessage(message, startValue, endValue);
-                } else if (type === 'wp' && paramCounter === 5) {
+                } else if (type === 'wp' || type === 'w') {
                     // weapon command
-                    message.channel.send('Noch in Implementierung.');
+                    sendWeaponLevelupExpMessage(message, startValue, endValue);
                 } else {
                     message.channel.send('Ungültige Parameter für Level Up Befehl. ' + type);
                 }
@@ -830,33 +830,45 @@ function sendFigureLevelupExpMessage (message, start, end) {
             d.setThumbnail(LOGO_URL);
             d.setTitle(`Übersicht Kosten beim Leveln der Figur: ${start} - ${end}`);
             d.setFooter(YUANSHEN_TITLE);
-            d.addField('Erforderliche Erfahrungspunkte', `${exp.toLocaleString('de-de')} EXP`);
 
-            // let moraCost = 0;
+            // 1000 exp = 200 Mora
+            // 5000 exp = 1000 Mora
+            // 20 000 exp = 4000 Mora
 
-            // for (let m in moraList) {
-            //     const entry = moraList[m];
-            //     if (entry.level < start) {
-            //         //skip
-            //     } else {
-            //         if (entry.level > end) {
-            //             // skip
-            //         } else {
-            //             const startRounded = parseInt(Math.ceil(parseFloat(start) / 10) * 10);
-            //             const endRounded = parseInt(Math.ceil(parseFloat(end) / 10) * 10);
-            //         }
-            //     }
-            // }
-            let moraCostString = '';
             let moraSum = 0;
+            let calculateExp = exp;
+
+            const countLargeBooks = parseInt(calculateExp / 20000.0);
+            calculateExp = calculateExp - countLargeBooks * 20000;
+            const countMediumBooks = parseInt(calculateExp / 5000.0);
+            calculateExp = calculateExp - countMediumBooks * 5000;
+            let countSmallBooks = parseInt(calculateExp / 1000.0);
+            calculateExp = calculateExp - countSmallBooks * 1000;
+
+            if (calculateExp > 0) {
+                // add small book for covering exp below 1000
+                countSmallBooks = countSmallBooks + 1;
+            }
+            moraSum = countLargeBooks * 4000 + countMediumBooks * 1000 + countSmallBooks * 200;
+
+            // calculate ascension
+            let totalAscensionMora = 0;
+            let ascensionString = '';
             for (const m in moraList) {
-                const entry = moraList[m];
-                if (start < entry.level && end >= entry.level) {
-                    moraSum = moraSum + entry.mora;
-                    moraCostString = `${moraCostString}Bis Level ${entry.level}: ${entry.mora.toLocaleString('de-de')} Mora\n`;
+                const value = moraList[m];
+
+                if (start <= value.level && end >= value.level && value.mora_ascension > 0) {
+                    // is in range
+                    totalAscensionMora = totalAscensionMora + value.mora_ascension;
+                    ascensionString = `${ascensionString}- Level ${value.level}: ${value.mora_ascension.toLocaleString('de-de')} Mora\n`;
                 }
             }
-            d.addField('Erforderliches Mora', `${moraCostString}\nInsgesamt: ca. ${moraSum.toLocaleString('de-de')} Mora`);
+
+            d.addField('Erforderliche Erfahrungspunkte', `${exp.toLocaleString('de-de')} EP [${countLargeBooks}/${countMediumBooks}/${countSmallBooks}]`);
+            d.addField('Erforderliches Mora', `${moraSum.toLocaleString('de-de')} Mora`);
+            if (totalAscensionMora > 0) {
+                d.addField(`Kosten für Aufstieg [${totalAscensionMora.toLocaleString('de-de')} Mora]`, ascensionString);
+            }
             message.channel.send(d);
         } else {
             // error occured
@@ -865,6 +877,68 @@ function sendFigureLevelupExpMessage (message, start, end) {
     };
 
     getApiService().levelupFigure(callback, start, end);
+}
+
+function sendWeaponLevelupExpMessage (message, start, end) {
+    const callback = function (expList, levelupEntries, moraList, error) {
+        const fiveExp = expList[0].five_exp;
+        const fourExp = expList[0].four_exp;
+        if (error == null) {
+            const d = new Discord.MessageEmbed();
+            d.setThumbnail(LOGO_URL);
+            d.setTitle(`Übersicht Kosten beim Leveln der Waffe: ${start} - ${end}`);
+            d.setFooter(YUANSHEN_TITLE);
+
+
+            // 400 exp = 40 Mora
+            // 2000 exp = 200 Mora
+            // 10 000 exp = 1000 Mora
+
+            let moraSum = 0;
+            let calculateExp = fourExp;
+
+            let countLargeChunk = parseInt(calculateExp / 10000.0);
+            calculateExp = calculateExp - countLargeChunk * 10000;
+            let countMediumChunk = parseInt(calculateExp / 2000.0);
+            calculateExp = calculateExp - countMediumChunk * 2000;
+            let countSmallChunk = parseInt(calculateExp / 400.0);
+            calculateExp = calculateExp - countSmallChunk * 400;
+
+            if (calculateExp > 0) {
+                // add small chunk for covering exp below 1000
+                countSmallChunk = countSmallChunk + 1;
+            }
+            moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
+
+            d.addField('Erfahrungspunkte bei 4-Sterne Waffe', `${fourExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
+            d.addField('Mora bei 4-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
+
+            // five star weapon
+            moraSum = 0;
+            calculateExp = fiveExp;
+
+            countLargeChunk = parseInt(calculateExp / 10000.0);
+            calculateExp = calculateExp - countLargeChunk * 10000;
+            countMediumChunk = parseInt(calculateExp / 2000.0);
+            calculateExp = calculateExp - countMediumChunk * 2000;
+            countSmallChunk = parseInt(calculateExp / 400.0);
+            calculateExp = calculateExp - countSmallChunk * 400;
+
+            if (calculateExp > 0) {
+                // add small chunk for covering exp below 1000
+                countSmallChunk = countSmallChunk + 1;
+            }
+            moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
+            d.addField('Erfahrungspunkte bei 5-Sterne Waffen', `${fiveExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
+            d.addField('Mora bei 5-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
+            message.channel.send(d);
+        } else {
+            // error occured
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+        }
+    };
+
+    getApiService().levelupWeapon(callback, start, end);
 }
 
 function sendElementMessages (message, msgArguments, elementList) {
