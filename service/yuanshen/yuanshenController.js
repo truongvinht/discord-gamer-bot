@@ -930,7 +930,7 @@ function sendWeaponLevelupExpMessage (message, start, end) {
                 countSmallChunk = countSmallChunk + 1;
             }
             moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
-            d.addField('Erfahrungspunkte bei 5-Sterne Waffen [L/M/S]', `${fiveExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
+            d.addField('Erfahrungspunkte bei 5-Sterne Waffe [L/M/S]', `${fiveExp.toLocaleString('de-de')} EP [${countLargeChunk}/${countMediumChunk}/${countSmallChunk}]`);
             d.addField('Mora bei 5-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
             message.channel.send(d);
         } else {
