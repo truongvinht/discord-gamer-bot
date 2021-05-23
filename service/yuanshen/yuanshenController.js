@@ -807,12 +807,15 @@ const levelup = (message) => {
             } else {
                 if (type === 'fig' || type === 'f') {
                     // figure command
+                    message.channel.startTyping();
                     sendFigureLevelupExpMessage(message, startValue, endValue);
                 } else if (type === 'wp' || type === 'w') {
                     // weapon command
+                    message.channel.startTyping();
                     sendWeaponLevelupExpMessage(message, startValue, endValue);
                 } else if (type === 't' || type === 'tl' || type === 'tal') {
                     // talent command
+                    message.channel.startTyping();
                     sendTalentLevelupMessage(message, startValue, endValue);
                 } else {
                     message.channel.send('Ungültige Parameter für Level Up Befehl. ' + type);
@@ -871,10 +874,14 @@ function sendFigureLevelupExpMessage (message, start, end) {
             if (totalAscensionMora > 0) {
                 d.addField(`Kosten für Aufstieg [${totalAscensionMora.toLocaleString('de-de')} Mora]`, ascensionString);
             }
-            message.channel.send(d);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         } else {
             // error occured
-            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         }
     };
 
@@ -932,10 +939,15 @@ function sendWeaponLevelupExpMessage (message, start, end) {
             moraSum = countLargeChunk * 1000 + countMediumChunk * 200 + countSmallChunk * 40;
             d.addField(`Erfahrungspunkte bei 5-Sterne Waffe [${fiveExp.toLocaleString('de-de')} EP]`, `${countSmallChunk} Grau | ${countMediumChunk} Grün | ${countLargeChunk} Blau`);
             d.addField('Mora bei 5-Sterne Waffe', `${moraSum.toLocaleString('de-de')} Mora`);
-            message.channel.send(d);
+
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         } else {
             // error occured
-            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         }
     };
 
@@ -978,10 +990,15 @@ function sendTalentLevelupMessage (message, start, end) {
             }
             d.addField('Insgesamt in Mora', `${moraSum.toLocaleString('de-de')} Mora`);
             d.addField('Anzahl der Bücher', `${book1Sum} Grün | ${book2Sum} Blau | ${book3Sum} Lila`);
-            message.channel.send(d);
+
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         } else {
             // error occured
-            message.channel.send('Befehl für Level Up ist fehlgeschlagen.');
+            message.channel.send('Befehl für Level Up ist fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
         }
     };
     getApiService().levelupTalent(callback, start, end);
