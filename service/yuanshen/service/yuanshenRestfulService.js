@@ -174,7 +174,7 @@ class YuanShenRestFulService extends ApiAccessService {
      * @param {number} gbid gatcha banner ID
      */
     allFiguresForSelectedBanner (callback, gbid) {
-        super.getRequest(callback, '/api/v1/banner', { gbid: gbid });
+        super.getRequest(callback, `/api/v1/banner/${gbid}/figures`, null);
     }
 
     /**
