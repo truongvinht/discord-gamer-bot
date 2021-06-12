@@ -243,9 +243,8 @@ async function sendAsyncMessage (message, figure, banners, weekdays) {
 
     // add banner information only for 5 Star
     if (banners != null && figure.rarity == 5) {
-        const bannerList = banners.entry;
-        for (const b in bannerList) {
-            const banner = bannerList[b];
+        for (const b in banners) {
+            const banner = banners[b];
             d.addField(banner.title, `${DateExtension.shortCustomFormatter(banner.started_at)} - ${DateExtension.shortCustomFormatter(banner.ended_at)}`);
         }
     }
@@ -494,7 +493,7 @@ const banner = (message) => {
             d.setFooter(`${YUANSHEN_TITLE}`);
             message.channel.send(d).then(async function (msg) {
                 msg.channel.stopTyping();
-                sendAsyncFigureMessage(msg, `Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`, figure.entry);
+                sendAsyncFigureMessage(msg, `Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`, figure);
             });
         } else {
             d.setTitle('Kein Banner gefunden!');
@@ -621,8 +620,7 @@ const randomChallenge = (message) => {
                     const figure = entries[pickedIndex].name;
 
                     const figCallback = function (entry, _) {
-                        const object = entry.entry;
-                        sendMinFigureMessage(message, object);
+                        sendMinFigureMessage(message, entry);
                     };
 
                     getApiService().singleFigure(figCallback, figure);
@@ -666,8 +664,7 @@ const randomLowChallenge = (message) => {
 
                     list.push(pickedIndex);
                     const figCallback = function (entry, _) {
-                        const object = entry.entry;
-                        sendMinFigureMessage(message, object);
+                        sendMinFigureMessage(message, entry);
                     };
 
                     getApiService().singleFigure(figCallback, figure.name);

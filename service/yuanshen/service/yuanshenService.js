@@ -165,8 +165,8 @@ class YuanShenService extends ApiAccessService {
         const service = this;
         const bannerCallback = function (banner, bannerError) {
             if (bannerError == null && bannerError !== undefined) {
-                if (banner != null && banner.entry != null) {
-                    const bannerObj = banner.entry[0];
+                if (banner != null && banner != null) {
+                    const bannerObj = banner[0];
                     const figureCallback = function (figure, figureError) {
                         if (figureError == null) {
                             callback(bannerObj, figure);
@@ -257,15 +257,14 @@ class YuanShenService extends ApiAccessService {
     singleFigureWithBanner (callback, name) {
         const service = this;
 
-        const figureCallback = function (figures, figureError) {
-            if (figureError == null && figures != null && Object.prototype.hasOwnProperty.call(figures, 'entry')) {
-                const figure = figures.entry;
+        const figureCallback = function (figure, figureError) {
+            if (figureError == null && figure != null) {
                 // request banner information
                 const bannerCallback = function (banners, bannerError) {
                     if (bannerError == null) {
-                        callback(figures.entry, banners, null);
+                        callback(figure, banners, null);
                     } else {
-                        callback(figures.entry, null, bannerError);
+                        callback(figure, null, bannerError);
                     }
                 };
 
