@@ -264,7 +264,7 @@ class YuanShenService extends ApiAccessService {
                     if (bannerError == null) {
                         callback(figure, banners, null);
                     } else {
-                        callback(figure, null, bannerError);
+                        callback(figure, null, null);
                     }
                 };
 

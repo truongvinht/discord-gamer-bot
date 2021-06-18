@@ -58,6 +58,8 @@ class ApiAccessService {
             // collect data for callback
             const data = [];
 
+            const status = res.statusCode;
+
             res.on('data', chunk => {
                 data.push(chunk);
             });
@@ -65,9 +67,14 @@ class ApiAccessService {
             res.on('end', () => {
                 const content = Buffer.concat(data).toString();
                 const responseData = JSON.parse(content);
+                console.log(status);
 
-                // return result to callback
-                callback(responseData, null);
+                if (status !== 200) {
+                    // return result to callback
+                    callback(null, `Bad Request [${status}]`);
+                } else {
+                    callback(responseData, null);
+                }
             });
         }).on('error', err => {
             console.log('Error: ', err.message);

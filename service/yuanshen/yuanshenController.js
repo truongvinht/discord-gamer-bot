@@ -56,6 +56,7 @@ const figureForMessage = (message) => {
                 sendFigureMessage(message, fig, banners);
             } else {
                 message.channel.send('Anfrage konnte nicht ausgeführt werden. Bitte versuche es erneut.');
+                message.channel.stopTyping();
             }
         };
 
@@ -82,6 +83,7 @@ const figureForMessage = (message) => {
                     });
                 } else {
                     message.channel.send('Anfrage konnte nicht ausgeführt werden. Bitte versuche es erneut.');
+                    message.channel.stopTyping();
                 }
             };
 
