@@ -10,6 +10,7 @@ const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
 const c = require('../../helper/envHandler');
 const DateExtension = require('../../helper/dateExtension');
+const { prefix } = require('../../helper/envHandler');
 
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
@@ -107,10 +108,10 @@ const figurelist = (message) => {
     };
 
     const resultCallback = function (entries, err) {
-        var list = '';
-        for (var i = 0; i < entries.length; i++) {
+        let list = '';
+        for (let i = 0; i < entries.length; i++) {
             const name = entries[i].name;
-            var element = '';
+            let element = '';
             if (entries[i].element !== '') {
                 element = ` [${entries[i].element}]`;
             }
@@ -164,24 +165,24 @@ const figureTalent = (message) => {
     message.channel.startTyping();
     const callback = function (talents, figures, schedule) {
         // prepare list of entries
-        var talentList = [];
+        const talentList = [];
 
-        for (var i = 0; i < talents.length; i++) {
-            var t = {};
+        for (let i = 0; i < talents.length; i++) {
+            const t = {};
             const talent = talents[i];
             t['name'] = talent.name;
             t['location'] = talent.location;
             t['image_url'] = talent.image_url;
 
-            var names = [];
-            for (var j = 0; j < figures.length; j++) {
+            let names = [];
+            for (let j = 0; j < figures.length; j++) {
                 const fig = figures[j];
                 if (talent["tid"] === fig["talent_id"]) {
                     names.push(fig.name);
                 }
             }
             t["figures"] = names;
-            var schedules = [];
+            let schedules = [];
 
             for (var k = 0; k < schedule.length; k++) {
                 const s = schedule[k];
@@ -482,17 +483,17 @@ const boss = (message) => {
 };
 
 const banner = (message) => {
-    // current banner
-    message.channel.startTyping();
+    // prefix
+    let textPrefix = 'Aktueller ';
 
     const callback = function (banner, figure, error) {
         const d = new Discord.MessageEmbed();
         // check for error
         if (error == null) {
-            d.setTitle(`Aktueller Banner - ${banner.title}`);
+            d.setTitle(`${textPrefix}Banner - ${banner.title}`);
             d.setDescription(`Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`);
             d.setImage(banner.image_url);
-            d.setFooter(`${YUANSHEN_TITLE}`);
+            d.setFooter(`${YUANSHEN_TITLE} - ${banner.gbid}. Banner`);
             message.channel.send(d).then(async function (msg) {
                 msg.channel.stopTyping();
                 sendAsyncFigureMessage(msg, `Zeitraum: ${DateExtension.customFormatter(banner.started_at)} - ${DateExtension.customFormatter(banner.ended_at)}`, figure);
@@ -505,8 +506,21 @@ const banner = (message) => {
             });
         }
     };
-    const now = new DateExtension();
-    getApiService().bannerforTime(callback, parseInt(`${now.dateToYMD()}`));
+
+    const msgArguments = message.content.split(' ');
+
+    if (msgArguments.length > 1) {
+        // target banner: only accept integer
+        if (!isNaN(msgArguments[1])) {
+            textPrefix = '';
+            getApiService().bannerForId(callback, parseInt(msgArguments[1]));
+        }
+    } else {
+        // current banner
+        message.channel.startTyping();
+        const now = new DateExtension();
+        getApiService().bannerforTime(callback, parseInt(`${now.dateToYMD()}`));
+    }
 };
 
 const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, figures) => {

@@ -70,8 +70,8 @@ class YuanShenService extends ApiAccessService {
             if (err == null) {
                 const pickedList = [];
 
-                for (var i = 0; i < count; i++) {
-                    var pickedIndex = Math.floor(Math.random() * Math.floor(weapons.length));
+                for (let i = 0; i < count; i++) {
+                    const pickedIndex = Math.floor(Math.random() * Math.floor(weapons.length));
                     pickedList.push(weapons[pickedIndex]);
                 }
                 callback(pickedList, null);
@@ -157,7 +157,7 @@ class YuanShenService extends ApiAccessService {
     };
 
     /**
-     * GET banner details for selected date 
+     * GET banner details for selected date
      * @param {requestCallback} callback callback to handle result/error
      * @param {number} time date in format YYYYMMDD
      */
@@ -185,6 +185,32 @@ class YuanShenService extends ApiAccessService {
         };
 
         super.targetBannerInTime(bannerCallback, time);
+    };
+
+    bannerForId (callback, gbid) {
+        const service = this;
+        const bannerCallback = function (banner, bannerError) {
+            if (bannerError == null && bannerError !== undefined) {
+                if (banner != null && banner != null) {
+                    const bannerObj = banner[0];
+                    const figureCallback = function (figure, figureError) {
+                        if (figureError == null) {
+                            callback(bannerObj, figure);
+                        } else {
+                            callback(null, null, 'Invalid request for figure banner.');
+                        }
+                    };
+
+                    service.allFiguresForSelectedBanner(figureCallback, bannerObj.gbid);
+                } else {
+                    callback(null, null, 'Invalid banner id.');
+                }
+            } else {
+                callback(null, null, bannerError);
+            }
+        };
+
+        super.targetBanner(bannerCallback, gbid);
     };
 
     /**
@@ -216,7 +242,7 @@ class YuanShenService extends ApiAccessService {
             }
         };
         super.allBosses(bosscallback);
-    }
+    };
 
     /**
      * GET all talents

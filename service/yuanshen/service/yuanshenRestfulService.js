@@ -160,6 +160,15 @@ class YuanShenRestFulService extends ApiAccessService {
     }
 
     /**
+     * GET wish banner with matching id
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {number} gbid banner id
+     */
+    targetBanner (callback, gbid) {
+        super.getRequest(callback, `/api/v1/banner/${gbid}`, null);
+    }
+
+    /**
      * GET all wish banner for figure appearance
      * @param {requestCallback} callback callback to handle result/error
      * @param {number} fid figure ID

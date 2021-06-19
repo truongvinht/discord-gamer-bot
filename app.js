@@ -42,5 +42,5 @@ class MyClient extends AkairoClient {
 
 const client = new MyClient();
 client.login(c.botToken()).then(() => {
-    // console.log('Started up!');
+    console.log('Login Done!');
 });
