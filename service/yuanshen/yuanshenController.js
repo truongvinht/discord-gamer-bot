@@ -10,7 +10,9 @@ const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
 const c = require('../../helper/envHandler');
 const DateExtension = require('../../helper/dateExtension');
-const { prefix } = require('../../helper/envHandler');
+
+const ColorManager = require('./../base/colorManager');
+const colorManager = ColorManager.getInstance();
 
 const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
@@ -94,6 +96,76 @@ const figureForMessage = (message) => {
     }
 };
 
+const yuanshenReaction = (reaction, user) => {
+    const message = reaction.message;
+
+    // show stats for figure
+    if (reaction.emoji.name === '📊') {
+        if (message.embeds.length === 1) {
+            const embedMessage = message.embeds[0];
+            const image = embedMessage.image;
+
+            if (image !== null) {
+                const imgUrl = image.url;
+                if (imgUrl !== null) {
+                    const filename = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+                    const names = filename.split('.');
+                    const name = names[0];
+                    message.channel.startTyping();
+                    const resultCallback = function (entry, err) {
+                        if (err === null) {
+                            sendMessageWithBaseStat(message, entry);
+                        } else {
+                            // do nothing
+                            message.channel.send('Keine weiteren Daten verfügbar.').then(async function (msg) {
+                                msg.channel.stopTyping();
+                            });
+                        }
+                    };
+                    getApiService().singleFigureDetails(resultCallback, name);
+                }
+            }
+        }
+    }
+};
+
+function sendMessageWithBaseStat (message, entry) {
+    const d = new Discord.MessageEmbed();
+    d.setTitle(`${entry.data.name}`);
+    d.setDescription(`${entry.data.titles}`);
+    d.setFooter(YUANSHEN_TITLE);
+    d.setThumbnail('https://' + c.yuanshenServer + entry.values.images.thumb);
+    let labelsString = '';
+    for (const label of entry.labels.baseStat) {
+        labelsString = labelsString + label + '\n';
+    }
+    let hpString = '';
+    for (const hp of entry.values.baseStat.characterHP) {
+        hpString = hpString + hp + '\n';
+    }
+    let aktDefString = '';
+    for (const index in entry.values.baseStat.characterATK) {
+        const atk = entry.values.baseStat.characterATK[index];
+        const def = entry.values.baseStat.characterDEF[index];
+        aktDefString = aktDefString + atk + '|' + def + '\n';
+    }
+    d.addFields(
+        { name: 'Lv', value: labelsString, inline: true },
+        { name: 'LP', value: hpString, inline: true },
+        { name: 'ANG|VTD', value: aktDefString, inline: true });
+
+    // add special dmg
+    const special = entry.values.specializeStat.key;
+    if (special !== null) {
+        const specialValues = entry.values.specializeStat.value;
+        d.addField(special, `${specialValues[0]} - ${specialValues[specialValues.length - 1]}`);
+    }
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+        await msg.react('🗑');
+    });
+}
+
 const figurelist = (message) => {
     message.channel.startTyping();
     const callback = function (entry, count) {
@@ -127,8 +199,8 @@ const figureDraft = (message) => {
     message.channel.startTyping();
 
     const resultCallback = function (entries) {
-        var list = [];
-        for (var i = 0; i < entries.length; i++) {
+        const list = [];
+        for (let i = 0; i < entries.length; i++) {
             const name = entries[i].name;
 
             if (name !== 'Traveler') {
@@ -147,7 +219,7 @@ const figureDraft = (message) => {
         d.setColor('#008000');
         d.setDescription(`${list.length} Figuren verfügbar`);
 
-        for (var dr = 0; dr < batch.length; dr++) {
+        for (let dr = 0; dr < batch.length; dr++) {
             const name = batch[dr];
             d.addField(name, '\u200B');
         }
@@ -182,9 +254,9 @@ const figureTalent = (message) => {
                 }
             }
             t["figures"] = names;
-            let schedules = [];
+            const schedules = [];
 
-            for (var k = 0; k < schedule.length; k++) {
+            for (let k = 0; k < schedule.length; k++) {
                 const s = schedule[k];
                 if (talent["tid"] === s["talent_id"]) {
                     schedules.push(s.day);
@@ -234,18 +306,21 @@ async function sendAsyncMessage (message, figure, banners, weekdays) {
     const d = new Discord.MessageEmbed();
     d.setTitle(`${figure.name}`);
     d.setDescription(getRating(figure.rarity));
-    d.setThumbnail(figure.image_url);
+    d.setColor(colorManager.yuanshenColor1());
+    if (figure.images != null) {
+        console.log('https://' + c.yuanshenServer + figure.images.card);
+        d.setThumbnail('https://' + c.yuanshenServer + figure.images.card);
+    } else {
+        d.setThumbnail(figure.image_url);
+    }
 
-    let name = figure.name;
-    name = name.split(' ').join('_');
-
-    const attachment = new Discord.MessageAttachment(myImage, `${name}.jpg`);
+    const attachment = new Discord.MessageAttachment(myImage, `${figure.data_key}.jpg`);
     d.attachFiles(attachment);
 
-    d.setImage(`attachment://${name}.jpg`);
+    d.setImage(`attachment://${figure.data_key}.jpg`);
 
     // add banner information only for 5 Star
-    if (banners != null && figure.rarity == 5) {
+    if (banners != null && figure.rarity === 5) {
         for (const b in banners) {
             const banner = banners[b];
             d.addField(banner.title, `${DateExtension.shortCustomFormatter(banner.started_at)} - ${DateExtension.shortCustomFormatter(banner.ended_at)}`);
@@ -267,8 +342,10 @@ async function sendAsyncMessage (message, figure, banners, weekdays) {
         }
     }
 
-    message.channel.send(d);
-    message.channel.stopTyping();
+    message.channel.send(d).then(async function (msg) {
+        msg.channel.stopTyping();
+        await msg.react('📊');
+    });
 }
 
 function sendMinFigureMessage (message, figure) {
@@ -308,6 +385,7 @@ async function sendAsyncFigureMessage (message, footer, figures) {
 
 function sendFigureMessage (message, figure, banners) {
     if (figure.talent != null && figure.talent !== '') {
+        // show further information from image
         const talentCallback = function (weekdays, _) {
             sendAsyncMessage(message, figure, banners, weekdays);
         };
@@ -316,7 +394,13 @@ function sendFigureMessage (message, figure, banners) {
         const d = new Discord.MessageEmbed();
         d.setTitle(`${figure.name}`);
         d.setDescription(getRating(figure.rarity));
-        d.setThumbnail(figure.image_url);
+
+        if (figure.images != null) {
+            console.log('https://' + c.yuanshenServer + figure.images.card);
+            d.setThumbnail('https://' + c.yuanshenServer + figure.images.card);
+        } else {
+            d.setThumbnail(figure.image_url);
+        }
         d.addField('Waffe', figure.weapon);
 
         // weekly boss drop
@@ -377,7 +461,7 @@ const sendYesterday = (message) => {
         });
     };
     const date = new Date();
-    var weekday = date.getDay(); // 0-6 Sonntag - Samstag
+    let weekday = date.getDay(); // 0-6 Sonntag - Samstag
 
     // override Sunday as 7
     if (weekday === 0) {
@@ -513,6 +597,7 @@ const banner = (message) => {
         // target banner: only accept integer
         if (!isNaN(msgArguments[1])) {
             textPrefix = '';
+            message.channel.startTyping();
             getApiService().bannerForId(callback, parseInt(msgArguments[1]));
         }
     } else {
@@ -1076,6 +1161,7 @@ function getRating (number) {
 module.exports = {
     getHelpMessage: help,
     sendFigure: figureForMessage,
+    sendReactionMessage: yuanshenReaction,
     sendFigureDraft: figureDraft,
     sendFigureTalent: figureTalent,
     sendFigurelist: figurelist,

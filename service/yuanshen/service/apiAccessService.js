@@ -67,10 +67,10 @@ class ApiAccessService {
             res.on('end', () => {
                 const content = Buffer.concat(data).toString();
                 const responseData = JSON.parse(content);
-                console.log(status);
 
                 if (status !== 200) {
                     // return result to callback
+                    console.log(status);
                     callback(null, `Bad Request [${status}]`);
                 } else {
                     callback(responseData, null);

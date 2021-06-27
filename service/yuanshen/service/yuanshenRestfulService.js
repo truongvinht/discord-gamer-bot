@@ -28,6 +28,15 @@ class YuanShenRestFulService extends ApiAccessService {
     }
 
     /**
+     * GET a Figure details by name
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {string} name figure name
+     */
+    singleFigureDetails (callback, name) {
+        super.getRequest(callback, '/api/v1/figureDetails', { name: name });
+    }
+
+    /**
      * GET all locations
      * @param {requestCallback} callback callback to handle result/error
      */

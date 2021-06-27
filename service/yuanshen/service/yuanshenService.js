@@ -34,6 +34,29 @@ class YuanShenService extends ApiAccessService {
     }
 
     /**
+     * GET a Figure details by name
+     * @param {requestCallback} callback callback to handle result/error
+     * @param {string} name figure name
+     */
+    singleFigureDetails (callback, name) {
+        // check input and adjust
+        let figureName = name;
+
+        // adjust figure names
+        if (name.toLowerCase() === 'childe') {
+            figureName = 'tartaglia';
+        }
+        if (name.toLowerCase() === 'sucrose') {
+            figureName = 'saccharose';
+        }
+
+        if (name.toLowerCase() === 'hutao') {
+            figureName = 'hu tao';
+        }
+        super.singleFigureDetails(callback, figureName);
+    }
+
+    /**
      * GET a list of random elements
      * @param {requestCallback} callback callback to handle result/error
      * @param {number} count number of random elements
