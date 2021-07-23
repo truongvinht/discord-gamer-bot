@@ -40,10 +40,11 @@
     "discord.js": "^12.5.3",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
+    "http": "^0.0.1-security",
     "node-fetch": "^2.6.1",
     "node-html-to-image": "^3.1.0",
     "puppeteer-cluster": "^0.22.0",
-    "ytdl-core": "^4.8.0"
+    "ytdl-core": "^4.9.0"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
