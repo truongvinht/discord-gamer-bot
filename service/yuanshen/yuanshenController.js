@@ -1192,7 +1192,7 @@ function urlPrefix (ssl) {
 }
 
 function apiServerUrl () {
-    if (c.yuanshenServerPort === '') {
+    if (c.yuanshenServerPort === '' || c.yuanshenServerPort === undefined) {
         return urlPrefix(c.yuanshen_api_ssl) + c.yuanshenServer;
     } else {
         return urlPrefix(c.yuanshen_api_ssl) + c.yuanshenServer + ':' + c.yuanshenServerPort;
