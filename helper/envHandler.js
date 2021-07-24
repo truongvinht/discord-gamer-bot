@@ -16,7 +16,7 @@ try {
 }
 
 // Bot Token
-var botToken = botSettings.token;
+let botToken = botSettings.token;
 if (botToken === '') {
     // Heroku ENV token
     botToken = process.env.BOT_TOKEN;
@@ -33,6 +33,18 @@ if (yuanshenToken === '') {
 let yuanshenServer = botSettings.yuanshen_api_server;
 if (yuanshenServer === '') {
     yuanshenServer = process.env.YUANSHEN_API_SERVER;
+}
+
+// Yuan Shen DB Server port
+let yuanshenServerPort = botSettings.yuanshen_api_port;
+if (yuanshenServerPort === '') {
+    yuanshenServerPort = process.env.YUANSHEN_API_SERVER_PORT;
+}
+
+// Yuan Shen DB Server port
+let yuanshenServerSSL = botSettings.yuanshen_api_ssl;
+if (yuanshenServerSSL === '') {
+    yuanshenServerSSL = true;
 }
 
 // command prefix
@@ -68,6 +80,7 @@ module.exports = {
     roles: getRoles,
     yuanshenToken,
     yuanshenServer,
+    yuanshenServerPort,
     author: author,
     version: getVersion
 };

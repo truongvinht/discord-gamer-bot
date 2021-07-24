@@ -4,6 +4,8 @@
 
 // import
 const https = require('https');
+const http = require('http');
+
 /**
  * Service to acccess Restful API for Yuanshen.
  */
@@ -14,7 +16,7 @@ class ApiAccessService {
      * @param {string} url - API Server URL
      * @param {string} token - Access Token
      */
-    constructor (url, token) {
+    constructor (url, token, port, ssl) {
         // invalid url
         if (url === undefined || url == null) {
             throw new TypeError("Invalid input for 'url'");
@@ -26,6 +28,13 @@ class ApiAccessService {
         }
         this.url = url;
         this.token = token;
+        this.port = port;
+
+        if (ssl) {
+            this.httpRequest = https;
+        } else {
+            this.httpRequest = http;
+        }
     }
 
     /**
@@ -48,13 +57,14 @@ class ApiAccessService {
         // prepare GET request
         const options = {
             host: this.url,
+            port: this.port,
             path: path,
             method: 'GET',
             headers: header
         };
 
         // fire request
-        https.get(options, res => {
+        this.httpRequest.get(options, res => {
             // collect data for callback
             const data = [];
 
@@ -71,6 +81,7 @@ class ApiAccessService {
                 if (status !== 200) {
                     // return result to callback
                     console.log(status);
+                    console.log(this.url);
                     callback(null, `Bad Request [${status}]`);
                 } else {
                     callback(responseData, null);

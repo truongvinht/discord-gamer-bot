@@ -21,7 +21,7 @@ let yuanshenApiService = null;
 
 function getApiService () {
     if (yuanshenApiService == null) {
-        yuanshenApiService = new ApiService(c.yuanshenServer, c.yuanshenToken);
+        yuanshenApiService = new ApiService(c.yuanshenServer, c.yuanshenToken, c.yuanshenServerPort, false);
     }
     return yuanshenApiService;
 }
@@ -134,7 +134,7 @@ function sendMessageWithBaseStat (message, entry) {
     d.setTitle(`${entry.data.name}`);
     d.setDescription(`${entry.data.titles}`);
     d.setFooter(YUANSHEN_TITLE);
-    d.setThumbnail('https://' + c.yuanshenServer + entry.values.images.thumb);
+    d.setThumbnail(apiServerUrl() + entry.values.images.thumb);
     let labelsString = '';
     for (const label of entry.labels.baseStat) {
         labelsString = labelsString + label + '\n';
@@ -308,8 +308,8 @@ async function sendAsyncMessage (message, figure, banners, weekdays) {
     d.setDescription(getRating(figure.rarity));
     d.setColor(colorManager.yuanshenColor1());
     if (figure.images != null) {
-        console.log('https://' + c.yuanshenServer + figure.images.card);
-        d.setThumbnail('https://' + c.yuanshenServer + figure.images.card);
+        console.log(apiServerUrl() + figure.images.card);
+        d.setThumbnail(apiServerUrl() + figure.images.card);
     } else {
         d.setThumbnail(figure.image_url);
     }
@@ -396,8 +396,8 @@ function sendFigureMessage (message, figure, banners) {
         d.setDescription(getRating(figure.rarity));
 
         if (figure.images != null) {
-            console.log('https://' + c.yuanshenServer + figure.images.card);
-            d.setThumbnail('https://' + c.yuanshenServer + figure.images.card);
+            console.log(apiServerUrl() + figure.images.card);
+            d.setThumbnail(apiServerUrl() + figure.images.card);
         } else {
             d.setThumbnail(figure.image_url);
         }
@@ -436,10 +436,16 @@ const sendToday = (message) => {
     d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, talents, figures, weaponDrops, error) {
-        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d).then(async function (msg) {
-            msg.channel.stopTyping();
-        });
+        if (error != null) {
+            message.channel.send('Anfrage fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        } else {
+            summarizedDataForDate(d, locations, figures, talents, weaponDrops);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        }
     };
 
     const date = new Date();
@@ -455,10 +461,16 @@ const sendYesterday = (message) => {
     d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, talents, figures, weaponDrops, error) {
-        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d).then(async function (msg) {
-            msg.channel.stopTyping();
-        });
+        if (error != null) {
+            message.channel.send('Anfrage fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        } else {
+            summarizedDataForDate(d, locations, figures, talents, weaponDrops);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        }
     };
     const date = new Date();
     let weekday = date.getDay(); // 0-6 Sonntag - Samstag
@@ -483,13 +495,19 @@ const sendTomorrow = (message) => {
     d.setFooter(`${YUANSHEN_TITLE}`);
 
     const callback = function (locations, talents, figures, weaponDrops, error) {
-        summarizedDataForDate(d, locations, figures, talents, weaponDrops);
-        message.channel.send(d).then(async function (msg) {
-            msg.channel.stopTyping();
-        });
+        if (error != null) {
+            message.channel.send('Anfrage fehlgeschlagen.').then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        } else {
+            summarizedDataForDate(d, locations, figures, talents, weaponDrops);
+            message.channel.send(d).then(async function (msg) {
+                msg.channel.stopTyping();
+            });
+        }
     };
     const date = new Date();
-    const weekday = (date.getDay() + 1) % 7; // 0-6 Sonntag - Samstag
+    const weekday = date.getDay() + 1; // 0-6 Sonntag - Samstag
     getApiService().ressourcesForWeekday(callback, weekday);
 };
 
@@ -509,6 +527,10 @@ function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
                             figureListname = `${figureListname}\n${figures[f].name}`;
                         }
                     }
+                }
+
+                if (figureListname === '') {
+                    figureListname = '-';
                 }
                 d.addField(`Talent ${talent.name} - ${talent.location}`, figureListname);
             }
@@ -1156,6 +1178,22 @@ function getRating (number) {
     }
     return stars;
 };
+
+function urlPrefix (ssl) {
+    if (ssl) {
+        return 'https://';
+    } else {
+        return 'http://';
+    }
+}
+
+function apiServerUrl () {
+    if (c.yuanshenServerPort === '') {
+        return urlPrefix(c.yuanshen_api_ssl) + c.yuanshenServer;
+    } else {
+        return urlPrefix(c.yuanshen_api_ssl) + c.yuanshenServer + ':' + c.yuanshenServerPort;
+    }
+}
 
 // export
 module.exports = {
