@@ -17,19 +17,7 @@ class YuanShenService extends ApiAccessService {
      */
     singleFigure (callback, name) {
         // check input and adjust
-        let figureName = name;
-
-        // adjust figure names
-        if (name.toLowerCase() === 'childe') {
-            figureName = 'tartaglia';
-        }
-        if (name.toLowerCase() === 'sucrose') {
-            figureName = 'saccharose';
-        }
-
-        if (name.toLowerCase() === 'hutao') {
-            figureName = 'hu tao';
-        }
+        const figureName = this.mapFigureNickname(name);
         super.singleFigure(callback, figureName);
     }
 
@@ -40,20 +28,34 @@ class YuanShenService extends ApiAccessService {
      */
     singleFigureDetails (callback, name) {
         // check input and adjust
-        let figureName = name;
-
-        // adjust figure names
-        if (name.toLowerCase() === 'childe') {
-            figureName = 'tartaglia';
-        }
-        if (name.toLowerCase() === 'sucrose') {
-            figureName = 'saccharose';
-        }
-
-        if (name.toLowerCase() === 'hutao') {
-            figureName = 'hu tao';
-        }
+        const figureName = this.mapFigureNickname(name);
         super.singleFigureDetails(callback, figureName);
+    }
+
+    /**
+     * Map nickname to correct name
+     * @param {string} name input name for checking
+     * @returns matching or original name
+     */
+    mapFigureNickname (name) {
+        const nickNameMap = { childe: 'tartaglia', sucrose: 'saccharose', hutao: 'hu tao', kazuha: 'kaedehara kazuha', ayaka: 'kamisato ayaka' };
+
+        if (Object.prototype.hasOwnProperty.call(nickNameMap, name.toLowerCase())) {
+            return nickNameMap[name];
+        }
+
+        return name;
+    }
+
+    /**
+     * Check whether combined name is valid
+     * @param {string} name input name for checking
+     * @returns true, if name is valid
+     */
+    validateLongFigureName (name) {
+        const playerNames = ['hu tao', 'kaedehara kazuha', 'kamisato ayaka'];
+
+        return playerNames.includes(name.toLowerCase());
     }
 
     /**

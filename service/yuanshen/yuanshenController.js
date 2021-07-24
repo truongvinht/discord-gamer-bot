@@ -67,8 +67,12 @@ const figureForMessage = (message) => {
 
         if (msgArguments.length === 3) {
             const secondName = msgArguments[2];
-            if (name.toLowerCase() === 'hu' && secondName.toLowerCase() === 'tao') {
-                name = 'hu tao';
+
+            // combine name
+            const fullName = name + ' ' + secondName;
+
+            if (getApiService().validateLongFigureName(fullName)) {
+                name = fullName;
             }
         }
 

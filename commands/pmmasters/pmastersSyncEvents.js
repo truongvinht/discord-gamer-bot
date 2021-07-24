@@ -3,7 +3,7 @@
 // ================
 
 // import
-const controller = require('../service/pmasters/pmastersController');
+const controller = require('../../service/pmasters/pmastersController');
 const { Command } = require('discord-akairo');
 
 class pmastersSyncEventsCommand extends Command {

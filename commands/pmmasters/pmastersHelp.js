@@ -3,8 +3,8 @@
 // ================
 
 // import
-const controller = require('../service/pmasters/pmastersController');
-const c = require('../helper/envHandler');
+const controller = require('../../service/pmasters/pmastersController');
+const c = require('../../helper/envHandler');
 
 const { Command } = require('discord-akairo');
 
