@@ -453,7 +453,16 @@ const sendToday = (message) => {
     };
 
     const date = new Date();
-    const weekday = date.getDay(); // 0-6 Sonntag - Samstag
+    let weekday = date.getDay(); // 0-6 Sonntag - Samstag
+
+    switch (weekday) {
+    case 0:
+        weekday = 7;
+        break;
+    default:
+        weekday = Math.abs(weekday);
+    }
+
     getApiService().ressourcesForWeekday(callback, weekday);
 };
 
