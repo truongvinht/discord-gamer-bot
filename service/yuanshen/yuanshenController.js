@@ -172,10 +172,39 @@ function sendMessageWithBaseStat (message, entry) {
 
 const figurelist = (message) => {
     message.channel.startTyping();
-    const callback = function (entry, count) {
+    const callback = function (elements, elementCounter, count) {
         const d = new Discord.MessageEmbed();
         d.setTitle(`Figurenliste [${count}]`);
-        d.addField('Verfügbare Figuren', entry);
+        // d.addField('Verfügbare Figuren', entry);
+
+        const elementName = Object.keys(elements);
+
+        // build all fields
+        let elementFields = [];
+        for (let element in elementName) {
+            let elementTitle = elementName[element];
+            let elementCount = elementCounter[elementName[element]];
+            let elementMap = { name: `**${elementTitle} [${elementCount}]**`, value: elements[elementName[element]] + '\n', inline: true };
+            elementFields.push(elementMap);
+        }
+        // 0 1 2 => 3 4 5 => 6 7 8
+
+        for (let i = 0; i < elementFields.length; i = i + 2) {
+            // all 2
+            if (i + 1 < elementFields.length) {
+                // only 2
+                d.addFields(
+                    elementFields[i],
+                    elementFields[i + 1]
+                );
+            } else {
+                // only 1
+                d.addFields(
+                    elementFields[i]
+                );
+            }
+        }
+
         d.setFooter(YUANSHEN_TITLE);
         d.setThumbnail(LOGO_URL);
         message.channel.send(d).then(async function (msg) {
@@ -184,16 +213,40 @@ const figurelist = (message) => {
     };
 
     const resultCallback = function (entries, err) {
-        let list = '';
+        // let list = '';
+        const elementMap = {};
+        const elementCount = {};
+
         for (let i = 0; i < entries.length; i++) {
             const name = entries[i].name;
+            const rarity = entries[i].rarity;
+
+            // figure element
             let element = '';
             if (entries[i].element !== '') {
-                element = ` [${entries[i].element}]`;
+                element = ` ${entries[i].element}`;
             }
-            list = `${list} ${name}${element}\n`;
+
+            let elementFigures = '';
+            let elementCounter = 0;
+
+            // load existing map
+            if (Object.prototype.hasOwnProperty.call(elementMap, element)) {
+                elementFigures = elementMap[element];
+                elementCounter = elementCount[element];
+            }
+
+            if (rarity === 5) {
+                elementFigures = `${elementFigures}★ ${name}\n`;
+            } else {
+                elementFigures = `${elementFigures}${name}\n`;
+            }
+            elementCount[element] = elementCounter + 1;
+            elementMap[element] = elementFigures;
+
+            // list = `${list} ${name}${element}\n`;
         }
-        callback(list, entries.length);
+        callback(elementMap, elementCount, entries.length);
     };
     getApiService().allFigures(resultCallback);
 };
@@ -877,7 +930,7 @@ const artifact = (message) => {
 function sendArtifactListMessage (message, list) {
     const d = new Discord.MessageEmbed();
     d.setTitle('Liste der Artifakte');
-    for (var a = 0; a < list.length; a++) {
+    for (let a = 0; a < list.length; a++) {
         const af = list[a];
         if (af.dungeon == null) {
             d.addField(`${a + 1}: ${af.name}`, '-');
