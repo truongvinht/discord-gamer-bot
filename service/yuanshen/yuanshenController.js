@@ -41,6 +41,7 @@ const help = (PREFIX, author) => {
         .addField(`${PREFIX}gtalent`, 'Liste aller Talentbücher')
         .addField(`${PREFIX}gbanner`, 'Zeigt den aktuellen Banner an')
         .addField(`${PREFIX}gchallenge SPIELER-NAME`, 'Zufällige Challenge gegen einen Boss')
+        .addField(`${PREFIX}gfm`, 'Figurenmaterial zum Aufstieg')
         .addField(`${PREFIX}glv [FIG/WP/TL] [1-89] [2-90]`, 'Berechnet die Kosten bei Level up von Figuren/Waffen/Talenten')
         .setThumbnail(LOGO_URL);
 
@@ -972,6 +973,16 @@ function sendArtifactMessage (message, index, sets) {
     });
 };
 
+const figurematerial = (message) => {
+    const d = new Discord.MessageEmbed();
+    d.setTitle('Material zum Figurenaufstieg von 1-90');
+    d.addField('**Boss-Broken**', '1 Splitter\n9 Bruchstücke\n 9 Brocken\n 6 \'gr. Steine\'');
+    d.addField('Boss Spezialdrop', '46 Stück');
+    d.addField('Regionale Besonderheit', '168 Stück (3/10/20/30/45/60)');
+    d.addField('weiteres Material', '18 kl., 30 mtl., 36 gr.');
+    message.channel.send(d);
+};
+
 const levelup = (message) => {
     const msgArguments = message.content.split(' ');
 
@@ -1281,5 +1292,6 @@ module.exports = {
     sendRandomWeapon: randomWeapon,
     sendRandom: random,
     sendArtifact: artifact,
-    sendLevelup: levelup
+    sendLevelup: levelup,
+    sendFigMat: figurematerial
 };
