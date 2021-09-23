@@ -38,7 +38,7 @@ class YuanShenService extends ApiAccessService {
      * @returns matching or original name
      */
     mapFigureNickname (name) {
-        const nickNameMap = { childe: 'tartaglia', sucrose: 'saccharose', hutao: 'hu tao', kazuha: 'kaedehara kazuha', ayaka: 'kamisato ayaka', baal: 'raiden shogun', sara: 'kujou sara' };
+        const nickNameMap = { childe: 'tartaglia', sucrose: 'saccharose', hutao: 'hu tao', kazuha: 'kaedehara kazuha', ayaka: 'kamisato ayaka', baal: 'raiden shogun', sara: 'kujou sara', kokomi: 'sangonomiya kokomi' };
 
         if (Object.prototype.hasOwnProperty.call(nickNameMap, name.toLowerCase())) {
             return nickNameMap[name];
@@ -53,7 +53,7 @@ class YuanShenService extends ApiAccessService {
      * @returns true, if name is valid
      */
     validateLongFigureName (name) {
-        const playerNames = ['hu tao', 'kaedehara kazuha', 'kamisato ayaka', 'raiden shogun', 'kujou sara'];
+        const playerNames = ['hu tao', 'kaedehara kazuha', 'kamisato ayaka', 'raiden shogun', 'kujou sara', 'sangonomiya kokomi'];
 
         return playerNames.includes(name.toLowerCase());
     }
