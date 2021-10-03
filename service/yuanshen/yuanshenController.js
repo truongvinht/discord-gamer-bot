@@ -579,14 +579,14 @@ const sendTomorrow = (message) => {
 };
 
 function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
-    for (var l = 0; l < locations.length; l++) {
-        for (var t = 0; t < talents.length; t++) {
-            var location = locations[l];
-            var talent = talents[t];
+    for (let l = 0; l < locations.length; l++) {
+        for (let t = 0; t < talents.length; t++) {
+            const location = locations[l];
+            const talent = talents[t];
 
             if (location.lid === talent.lid) {
-                var figureListname = '';
-                for (var f = 0; f < figures.length; f++) {
+                let figureListname = '';
+                for (let f = 0; f < figures.length; f++) {
                     if (figures[f].talent_id === talent.tid) {
                         if (figureListname === '') {
                             figureListname = figures[f].name;
@@ -603,15 +603,19 @@ function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
             }
         }
     }
-    for (var lp = 0; lp < locations.length; lp++) {
-        var wpLocation = locations[lp];
-        for (var wp = 0; wp < weaponDrops.length; wp++) {
-            var weapon = weaponDrops[wp];
 
+    for (let lp = 0; lp < locations.length; lp++) {
+        const wpLocation = locations[lp];
+
+        let weaponDropList = '';
+
+        for (let wp = 0; wp < weaponDrops.length; wp++) {
+            const weapon = weaponDrops[wp];
             if (wpLocation.lid === weapon.location_id) {
-                d.addField(`Waffendrop - ${weapon.name}`, `in ${wpLocation.name}`);
+                weaponDropList = `${weaponDropList}${weapon.name}\n`;
             }
         }
+        d.addField(`Waffendrop in ${wpLocation.name}`, weaponDropList);
     }
 }
 
