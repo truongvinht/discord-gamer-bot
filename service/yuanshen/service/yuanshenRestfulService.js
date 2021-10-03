@@ -41,7 +41,7 @@ class YuanShenRestFulService extends ApiAccessService {
      * @param {requestCallback} callback callback to handle result/error
      */
     allLocations (callback) {
-        super.getRequest(callback, '/api/v1/location', null);
+        super.getRequest(callback, '/api/v1/locations', null);
     }
 
     /**
