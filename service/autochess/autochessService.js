@@ -18,10 +18,10 @@ const randomizerClass = (count) => {
 };
 
 function getRandomSynergyFrom (source, count) {
-    var pickedList = [];
+    const pickedList = [];
 
-    for (var i = 0; i < count; i++) {
-        var pickedIndex = Math.floor(Math.random() * Math.floor(source.length));
+    for (let i = 0; i < count; i++) {
+        let pickedIndex = Math.floor(Math.random() * Math.floor(source.length));
 
         // prevent same entries, if enough varity exist
         while (pickedList.includes(source[pickedIndex]) && source.length > pickedList.length) {
@@ -34,7 +34,7 @@ function getRandomSynergyFrom (source, count) {
 };
 
 const randomSynergy = (count) => {
-    var synergyList;
+    let synergyList;
 
     if (Math.random() >= 0.5) {
         synergyList = classList;

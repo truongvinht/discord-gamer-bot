@@ -13,7 +13,9 @@
         "Kira",
         "Egersis",
         "Spirit",
-        "Dwarf"
+        "Dwarf",
+        "Civet",
+        "Insectoid"
     ],
     "class":[
         "Mech",
@@ -30,6 +32,8 @@
         "Priest"
     ],
     "icons": {
+        "Civet":"https://static.ilongyuan.cn/official_website/e52b47a8c88/404e417dbc5e79e96f3724a629b53cf5.png",
+        "Insectoid":"https://static.ilongyuan.cn/official_website/e52b47a8c88/e221b8f799c0a2e1f120c435bdd6eb8c.png",
         "Dwarf":"http://static.ilongyuan.cn/official_website/e52b47a8c88/7fad1c4176b5d95c3d796450b07710a8.png",
         "Priest":"http://static.ilongyuan.cn/official_website/e52b47a8c88/560e2a8327caf84dc03983e5b2cd0a7d.png",
         "Wizard":"http://static.ilongyuan.cn/official_website/e52b47a8c88/b70d40942e52f567b78445724b6adfaa.png",

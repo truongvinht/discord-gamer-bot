@@ -23,7 +23,7 @@ const help = (PREFIX, author) => {
 const raceForMessage = (message) => {
     const msgArguments = message.content.split(' ');
 
-    var playerCounter = msgArguments.length;
+    let playerCounter = msgArguments.length;
     if (playerCounter > 1) {
         // more than one player
         // ignore first
@@ -40,7 +40,7 @@ const raceForMessage = (message) => {
 const classForMessage = (message) => {
     const msgArguments = message.content.split(' ');
 
-    var playerCounter = msgArguments.length;
+    let playerCounter = msgArguments.length;
     if (playerCounter > 1) {
         // more than one player
         // ignore first
@@ -57,7 +57,7 @@ const classForMessage = (message) => {
 const synergyForMessage = (message) => {
     const msgArguments = message.content.split(' ');
 
-    var playerCounter = msgArguments.length;
+    let playerCounter = msgArguments.length;
     if (playerCounter > 1) {
         // more than one player
         // ignore first
@@ -72,14 +72,14 @@ const synergyForMessage = (message) => {
 };
 
 function sendSynergyMessages (message, msgArguments, synergyList) {
-    var playerPick = [];
+    const playerPick = [];
 
     const userData = message.mentions.users;
 
-    for (var i = 0; i < msgArguments.length - 1; i++) {
+    for (let i = 0; i < msgArguments.length - 1; i++) {
         const synergy = synergyList[i];
-        var player = msgArguments[i + 1];
-        var pick = {};
+        let player = msgArguments[i + 1];
+        const pick = {};
 
         const key = player.replace(/[\\<>@#&!]/g, '');
         // eslint-disable-next-line no-useless-escape
@@ -98,10 +98,10 @@ function sendSynergyMessages (message, msgArguments, synergyList) {
 
 function writePlayerSynergy (message, playerPick) {
     if (playerPick.length > 0) {
-        var pick = playerPick.shift();
+        const pick = playerPick.shift();
 
         // player
-        var player = pick.player;
+        const player = pick.player;
 
         const d = new Discord.MessageEmbed();
         d.setTitle(`${AUTOCHESS_TITLE} - Synergy Pick`);
