@@ -30,7 +30,6 @@ describe('Get Random Synergy', () => {
 });
 
 describe('Get icon URL for Synergy', () => {
-
     test('Get icon URL for human synergy', () => {
         expect(service.getIconUrl('Human')).toBe('https://static.ilongyuan.cn/official_website/e52b47a8c88/61268e367c33412f5cce9bf77333d723.png');
     });
