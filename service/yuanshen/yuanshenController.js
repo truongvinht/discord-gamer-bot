@@ -181,11 +181,11 @@ const figurelist = (message) => {
         const elementName = Object.keys(elements);
 
         // build all fields
-        let elementFields = [];
-        for (let element in elementName) {
-            let elementTitle = elementName[element];
-            let elementCount = elementCounter[elementName[element]];
-            let elementMap = { name: `**${elementTitle} [${elementCount}]**`, value: elements[elementName[element]] + '\n', inline: true };
+        const elementFields = [];
+        for (const element in elementName) {
+            const elementTitle = elementName[element];
+            const elementCount = elementCounter[elementName[element]];
+            const elementMap = { name: `**${elementTitle} [${elementCount}]**`, value: elements[elementName[element]] + '\n', inline: true };
             elementFields.push(elementMap);
         }
         // 0 1 2 => 3 4 5 => 6 7 8
@@ -304,23 +304,23 @@ const figureTalent = (message) => {
             t['location'] = talent.location;
             t['image_url'] = talent.image_url;
 
-            let names = [];
+            const names = [];
             for (let j = 0; j < figures.length; j++) {
                 const fig = figures[j];
-                if (talent["tid"] === fig["talent_id"]) {
+                if (talent['tid'] === fig['talent_id']) {
                     names.push(fig.name);
                 }
             }
-            t["figures"] = names;
+            t['figures'] = names;
             const schedules = [];
 
             for (let k = 0; k < schedule.length; k++) {
                 const s = schedule[k];
-                if (talent["tid"] === s["talent_id"]) {
+                if (talent['tid'] === s['talent_id']) {
                     schedules.push(s.day);
                 }
             }
-            t["schedules"] = schedules;
+            t['schedules'] = schedules;
             talentList.push(t);
         }
         sendMessageForTalents(message, talentList);
@@ -623,13 +623,13 @@ const boss = (message) => {
     message.channel.startTyping();
     const callback = function (bosslist, bossdrops, figures) {
         // group all drops together based on boss
-        var bossmap = {};
-        var bossdropNames = {};
+        const bossmap = {};
+        const bossdropNames = {};
 
-        for (var bd = 0; bd < bossdrops.length; bd++) {
+        for (let bd = 0; bd < bossdrops.length; bd++) {
             bossdropNames[bd] = bossdrops[bd].name;
             const bdkey = `${bossdrops[bd].boss_id}`;
-            var bossdropsforBoss = [];
+            let bossdropsforBoss = [];
             if (Object.prototype.hasOwnProperty.call(bossmap, bdkey)) {
                 bossdropsforBoss = bossmap[bdkey];
             }
@@ -639,11 +639,11 @@ const boss = (message) => {
         }
 
         // group all figures together for displaying (base on drop id)
-        var bossdropfiguremap = {};
+        const bossdropfiguremap = {};
 
-        for (var f = 0; f < figures.length; f++) {
+        for (let f = 0; f < figures.length; f++) {
             const key = `${figures[f].bdid}`;
-            var bossdropindex = '';
+            let bossdropindex = '';
             if (Object.prototype.hasOwnProperty.call(bossdropfiguremap, key)) {
                 bossdropindex = bossdropfiguremap[key] + ', ' + figures[f].name;
             } else {
@@ -712,7 +712,7 @@ const sendMessageForWeeklyBoss = (message, bosslist, bossdropNames, bossdrops, f
 
         const drops = bossdrops[`${boss.bid}`];
 
-        for (var dp = 0; dp < drops.length; dp++) {
+        for (let dp = 0; dp < drops.length; dp++) {
             const dropname = bossdropNames[`${drops[dp] - 1}`];
             d.addField(dropname, figures[`${drops[dp]}`]);
         }
@@ -889,12 +889,12 @@ function sendNormalBossMessage (message, boss) {
 };
 
 function sendDungeonMessage (message, msgArguments, dungeon) {
-    var playerPick = [];
+    const playerPick = [];
 
     const userData = message.mentions.users;
 
-    for (var i = 0; i < msgArguments.length - 1; i++) {
-        var player = msgArguments[i + 1];
+    for (let i = 0; i < msgArguments.length - 1; i++) {
+        let player = msgArguments[i + 1];
 
         const key = player.replace(/[\\<>@#&!]/g, '');
         // eslint-disable-next-line no-useless-escape
@@ -1206,14 +1206,14 @@ function sendTalentLevelupMessage (message, start, end) {
 }
 
 function sendElementMessages (message, msgArguments, elementList) {
-    var playerPick = [];
+    const playerPick = [];
 
     const userData = message.mentions.users;
 
-    for (var i = 0; i < msgArguments.length - 1; i++) {
+    for (let i = 0; i < msgArguments.length - 1; i++) {
         const element = elementList[i];
-        var player = msgArguments[i + 1];
-        var pick = {};
+        let player = msgArguments[i + 1];
+        const pick = {};
 
         const key = player.replace(/[\\<>@#&!]/g, '');
         // eslint-disable-next-line no-useless-escape
@@ -1232,10 +1232,10 @@ function sendElementMessages (message, msgArguments, elementList) {
 
 function writePlayerPick (message, playerPick) {
     if (playerPick.length > 0) {
-        var pick = playerPick.shift();
+        const pick = playerPick.shift();
 
         // player
-        var player = pick.player;
+        const player = pick.player;
 
         const d = new Discord.MessageEmbed();
         d.setTitle('Zufallsgenerator');
