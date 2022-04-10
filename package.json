@@ -12,6 +12,9 @@
     "test:coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "test:staged": "jest --findRelatedTests"
   },
+  "engines": {
+    "node": "14.x"
+  },
   "jest": {
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
