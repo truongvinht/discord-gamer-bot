@@ -5,7 +5,7 @@
 const Discord = require('discord.js');
 const nodeHtmlToImage = require('node-html-to-image');
 const ApiService = require('./service/yuanshenService');
-const ApiService2 = require('./service/yuanshenApiService');
+const YSApiService = require('./service/yuanshenApiService');
 
 const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
@@ -30,7 +30,7 @@ function getApiService () {
 
 function getApi2Service () {
     if (yuanshenService == null) {
-        yuanshenService = new ApiService2(c.yuanshenServer2, '-', c.yuanshenServerPort, false);
+        yuanshenService = new YSApiService(c.yuanshenServer2, '-', c.yuanshenServerPort, false);
     }
     return yuanshenService;
 }
