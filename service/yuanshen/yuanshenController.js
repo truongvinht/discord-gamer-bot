@@ -5,6 +5,7 @@
 const Discord = require('discord.js');
 const nodeHtmlToImage = require('node-html-to-image');
 const ApiService = require('./service/yuanshenService');
+const ApiService2 = require('./service/yuanshenApiService');
 
 const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
@@ -18,12 +19,20 @@ const YUANSHEN_TITLE = 'Genshin Impact';
 const LOGO_URL = 'https://webstatic-sea.mihoyo.com/upload/event/2020/11/06/f28664c6712f7c309ab296f3fb6980f3_698588692114461869.png';
 
 let yuanshenApiService = null;
+let yuanshenService = null;
 
 function getApiService () {
     if (yuanshenApiService == null) {
         yuanshenApiService = new ApiService(c.yuanshenServer, c.yuanshenToken, c.yuanshenServerPort, false);
     }
     return yuanshenApiService;
+}
+
+function getApi2Service () {
+    if (yuanshenService == null) {
+        yuanshenService = new ApiService2(c.yuanshenServer2, '-', c.yuanshenServerPort, false);
+    }
+    return yuanshenService;
 }
 
 const help = (PREFIX, author) => {
@@ -781,12 +790,12 @@ const randomDungeon = (message) => {
         const callback = function (dungeon) {
             sendDungeonMessage(message, msgArguments, dungeon);
         };
-        getApiService().randomDungeon(callback);
+        getApi2Service().randomDungeon(callback);
     } else {
         const callback = function (dungeon) {
             sendDungeonMessage(message, [message.author.username, message.author.username], dungeon);
         };
-        getApiService().randomDungeon(callback);
+        getApi2Service().randomDungeon(callback);
     }
 };
 
@@ -912,7 +921,7 @@ function sendDungeonMessage (message, msgArguments, dungeon) {
     d.setTitle('Sphäre');
     d.setDescription('$1, versuch mal $2'.replace('$1', playername).replace('$2', dungeon.name));
     d.setThumbnail(dungeon.image_url);
-    d.setFooter(`in ${dungeon.location} - ${YUANSHEN_TITLE}`);
+    d.setFooter(`in ${dungeon.location.name} - ${YUANSHEN_TITLE}`);
     message.channel.send(d).then(async function (msg) {
         msg.channel.stopTyping();
     });
@@ -930,7 +939,7 @@ const artifact = (message) => {
     };
 
     // get weapon
-    getApiService().allArtifacts(callback);
+    getApi2Service().allArtifactsWithLocation(callback);
 };
 function sendArtifactListMessage (message, list) {
     const d = new Discord.MessageEmbed();
@@ -962,13 +971,13 @@ function sendArtifactMessage (message, index, sets) {
     } else {
         d.setFooter(YUANSHEN_TITLE);
     }
-    if (pick.one_set != null) {
+    if (pick.one_set != null && pick.one_set !== '') {
         d.addField('1-Set', pick.one_set);
     }
-    if (pick.two_set != null) {
+    if (pick.two_set != null && pick.two_set !== '') {
         d.addField('2-Set', pick.two_set);
     }
-    if (pick.four_set != null) {
+    if (pick.four_set != null && pick.four_set !== '') {
         d.addField('4-Set', pick.four_set);
     }
     d.setThumbnail(pick.image_url);

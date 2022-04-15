@@ -2,7 +2,7 @@
 // handle environment variable
 // ==================
 
-var botSettings = {};
+let botSettings = {};
 const exampleSettings = require('../template/example_settings.json');
 
 try {
@@ -33,6 +33,11 @@ if (yuanshenToken === '') {
 let yuanshenServer = botSettings.yuanshen_api_server;
 if (yuanshenServer === '') {
     yuanshenServer = process.env.YUANSHEN_API_SERVER;
+}
+
+let yuanshenServer2 = botSettings.yuanshen_api2_server;
+if (yuanshenServer2 === '') {
+    yuanshenServer2 = process.env.YUANSHEN_API2_SERVER;
 }
 
 // Yuan Shen DB Server port
@@ -80,6 +85,7 @@ module.exports = {
     roles: getRoles,
     yuanshenToken,
     yuanshenServer,
+    yuanshenServer2,
     yuanshenServerPort,
     author: author,
     version: getVersion
