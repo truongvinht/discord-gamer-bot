@@ -3,13 +3,13 @@
 // ==================
 
 // import
-const YuanShenApiRestFulService = require('./yuanshenApiRestfulService');
+const ApiRestfulService = require('./apiRestfulService');
 
 /**
  * Service to acccess Yuanshen Data.
- * {@link yuanshenApiRestfulService}
+ * {@link apiRestfulService}
  */
-class YuanShenApiService extends YuanShenApiRestFulService {
+class ApiService extends ApiRestfulService {
     /**
      * GET a random dungeon
      * @param {requestCallback} callback callback to handle result/error
@@ -68,4 +68,4 @@ class YuanShenApiService extends YuanShenApiRestFulService {
     }
 };
 
-module.exports = YuanShenApiService;
+module.exports = ApiService;

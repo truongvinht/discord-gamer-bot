@@ -5,7 +5,7 @@
 const Discord = require('discord.js');
 const nodeHtmlToImage = require('node-html-to-image');
 const ApiService = require('./service/yuanshenService');
-const YSApiService = require('./service/yuanshenApiService');
+const ApiRestService = require('./service/apiService');
 
 const draft = require('./yuanshenDraftHandler');
 const imgGen = require('./service/imageGeneratorService');
@@ -28,9 +28,9 @@ function getApiService () {
     return yuanshenApiService;
 }
 
-function getApi2Service () {
+function getApiRestService () {
     if (yuanshenService == null) {
-        yuanshenService = new YSApiService(c.yuanshenServer2, '-', c.yuanshenServerPort, false);
+        yuanshenService = new ApiRestService(c.yuanshenServer2, '-', c.yuanshenServerPort, false);
     }
     return yuanshenService;
 }
@@ -790,12 +790,12 @@ const randomDungeon = (message) => {
         const callback = function (dungeon) {
             sendDungeonMessage(message, msgArguments, dungeon);
         };
-        getApi2Service().randomDungeon(callback);
+        getApiRestService().randomDungeon(callback);
     } else {
         const callback = function (dungeon) {
             sendDungeonMessage(message, [message.author.username, message.author.username], dungeon);
         };
-        getApi2Service().randomDungeon(callback);
+        getApiRestService().randomDungeon(callback);
     }
 };
 
@@ -939,7 +939,7 @@ const artifact = (message) => {
     };
 
     // get weapon
-    getApi2Service().allArtifactsWithLocation(callback);
+    getApiRestService().allArtifactsWithLocation(callback);
 };
 function sendArtifactListMessage (message, list) {
     const d = new Discord.MessageEmbed();

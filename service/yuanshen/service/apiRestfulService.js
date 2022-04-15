@@ -9,7 +9,7 @@ const ApiAccessService = require('./apiAccessService');
  * Service to acccess Restful API for Yuanshen.
  * {@link ApiAccessService}
  */
-class YuanShenApiRestFulService extends ApiAccessService {
+class ApiRestFulService extends ApiAccessService {
     /**
      * GET all locations
      * @param {requestCallback} callback callback to handle result/error
@@ -44,4 +44,4 @@ class YuanShenApiRestFulService extends ApiAccessService {
     }
 };
 
-module.exports = YuanShenApiRestFulService;
+module.exports = ApiRestFulService;
