@@ -45,6 +45,7 @@
     "node-html-to-image": "^3.1.0",
     "puppeteer-cluster": "^0.22.0",
     "pushover-notifications": "^1.2.2",
+    "request": "^2.88.2",
     "toad-scheduler": "^1.6.1"
   },
   "devDependencies": {
