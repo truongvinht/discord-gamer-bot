@@ -52,6 +52,36 @@ if (yuanshenServerSSL === '') {
     yuanshenServerSSL = true;
 }
 
+// TGTG Access Key
+let tgtgAccessToken = botSettings.tgtg_access_token;
+if (tgtgAccessToken === '') {
+    tgtgAccessToken = process.env.TGTG_ACCESS_TOKEN;
+}
+
+// TGTG Refresh Key
+let tgtgRefreshToken = botSettings.tgtg_refresh_token;
+if (tgtgRefreshToken === '') {
+    tgtgRefreshToken = process.env.TGTG_REFRESH_TOKEN;
+}
+
+// TGTG Refresh Key
+let tgtgUser = botSettings.tgtg_user;
+if (tgtgUser === '') {
+    tgtgUser = process.env.TGTG_User;
+}
+
+// Push Notifier Token
+let pushoverUser = botSettings.po_user;
+if (pushoverUser === '') {
+    pushoverUser = process.env.PO_USER;
+}
+
+// Push Notifier Token
+let pushoverToken = botSettings.po_token;
+if (pushoverToken === '') {
+    pushoverToken = process.env.PO_TOKEN;
+}
+
 // command prefix
 const prefix = process.env.PREFIX || botSettings.prefix;
 
@@ -87,6 +117,11 @@ module.exports = {
     yuanshenServer,
     yuanshenServer2,
     yuanshenServerPort,
+    tgtgAccessToken,
+    tgtgRefreshToken,
+    tgtgUser,
+    pushoverUser,
+    pushoverToken,
     author: author,
     version: getVersion
 };

@@ -44,3 +44,22 @@ const client = new MyClient();
 client.login(c.botToken()).then(() => {
     console.log('Login Done!');
 });
+
+// additional scheduler for the bot
+const { ToadScheduler, SimpleIntervalJob, Task } = require('toad-scheduler');
+const controller = require('./service/tgtg/tgtgController');
+const scheduler = new ToadScheduler();
+
+const task = new Task('simple task', () => {
+    console.log('Trigger TGTG');
+    controller.checkTgtg();
+});
+
+const job1 = new SimpleIntervalJob(
+    { seconds: 60, runImmediately: true },
+    task,
+    'id_1'
+);
+
+// create and start jobs
+scheduler.addSimpleIntervalJob(job1);

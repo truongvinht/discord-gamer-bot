@@ -5,8 +5,13 @@
   "yuanshen_api2_server": "",
   "yuanshen_api_port": "",
   "yuanshen_api_ssl": "",
+  "tgtg_access_token":"",
+  "tgtg_refresh_token":"",
+  "tgtg_user":"",
+  "po_user":"",
+  "po_token":"",
   "prefix":"!",
   "roles":[],
   "author":"C4CW",
-  "version":"1.5.0"
+  "version":"1.6.0"
 }

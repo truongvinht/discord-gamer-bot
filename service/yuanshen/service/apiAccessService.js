@@ -94,5 +94,6 @@ class ApiAccessService {
             callback(null, err);
         });
     }
+
 };
 module.exports = ApiAccessService;
