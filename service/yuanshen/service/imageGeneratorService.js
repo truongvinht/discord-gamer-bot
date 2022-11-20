@@ -133,7 +133,7 @@ const generateFigureContentPage = (figure, weekdays) => {
 
     // MATERIAL
     let materialContent = '';
-    if (materialName !== undefined && materialName !== '') {
+    if (materialName !== undefined && materialName !== '' && materialName !== null) {
         const materialImageUrl = figure.material_image_url;
 
         materialContent = `
@@ -156,7 +156,7 @@ const generateFigureContentPage = (figure, weekdays) => {
 
     let weaponTypeHeader = '';
     let weaponTypeContent = '';
-    if (weaponType !== undefined && weaponType !== '') {
+    if (weaponType !== undefined && weaponType !== '' && weaponType !== null) {
         weaponTypeHeader = '<td width="50%" colspan="2"><a class="head_title">Waffe</a></td>';
 
         if (weaponTypeImg !== undefined && weaponTypeImg !== '') {
@@ -196,7 +196,7 @@ const generateFigureContentPage = (figure, weekdays) => {
     // WEEKLY BOSS
     let weeklyBossContent = '';
 
-    if (figure.boss !== undefined && figure.boss !== '') {
+    if (figure.boss !== undefined && figure.boss !== '' && figure.boss !== null) {
         const weeklyBoss = figure.boss + ' / ' + figure.boss_description;
         const weeklyBossImg = figure.boss_image_url;
 

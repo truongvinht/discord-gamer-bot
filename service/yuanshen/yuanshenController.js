@@ -624,6 +624,11 @@ function summarizedDataForDate (d, locations, figures, talents, weaponDrops) {
                 weaponDropList = `${weaponDropList}${weapon.name}\n`;
             }
         }
+
+        if (weaponDropList === '') {
+            weaponDropList = '-';
+        }
+
         d.addField(`Waffendrop in ${wpLocation.name}`, weaponDropList);
     }
 }
