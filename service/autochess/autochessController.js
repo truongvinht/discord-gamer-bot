@@ -97,10 +97,12 @@ function sendSynergyMessages (source, players, synergyList) {
     }
 
     // write a message for every name
-    writePlayerSynergy(source, playerPick);
+    // Track if this is a slash command and if we've replied yet
+    const isSlashCommand = !!source.commandName;
+    writePlayerSynergy(source, playerPick, isSlashCommand, false);
 }
 
-function writePlayerSynergy (source, playerPick) {
+function writePlayerSynergy (source, playerPick, isSlashCommand, hasReplied) {
     if (playerPick.length > 0) {
         const pick = playerPick.shift();
 
@@ -113,20 +115,23 @@ function writePlayerSynergy (source, playerPick) {
         d.setThumbnail(service.getIconUrl(pick.synergy));
 
         // Send response based on type
-        // Interactions have commandName property, messages don't
-        if (source.commandName) {
-            // Slash command - use followUp after first reply
-            if (playerPick.length === 0) {
-                source.reply({ embeds: [d] });
+        if (isSlashCommand) {
+            // Slash command - first message uses reply(), rest use followUp()
+            if (!hasReplied) {
+                // First message - must use reply()
+                source.reply({ embeds: [d] }).then(() => {
+                    writePlayerSynergy(source, playerPick, isSlashCommand, true);
+                });
             } else {
-                source.followUp({ embeds: [d] }).then(async function () {
-                    writePlayerSynergy(source, playerPick);
+                // Subsequent messages - use followUp()
+                source.followUp({ embeds: [d] }).then(() => {
+                    writePlayerSynergy(source, playerPick, isSlashCommand, true);
                 });
             }
         } else {
             // Prefix command
             source.channel.send({ embeds: [d] }).then(async function (message) {
-                writePlayerSynergy(message, playerPick);
+                writePlayerSynergy(message, playerPick, false, false);
             });
         }
     }

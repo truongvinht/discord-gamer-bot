@@ -47,13 +47,15 @@ const syncEvents = (source) => {
                 pokemonEvents.push(syncEvent);
             }
         };
-        writePokemonSyncPairEvent(source, pokemonEvents);
+        // Track if this is a slash command
+        const isSlashCommand = !!source.commandName;
+        writePokemonSyncPairEvent(source, pokemonEvents, isSlashCommand, false);
     };
 
     service.getSyncEvents(callback);
 };
 
-function writePokemonSyncPairEvent (source, syncPairs) {
+function writePokemonSyncPairEvent (source, syncPairs, isSlashCommand, hasReplied) {
     if (syncPairs.length > 0) {
         const pair = syncPairs.shift();
 
@@ -67,20 +69,23 @@ function writePokemonSyncPairEvent (source, syncPairs) {
         );
 
         // Send response based on type
-        // Interactions have commandName property, messages don't
-        if (source.commandName) {
-            // Slash command - use followUp after first reply
-            if (syncPairs.length === 0) {
-                source.reply({ embeds: [d] });
+        if (isSlashCommand) {
+            // Slash command - first message uses reply(), rest use followUp()
+            if (!hasReplied) {
+                // First message - must use reply()
+                source.reply({ embeds: [d] }).then(() => {
+                    writePokemonSyncPairEvent(source, syncPairs, isSlashCommand, true);
+                });
             } else {
-                source.followUp({ embeds: [d] }).then(async function () {
-                    writePokemonSyncPairEvent(source, syncPairs);
+                // Subsequent messages - use followUp()
+                source.followUp({ embeds: [d] }).then(() => {
+                    writePokemonSyncPairEvent(source, syncPairs, isSlashCommand, true);
                 });
             }
         } else {
             // Prefix command
             source.channel.send({ embeds: [d] }).then(async function (message) {
-                writePokemonSyncPairEvent(message, syncPairs);
+                writePokemonSyncPairEvent(message, syncPairs, false, false);
             });
         }
     }
