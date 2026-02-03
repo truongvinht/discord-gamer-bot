@@ -4,13 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Discord bot for displaying game-related details and interacting with players. Built with Discord.js v12 and Discord-Akairo framework. The bot provides commands for multiple games including Pokémon Masters and Dota Auto Chess.
+Discord bot for displaying game-related details and interacting with players. Built with native Discord.js v14. The bot provides commands for multiple games including Pokémon Masters and Dota Auto Chess.
+
+**Key Features:**
+- Hybrid command system supporting both slash commands (/) and prefix commands (!)
+- Auto Chess random picks (race, class, synergy)
+- Pokémon Masters sync event tracking
+- Native Discord.js v14 implementation (no framework dependencies)
 
 ## Development Commands
 
 ### Running the Bot
 ```bash
 npm start                # Start the bot
+npm run deploy          # Deploy slash commands to Discord API
 ```
 
 ### Testing
@@ -33,38 +40,41 @@ npm run lint             # Run ESLint on entire project
 
 ## Architecture
 
-### Framework Structure (Discord-Akairo)
+### Command System (Native Discord.js v14)
 
-The bot uses Discord-Akairo's command framework with three main handler types:
+The bot uses a custom command handler with hybrid support for both command types:
 
-1. **CommandHandler** (`./commands/`) - Handles all bot commands
-   - Auto-loads all command files from subdirectories
-   - Commands extend `Command` class with aliases support
-   - Commands delegate logic to controllers/services
+**Slash Commands** (/) - Modern Discord API
+- Registered via Discord REST API using `deploy-commands.js`
+- Uses `SlashCommandBuilder` for command definitions
+- Responds via `interaction.reply()` and `interaction.followUp()`
 
-2. **InhibitorHandler** (`./inhibitors/`) - Command execution guards
-   - Example: `preventDmInhibitor.js` blocks commands in DMs
-
-3. **ListenerHandler** (`./listeners/`) - Event listeners
-   - `readyListener.js` - Bot ready event
-   - `reactionListener.js` - Message reaction handling
+**Prefix Commands** (!) - Legacy support
+- Custom command loader from `./commands/` directory
+- Responds via `message.channel.send()`
+- Supports command aliases
 
 ### Directory Structure
 
 ```
-/commands/           # Command definitions (thin wrappers)
+/commands/           # Command definitions (module.exports pattern)
   /pmmasters/       # Pokémon Masters commands
   /autochess/       # Dota Auto Chess commands
   generalHelp.js    # General help command
 
 /service/           # Business logic layer
-  /autochess/       # Auto Chess services
-  /pmasters/        # Pokémon Masters services
+  /autochess/       # Auto Chess services & controllers
+  /pmasters/        # Pokémon Masters services & controllers
   /base/            # Shared utilities
-    colorManager.js # Singleton for color codes
+    colorManager.js       # Singleton for color codes
+    reactionHandler.js    # Message reaction handling
+
+/listeners/         # Event listeners
+  readyListener.js       # Bot ready event
+  reactionListener.js    # Message reaction handling
 
 /helper/           # Shared utilities
-  envHandler.js    # Configuration and environment variable management
+  envHandler.js    # Configuration management
   dateExtension.js # Date formatting utilities
 
 /config/           # Configuration files
@@ -72,6 +82,8 @@ The bot uses Discord-Akairo's command framework with three main handler types:
 
 /template/         # Template files
   example_settings.json  # Configuration template
+
+/deploy-commands.js  # Slash command deployment script
 ```
 
 ### Configuration System (`helper/envHandler.js`)
@@ -79,51 +91,147 @@ The bot uses Discord-Akairo's command framework with three main handler types:
 Hierarchical configuration loading:
 1. Attempts to load `config/settings.json`
 2. Falls back to `template/example_settings.json`
-3. Overrides with environment variables (for Heroku deployment)
+3. Supports environment variable overrides
 
 Required configuration keys:
 - `token` / `BOT_TOKEN` - Discord bot token
 - `prefix` / `PREFIX` - Command prefix (default: `!`)
-- `po_user` / `PO_USER` - Pushover user key
-- `po_token` / `PO_TOKEN` - Pushover API token
+
+**Setup:**
+1. Copy `template/example_settings.json` to `config/settings.json`
+2. Add your Discord bot token
+3. Optionally customize prefix and other settings
 
 ### Service Layer Pattern
 
 Commands are thin wrappers that delegate to controller/service layers:
 
-**Command** → **Controller/Service** → **External API** (if applicable)
+**Command** → **Controller** → **Service** → **External API** (if applicable)
 
-- Commands in `/commands/` extend Discord-Akairo's `Command` class
-- They delegate business logic to service files in `/service/`
-- Services handle Discord message formatting, data processing, and external API calls
+- Commands in `/commands/` use module.exports pattern
+- They define both `data` (SlashCommandBuilder) and `execute()` function
+- Universal `execute()` handles both Message and Interaction objects
+- Controllers handle Discord message formatting and business logic
+- Services handle data processing and external API calls
 - This separation keeps commands lightweight and makes business logic testable
 
 ### Key Patterns
+
+#### Hybrid Command Structure
+```javascript
+const { SlashCommandBuilder } = require('discord.js');
+const controller = require('../../service/[domain]/[domain]Controller');
+
+module.exports = {
+    // Prefix command config
+    name: 'commandName',
+    aliases: ['alias1', 'alias2'],
+    description: 'Command description',
+
+    // Slash command config
+    data: new SlashCommandBuilder()
+        .setName('commandname')
+        .setDescription('Command description'),
+
+    // Universal execute function
+    execute: async (source, args, client) => {
+        // source can be Message or Interaction
+        return controller.method(source);
+    }
+};
+```
+
+#### Interaction Detection
+Controllers detect command type using `source.commandName`:
+```javascript
+if (source.commandName) {
+    // Slash command (Interaction)
+    return source.reply({ embeds: [embed] });
+} else {
+    // Prefix command (Message)
+    return source.channel.send({ embeds: [embed] });
+}
+```
+
+#### Multiple Message Responses
+For slash commands sending multiple messages:
+```javascript
+function sendMultipleMessages(source, dataList, isSlashCommand, hasReplied) {
+    if (dataList.length > 0) {
+        const data = dataList.shift();
+        const embed = createEmbed(data);
+
+        if (isSlashCommand) {
+            if (!hasReplied) {
+                // First message MUST use reply()
+                source.reply({ embeds: [embed] }).then(() => {
+                    sendMultipleMessages(source, dataList, isSlashCommand, true);
+                });
+            } else {
+                // Subsequent messages use followUp()
+                source.followUp({ embeds: [embed] }).then(() => {
+                    sendMultipleMessages(source, dataList, isSlashCommand, true);
+                });
+            }
+        } else {
+            // Prefix command uses channel.send()
+            source.channel.send({ embeds: [embed] }).then(() => {
+                sendMultipleMessages(source, dataList, false, false);
+            });
+        }
+    }
+}
+```
+
+#### Discord Embed Formatting (v14)
+```javascript
+const { EmbedBuilder } = require('discord.js');
+
+const embed = new EmbedBuilder()
+    .setTitle('Title')
+    .setAuthor({ name: 'Author Name' })
+    .setDescription('Description')
+    .addFields(
+        { name: 'Field 1', value: 'Value 1', inline: false },
+        { name: 'Field 2', value: 'Value 2', inline: true }
+    )
+    .setThumbnail('https://url-to-image.png')
+    .setFooter({ text: 'Footer text' });
+```
+
+**Key Changes from v12:**
+- `MessageEmbed` → `EmbedBuilder`
+- `setAuthor(string)` → `setAuthor({ name: string })`
+- `addField()` → `addFields([...])`
+- `setFooter(string)` → `setFooter({ text: string })`
+- `send(embed)` → `send({ embeds: [embed] })`
 
 #### Image Generation
 Uses `node-html-to-image` with Puppeteer for dynamic content:
 - Services generate HTML templates
 - Controllers convert to Discord attachments
-- Puppeteer args include `--no-sandbox` for Heroku compatibility
+- Puppeteer args include `--no-sandbox` for production environments
 
-#### Async Message Chains
-Controllers use recursive async patterns for batched messages:
+### Client Configuration
+
+**Gateway Intents (Required):**
 ```javascript
-function sendMultipleMessages(message, dataList) {
-    if (dataList.length > 0) {
-        const data = dataList.shift();
-        message.channel.send(embed).then(msg => {
-            sendMultipleMessages(msg, dataList); // Recursive call
-        });
-    }
-}
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,  // PRIVILEGED
+        GatewayIntentBits.GuildMessageReactions
+    ],
+    partials: [Partials.Message, Partials.Reaction]
+});
 ```
 
-#### Discord Embed Formatting
-- Use `Discord.MessageEmbed()` for rich messages
-- Set color with `colorManager` singleton from `/service/base/colorManager.js`
-- Add reactions with `msg.react('emoji')`
-- Handle typing indicators: `startTyping()` / `stopTyping()`
+**Important:** MESSAGE_CONTENT intent must be enabled in Discord Developer Portal:
+1. Go to https://discord.com/developers/applications
+2. Select your bot
+3. Navigate to "Bot" section
+4. Enable "MESSAGE CONTENT INTENT" under Privileged Gateway Intents
 
 ### Testing
 
@@ -135,25 +243,66 @@ function sendMultipleMessages(message, dataList) {
 ### External Dependencies
 
 Key dependencies:
-- `discord-akairo` ^8.1.0 - Command framework
-- `discord.js` ^12.5.3 - Discord API client
+- `discord.js` ^14.25.1 - Discord API client
 - `node-html-to-image` ^3.1.0 - Dynamic image generation
 - `puppeteer-cluster` ^0.22.0 - Puppeteer pooling
-- `pushover-notifications` ^1.2.2 - Push notifications
+- `node-fetch` ^2.6.1 - HTTP client for external APIs
+- `request` ^2.88.2 - Legacy HTTP client
 
 ## Development Notes
 
 ### Adding New Commands
 
 1. Create command file in appropriate `/commands/` subdirectory
-2. Extend `Command` class from `discord-akairo`
-3. Define aliases in constructor
-4. Delegate business logic to controller/service layer
-5. Command files are auto-loaded by CommandHandler
+2. Use module.exports pattern with `name`, `aliases`, `data`, `execute`
+3. Add SlashCommandBuilder configuration in `data` property
+4. Implement universal `execute()` function that handles both Message and Interaction
+5. Delegate business logic to controller/service layer
+6. Run `npm run deploy` to register slash command with Discord API
+7. Command files are auto-loaded by custom loader in `app.js`
 
-### Heroku Deployment
+### Slash Command Deployment
 
-- `Procfile` defines process: `worker: node app.js`
-- Environment variables override `settings.json` config
-- Puppeteer requires `--no-sandbox` flag in production
-- Node.js 14.x engine specified in `package.json`
+After adding or modifying slash commands:
+```bash
+npm run deploy
+```
+
+This registers commands globally with Discord API. Changes take effect immediately.
+
+### Bot Startup
+
+Ensure `config/settings.json` exists with your bot token:
+```bash
+npm start
+```
+
+Expected console output:
+```
+Loading commands...
+Loaded command: help
+Loaded command: autochessHelp
+...
+Loading events...
+Loaded event: ready
+Loaded event: messageReactionAdd
+Login Done!
+Started up!
+Logged in as YourBot#1234
+Serving X guilds
+```
+
+### Common Issues
+
+**"Used disallowed intents" error:**
+- Enable MESSAGE_CONTENT intent in Discord Developer Portal
+
+**Slash commands timeout:**
+- Ensure first response uses `interaction.reply()`
+- Subsequent responses use `interaction.followUp()`
+- Respond within 3 seconds
+
+**Prefix commands not working:**
+- Check bot has proper channel permissions
+- Verify prefix in settings.json matches usage
+- Check bot token is valid
