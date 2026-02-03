@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "deploy": "node deploy-commands.js",
+    "deploy:guild": "node deploy-guild-commands.js",
+    "cleanup": "node cleanup-commands.js",
+    "invite": "node get-client-id.js",
     "lint": "eslint ./",
     "test": "jest",
     "test:watch": "jest --watch",

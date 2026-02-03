@@ -41,34 +41,34 @@ function getPlayerNames (source) {
     return [source.author.username];
 }
 
-const raceForMessage = (source) => {
+const raceForMessage = async (source) => {
     const players = getPlayerNames(source);
     const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomRace(playerCounter);
-    sendSynergyMessages(source, players, synergyList);
+    return sendSynergyMessages(source, players, synergyList);
 };
 
-const classForMessage = (source) => {
+const classForMessage = async (source) => {
     const players = getPlayerNames(source);
     const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomClass(playerCounter);
-    sendSynergyMessages(source, players, synergyList);
+    return sendSynergyMessages(source, players, synergyList);
 };
 
-const synergyForMessage = (source) => {
+const synergyForMessage = async (source) => {
     const players = getPlayerNames(source);
     const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomSynergy(playerCounter);
-    sendSynergyMessages(source, players, synergyList);
+    return sendSynergyMessages(source, players, synergyList);
 };
 
-function sendSynergyMessages (source, players, synergyList) {
+async function sendSynergyMessages (source, players, synergyList) {
     const playerPick = [];
 
     // Get mentions if it's a message
@@ -99,10 +99,10 @@ function sendSynergyMessages (source, players, synergyList) {
     // write a message for every name
     // Track if this is a slash command and if we've replied yet
     const isSlashCommand = !!source.commandName;
-    writePlayerSynergy(source, playerPick, isSlashCommand, false);
+    return writePlayerSynergy(source, playerPick, isSlashCommand, false);
 }
 
-function writePlayerSynergy (source, playerPick, isSlashCommand, hasReplied) {
+async function writePlayerSynergy (source, playerPick, isSlashCommand, hasReplied) {
     if (playerPick.length > 0) {
         const pick = playerPick.shift();
 
@@ -119,20 +119,17 @@ function writePlayerSynergy (source, playerPick, isSlashCommand, hasReplied) {
             // Slash command - first message uses reply(), rest use followUp()
             if (!hasReplied) {
                 // First message - must use reply()
-                source.reply({ embeds: [d] }).then(() => {
-                    writePlayerSynergy(source, playerPick, isSlashCommand, true);
-                });
+                await source.reply({ embeds: [d] });
+                return writePlayerSynergy(source, playerPick, isSlashCommand, true);
             } else {
                 // Subsequent messages - use followUp()
-                source.followUp({ embeds: [d] }).then(() => {
-                    writePlayerSynergy(source, playerPick, isSlashCommand, true);
-                });
+                await source.followUp({ embeds: [d] });
+                return writePlayerSynergy(source, playerPick, isSlashCommand, true);
             }
         } else {
             // Prefix command
-            source.channel.send({ embeds: [d] }).then(async function (message) {
-                writePlayerSynergy(message, playerPick, false, false);
-            });
+            const message = await source.channel.send({ embeds: [d] });
+            return writePlayerSynergy(message, playerPick, false, false);
         }
     }
 }
