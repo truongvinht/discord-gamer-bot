@@ -67,7 +67,8 @@ function writePokemonSyncPairEvent (source, syncPairs) {
         );
 
         // Send response based on type
-        if (source.reply && !source.channel) {
+        // Interactions have commandName property, messages don't
+        if (source.commandName) {
             // Slash command - use followUp after first reply
             if (syncPairs.length === 0) {
                 source.reply({ embeds: [d] });

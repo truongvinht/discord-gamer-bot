@@ -22,7 +22,8 @@ const help = (source) => {
         .setFooter({ text: `Version: ${c.version()} - ${c.author()}` });
 
     // Check if it's an interaction (slash) or message (prefix)
-    if (source.reply && !source.channel) {
+    // Interactions have a commandName property, messages don't
+    if (source.commandName) {
         // Slash command - use interaction.reply()
         return source.reply({ embeds: [embed] });
     } else {

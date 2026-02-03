@@ -25,7 +25,8 @@ module.exports = {
         const embed = controller.getHelpMessage(c.prefix(), username);
 
         // Check if it's an interaction (slash) or message (prefix)
-        if (source.reply && !source.channel) {
+        // Interactions have commandName property, messages don't
+        if (source.commandName) {
             // Slash command - use interaction.reply()
             return source.reply({ embeds: [embed] });
         } else {

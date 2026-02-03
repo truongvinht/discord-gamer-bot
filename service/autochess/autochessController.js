@@ -113,7 +113,8 @@ function writePlayerSynergy (source, playerPick) {
         d.setThumbnail(service.getIconUrl(pick.synergy));
 
         // Send response based on type
-        if (source.reply && !source.channel) {
+        // Interactions have commandName property, messages don't
+        if (source.commandName) {
             // Slash command - use followUp after first reply
             if (playerPick.length === 0) {
                 source.reply({ embeds: [d] });
