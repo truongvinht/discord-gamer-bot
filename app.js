@@ -18,7 +18,6 @@ const client = new Client({
 
 // Bot configuration
 client.config = {
-    ownerId: '123992700587343872',
     prefix: c.prefix()
 };
 
