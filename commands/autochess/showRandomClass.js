@@ -3,19 +3,26 @@
 // ================
 
 // import
+const { SlashCommandBuilder } = require('discord.js');
 const controller = require('../../service/autochess/autochessController');
-const { Command } = require('discord-akairo');
 
-class autochessRandomClassCommand extends Command {
-    constructor () {
-        super('acclass', {
-            aliases: ['acclass', 'autochessclass', 'aclass']
-        });
+module.exports = {
+    // Prefix command config (legacy)
+    name: 'acclass',
+    aliases: ['acclass', 'autochessclass', 'aclass'],
+    description: 'Get random Auto Chess class for players',
+
+    // Slash command config
+    data: new SlashCommandBuilder()
+        .setName('acclass')
+        .setDescription('Get random Auto Chess class for players')
+        .addStringOption(option =>
+            option.setName('players')
+                .setDescription('Player names (space-separated)')
+                .setRequired(false)),
+
+    // Universal execute function
+    execute: async (source, args, client) => {
+        return controller.getRandomClass(source);
     }
-
-    exec (message) {
-        return controller.getRandomClass(message);
-    }
-}
-
-module.exports = autochessRandomClassCommand;
+};

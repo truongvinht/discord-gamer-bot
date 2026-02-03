@@ -3,20 +3,22 @@
 // ================
 
 // import
-const { Listener } = require('discord-akairo');
 const controller = require('../service/base/reactionHandler');
 
-class ReadyListener extends Listener {
-    constructor () {
-        super('messageReactionAdd', {
-            emitter: 'client',
-            event: 'messageReactionAdd'
-        });
-    }
+module.exports = {
+    name: 'messageReactionAdd',
+    once: false,
+    execute: async (reaction, user, client) => {
+        // Fetch partial reactions if needed
+        if (reaction.partial) {
+            try {
+                await reaction.fetch();
+            } catch (error) {
+                console.error('Error fetching reaction:', error);
+                return;
+            }
+        }
 
-    exec (reaction, user) {
         controller.messageReaction(reaction, user);
     }
-}
-
-module.exports = ReadyListener;
+};

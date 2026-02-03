@@ -1,65 +1,145 @@
-// app.js
-// main class
-// ================
-
-// import
+// app.js - Discord Bot Client - Native discord.js v14
+const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
 const c = require('./helper/envHandler');
 
-const { AkairoClient, CommandHandler, InhibitorHandler, ListenerHandler } = require('discord-akairo');
+// Create client with required intents
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent, // PRIVILEGED - must enable in portal
+        GatewayIntentBits.GuildMessageReactions
+    ],
+    partials: [Partials.Message, Partials.Reaction],
+    allowedMentions: { parse: [], repliedUser: false }
+});
 
-class MyClient extends AkairoClient {
-    constructor () {
-        super({
-            ownerID: '123992700587343872' // or ['123992700587343872', '86890631690977280']
-        }, {
-            disableEveryone: true
-        });
-        this.queue = new Map();
-        this.dispatcher = null;
-        this.defaultVolume = 1.0;
+// Bot configuration
+client.config = {
+    ownerId: '123992700587343872',
+    prefix: c.prefix()
+};
 
-        this.commandHandler = new CommandHandler(this, {
-            // Options for the command handler goes here.
-            prefix: c.prefix(),
-            directory: './commands/'
-        });
+// Bot state (preserved from original)
+client.queue = new Map();
+client.dispatcher = null;
+client.defaultVolume = 1.0;
 
-        this.inhibitorHandler = new InhibitorHandler(this, {
-            directory: './inhibitors/'
-        });
+// Command collections
+client.commands = new Collection();
+client.aliases = new Collection();
 
-        this.listenerHandler = new ListenerHandler(this, {
-            directory: './listeners/'
-        });
+// Load commands recursively
+function loadCommands (dir) {
+    const files = fs.readdirSync(dir);
 
-        this.commandHandler.loadAll();
-        this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
-        this.inhibitorHandler.loadAll();
-        this.commandHandler.useListenerHandler(this.listenerHandler);
-        this.listenerHandler.loadAll();
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isDirectory()) {
+            loadCommands(filePath);
+        } else if (file.endsWith('.js')) {
+            try {
+                const command = require(filePath);
+                if (command.name) {
+                    client.commands.set(command.name, command);
+                    if (command.aliases) {
+                        command.aliases.forEach(alias => {
+                            client.aliases.set(alias, command.name);
+                        });
+                    }
+                    console.log(`Loaded command: ${command.name}`);
+                }
+            } catch (error) {
+                console.error(`Error loading command ${file}:`, error);
+            }
+        }
     }
 }
 
-const client = new MyClient();
-client.login(c.botToken()).then(() => {
-    console.log('Login Done!');
+// Load event listeners
+function loadEvents (dir) {
+    const files = fs.readdirSync(dir);
+
+    for (const file of files) {
+        if (file.endsWith('.js')) {
+            try {
+                const event = require(path.join(dir, file));
+                if (event.name && event.execute) {
+                    if (event.once) {
+                        client.once(event.name, (...args) => event.execute(...args, client));
+                    } else {
+                        client.on(event.name, (...args) => event.execute(...args, client));
+                    }
+                    console.log(`Loaded event: ${event.name}`);
+                }
+            } catch (error) {
+                console.error(`Error loading event ${file}:`, error);
+            }
+        }
+    }
+}
+
+// Message command handler (prefix commands - legacy support)
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+    if (!message.content.startsWith(client.config.prefix)) return;
+
+    const args = message.content.slice(client.config.prefix.length).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
+
+    const command = client.commands.get(commandName) ||
+        client.commands.get(client.aliases.get(commandName));
+
+    if (!command) return;
+
+    try {
+        await command.execute(message, args, client);
+    } catch (error) {
+        console.error(`Error executing ${commandName}:`, error);
+        message.reply('There was an error executing that command.');
+    }
 });
 
-// additional scheduler for the bot
-const { ToadScheduler, SimpleIntervalJob, Task } = require('toad-scheduler');
-const controller = require('./service/tgtg/tgtgController');
-const scheduler = new ToadScheduler();
+// Interaction command handler (slash commands)
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
 
-const task = new Task('simple task', () => {
-    console.log('Trigger TGTG');
-    controller.checkTgtg();
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+    }
+
+    try {
+        await command.execute(interaction, [], client);
+    } catch (error) {
+        console.error(`Error executing ${interaction.commandName}:`, error);
+        if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+        } else {
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        }
+    }
 });
 
-const job1 = new SimpleIntervalJob(
-    { seconds: 60, runImmediately: true },
-    task,
-    'id_1'
-);
+// Load everything
+console.log('Loading commands...');
+loadCommands(path.join(__dirname, 'commands'));
 
-// create and start jobs
-scheduler.addSimpleIntervalJob(job1);
+console.log('Loading events...');
+loadEvents(path.join(__dirname, 'listeners'));
+
+// Login
+client.login(c.botToken())
+    .then(() => console.log('Login Done!'))
+    .catch(error => {
+        console.error('Failed to login:', error);
+        process.exit(1);
+    });
+
+module.exports = client;

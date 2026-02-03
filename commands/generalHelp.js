@@ -4,19 +4,22 @@
 // ================
 
 // import
+const { SlashCommandBuilder } = require('discord.js');
 const controller = require('../service/base/baseController');
-const { Command } = require('discord-akairo');
 
-class generalHelpCommand extends Command {
-    constructor () {
-        super('help', {
-            aliases: ['help', 'h', 'hilfe']
-        });
+module.exports = {
+    // Prefix command config (legacy)
+    name: 'help',
+    aliases: ['help', 'h', 'hilfe'],
+    description: 'Display general bot commands',
+
+    // Slash command config
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Display general bot commands'),
+
+    // Universal execute function (works for both prefix and slash)
+    execute: async (source, args, client) => {
+        return controller.getHelpMessage(source);
     }
-
-    exec (message) {
-        return controller.getHelpMessage(message);
-    }
-}
-
-module.exports = generalHelpCommand;
+};

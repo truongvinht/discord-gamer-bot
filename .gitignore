@@ -7,8 +7,3 @@ package-lock.json
 .vscode
 coverage
 config
-
-# Environment variables (CRITICAL - prevents token leaks)
-.env
-.env.local
-.env.*.local

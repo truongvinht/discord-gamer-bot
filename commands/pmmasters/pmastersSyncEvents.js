@@ -3,19 +3,22 @@
 // ================
 
 // import
+const { SlashCommandBuilder } = require('discord.js');
 const controller = require('../../service/pmasters/pmastersController');
-const { Command } = require('discord-akairo');
 
-class pmastersSyncEventsCommand extends Command {
-    constructor () {
-        super('pmsyncevent', {
-            aliases: ['pmsyncevent', 'pmevent']
-        });
+module.exports = {
+    // Prefix command config (legacy)
+    name: 'pmsyncevent',
+    aliases: ['pmsyncevent', 'pmevent'],
+    description: 'Get Pokemon Masters sync events',
+
+    // Slash command config
+    data: new SlashCommandBuilder()
+        .setName('pmevent')
+        .setDescription('Get Pokemon Masters current sync pair events'),
+
+    // Universal execute function
+    execute: async (source, args, client) => {
+        return controller.getSyncEvents(source);
     }
-
-    exec (message) {
-        return controller.getSyncEvents(message);
-    }
-}
-
-module.exports = pmastersSyncEventsCommand;
+};

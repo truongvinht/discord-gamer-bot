@@ -19,7 +19,7 @@ class ColorManager {
         return ColorManager.instance;
     }
 
-    yuanshenColor1 () {
+    defaultColor () {
         return '#123456';
     }
 };

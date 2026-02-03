@@ -3,21 +3,33 @@
 // ================
 
 // import
+const { SlashCommandBuilder } = require('discord.js');
 const controller = require('../../service/pmasters/pmastersController');
 const c = require('../../helper/envHandler');
 
-const { Command } = require('discord-akairo');
+module.exports = {
+    // Prefix command config (legacy)
+    name: 'pmhelp',
+    aliases: ['pmHelp', 'pokemonmastershelp', 'pmasterhelp'],
+    description: 'Display Pokemon Masters commands',
 
-class pmHelpCommand extends Command {
-    constructor () {
-        super('pmhelp', {
-            aliases: ['pmHelp', 'pokemonmastershelp', 'pmasterhelp']
-        });
+    // Slash command config
+    data: new SlashCommandBuilder()
+        .setName('pmhelp')
+        .setDescription('Display Pokemon Masters commands'),
+
+    // Universal execute function
+    execute: async (source, args, client) => {
+        const username = source.user?.username || source.author?.username;
+        const embed = controller.getHelpMessage(c.prefix(), username);
+
+        // Check if it's an interaction (slash) or message (prefix)
+        if (source.reply && !source.channel) {
+            // Slash command
+            return source.reply({ embeds: [embed] });
+        } else {
+            // Prefix command
+            return source.channel.send({ embeds: [embed] });
+        }
     }
-
-    exec (message) {
-        return message.channel.send(controller.getHelpMessage(c.prefix(), message.author.username));
-    }
-}
-
-module.exports = pmHelpCommand;
+};

@@ -3,7 +3,7 @@
 // Controller to prepare pokemon content for discord response
 // ================
 
-const Discord = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const service = require('./pmastersService');
 const POKEMONMASTERS_TITLE = 'Pokemon Masters';
 const PokemonSyncEvent = require('./model/pokemonSyncEvent');
@@ -13,19 +13,21 @@ const servicesJson = require('./services.json');
 const LOGO_URL = 'https://cdn.player.one/sites/player.one/files/styles/lg/public/2020/02/18/p1pokemonmatersnewtrainer.jpg';
 
 const help = (PREFIX, author) => {
-    const embed = new Discord.MessageEmbed()
+    const embed = new EmbedBuilder()
         .setTitle(`${POKEMONMASTERS_TITLE} - Commands`)
-        .setAuthor(`${author}`)
+        .setAuthor({ name: author })
         .setDescription('Following commands are available:')
-        .addField(`${PREFIX}pmevent`, 'Pokemon Masters Current Sync Pair Event')
+        .addFields(
+            { name: `${PREFIX}pmevent or /pmevent`, value: 'Pokemon Masters Current Sync Pair Event', inline: false }
+        )
         .setThumbnail(LOGO_URL);
 
     return embed;
 };
 
-const syncEvents = (message) => {
+const syncEvents = (source) => {
     const callback = function (responseJson) {
-        var pokemonEvents = [];
+        const pokemonEvents = [];
         // eslint-disable-next-line no-undef
         for (key in responseJson) {
             // eslint-disable-next-line no-undef
@@ -45,28 +47,41 @@ const syncEvents = (message) => {
                 pokemonEvents.push(syncEvent);
             }
         };
-        writePokemonSyncPairEvent(message, pokemonEvents);
+        writePokemonSyncPairEvent(source, pokemonEvents);
     };
 
     service.getSyncEvents(callback);
 };
 
-function writePokemonSyncPairEvent (message, syncPairs) {
+function writePokemonSyncPairEvent (source, syncPairs) {
     if (syncPairs.length > 0) {
         const pair = syncPairs.shift();
 
-        const d = new Discord.MessageEmbed();
+        const d = new EmbedBuilder();
         d.setTitle(`${POKEMONMASTERS_TITLE} - Sync Pair Event`);
-        // d.setDescription("$1, try $2 [$3]".replace("$1", player).replace("$2", pick['synergy']).replace("[$3]", "synergy"));
         d.setDescription(pair.target);
         d.setImage(servicesJson.baseUrl + '' + pair.getUrlPath());
-        d.addField('Start', pair.getStartDate().toLocaleString('de-DE'));
-        d.addField('End', pair.getEndDate().toLocaleString('de-DE'));
+        d.addFields(
+            { name: 'Start', value: pair.getStartDate().toLocaleString('de-DE'), inline: false },
+            { name: 'End', value: pair.getEndDate().toLocaleString('de-DE'), inline: false }
+        );
 
-        message.channel.send(d).then(async function (message) {
-            // write next player
-            writePokemonSyncPairEvent(message, syncPairs);
-        });
+        // Send response based on type
+        if (source.reply && !source.channel) {
+            // Slash command - use followUp after first reply
+            if (syncPairs.length === 0) {
+                source.reply({ embeds: [d] });
+            } else {
+                source.followUp({ embeds: [d] }).then(async function () {
+                    writePokemonSyncPairEvent(source, syncPairs);
+                });
+            }
+        } else {
+            // Prefix command
+            source.channel.send({ embeds: [d] }).then(async function (message) {
+                writePokemonSyncPairEvent(message, syncPairs);
+            });
+        }
     }
 }
 

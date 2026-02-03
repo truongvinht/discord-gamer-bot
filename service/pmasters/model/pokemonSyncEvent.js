@@ -23,7 +23,7 @@ class PokemonSyncEvent {
 
     getUrlPath () {
         const urlComponents = this.banner.split(' ');
-        var url = urlComponents[3].replace('src="', '').replace('"', '');
+        const url = urlComponents[3].replace('src="', '').replace('"', '');
         return url;
     }
 

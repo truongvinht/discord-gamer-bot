@@ -2,7 +2,6 @@
 // Extension to classic Date object for formatting content.
 // ==================
 
-
 /**
  * Date extension for formatting content.
  */
@@ -25,7 +24,7 @@ class DateExtension extends Date {
             const dayString = dateString.substr(6, 2);
 
             const customDate = new Date();
-            customDate.setMonth(parseInt(monthString)-1);
+            customDate.setMonth(parseInt(monthString) - 1);
 
             const month = customDate.toLocaleString('de-de', { month: 'long' });
             return `${parseInt(dayString)}. ${month} ${yearString}`;

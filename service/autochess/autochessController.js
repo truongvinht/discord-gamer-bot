@@ -2,89 +2,93 @@
 // Controller to prepare content for discord response
 // ================
 
-const Discord = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const service = require('./autochessService');
 const AUTOCHESS_TITLE = 'Auto Chess';
 const LOGO_URL = 'https://pbs.twimg.com/profile_images/1088372392945045505/3JOuR2pY.jpg';
 
 const help = (PREFIX, author) => {
-    const embed = new Discord.MessageEmbed()
+    const embed = new EmbedBuilder()
         .setTitle(`${AUTOCHESS_TITLE} - Commands`)
-        .setAuthor(`${author}`)
+        .setAuthor({ name: author })
         .setDescription('Following commands are available:')
-        .addField(`${PREFIX}acrace NAME`, 'Random hero pick [RACE]')
-        .addField(`${PREFIX}acclass NAME`, 'Random hero pick [CLASS]')
-        .addField(`${PREFIX}acany NAME`, 'Random hero pick [RACE/CLASS]')
+        .addFields(
+            { name: `${PREFIX}acrace NAME or /acrace`, value: 'Random hero pick [RACE]', inline: false },
+            { name: `${PREFIX}acclass NAME or /acclass`, value: 'Random hero pick [CLASS]', inline: false },
+            { name: `${PREFIX}acany NAME or /acany`, value: 'Random hero pick [RACE/CLASS]', inline: false }
+        )
         .setThumbnail(LOGO_URL);
 
     return embed;
 };
 
-const raceForMessage = (message) => {
-    const msgArguments = message.content.split(' ');
-
-    let playerCounter = msgArguments.length;
-    if (playerCounter > 1) {
-        // more than one player
-        // ignore first
-        playerCounter--;
-    } else {
-        playerCounter++;
+// Helper to get player names from either message or interaction
+function getPlayerNames (source) {
+    // Check if it's a slash command (interaction)
+    if (source.options) {
+        const playersOption = source.options.getString('players');
+        if (playersOption) {
+            return playersOption.split(/\s+/);
+        }
+        return [source.user.username];
     }
+
+    // Prefix command (message)
+    const msgArguments = source.content.split(' ');
+    if (msgArguments.length > 1) {
+        return msgArguments.slice(1);
+    }
+    return [source.author.username];
+}
+
+const raceForMessage = (source) => {
+    const players = getPlayerNames(source);
+    const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomRace(playerCounter);
-    sendSynergyMessages(message, msgArguments, synergyList);
+    sendSynergyMessages(source, players, synergyList);
 };
 
-const classForMessage = (message) => {
-    const msgArguments = message.content.split(' ');
-
-    let playerCounter = msgArguments.length;
-    if (playerCounter > 1) {
-        // more than one player
-        // ignore first
-        playerCounter--;
-    } else {
-        playerCounter++;
-    }
+const classForMessage = (source) => {
+    const players = getPlayerNames(source);
+    const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomClass(playerCounter);
-    sendSynergyMessages(message, msgArguments, synergyList);
+    sendSynergyMessages(source, players, synergyList);
 };
 
-const synergyForMessage = (message) => {
-    const msgArguments = message.content.split(' ');
-
-    let playerCounter = msgArguments.length;
-    if (playerCounter > 1) {
-        // more than one player
-        // ignore first
-        playerCounter--;
-    } else {
-        playerCounter++;
-    }
+const synergyForMessage = (source) => {
+    const players = getPlayerNames(source);
+    const playerCounter = players.length || 1;
 
     // get synergy
     const synergyList = service.getRandomSynergy(playerCounter);
-    sendSynergyMessages(message, msgArguments, synergyList);
+    sendSynergyMessages(source, players, synergyList);
 };
 
-function sendSynergyMessages (message, msgArguments, synergyList) {
+function sendSynergyMessages (source, players, synergyList) {
     const playerPick = [];
 
-    const userData = message.mentions.users;
+    // Get mentions if it's a message
+    const userData = source.mentions?.users;
 
-    for (let i = 0; i < msgArguments.length - 1; i++) {
+    for (let i = 0; i < players.length; i++) {
         const synergy = synergyList[i];
-        let player = msgArguments[i + 1];
+        let player = players[i];
         const pick = {};
 
-        const key = player.replace(/[\\<>@#&!]/g, '');
-        // eslint-disable-next-line no-useless-escape
-        if (player.match(/\<\@.*\>/g)) {
-            player = userData.get(key).username;
+        // Handle Discord mentions for prefix commands
+        if (userData) {
+            const key = player.replace(/[\\<>@#&!]/g, '');
+            // eslint-disable-next-line no-useless-escape
+            if (player.match(/\<\@.*\>/g)) {
+                const user = userData.get(key);
+                if (user) {
+                    player = user.username;
+                }
+            }
         }
 
         pick.player = player;
@@ -93,24 +97,37 @@ function sendSynergyMessages (message, msgArguments, synergyList) {
     }
 
     // write a message for every name
-    writePlayerSynergy(message, playerPick);
+    writePlayerSynergy(source, playerPick);
 }
 
-function writePlayerSynergy (message, playerPick) {
+function writePlayerSynergy (source, playerPick) {
     if (playerPick.length > 0) {
         const pick = playerPick.shift();
 
         // player
         const player = pick.player;
 
-        const d = new Discord.MessageEmbed();
+        const d = new EmbedBuilder();
         d.setTitle(`${AUTOCHESS_TITLE} - Synergy Pick`);
         d.setDescription('$1, try $2 [$3]'.replace('$1', player).replace('$2', pick.synergy).replace('[$3]', 'synergy'));
         d.setThumbnail(service.getIconUrl(pick.synergy));
-        message.channel.send(d).then(async function (message) {
-            // write next player
-            writePlayerSynergy(message, playerPick);
-        });
+
+        // Send response based on type
+        if (source.reply && !source.channel) {
+            // Slash command - use followUp after first reply
+            if (playerPick.length === 0) {
+                source.reply({ embeds: [d] });
+            } else {
+                source.followUp({ embeds: [d] }).then(async function () {
+                    writePlayerSynergy(source, playerPick);
+                });
+            }
+        } else {
+            // Prefix command
+            source.channel.send({ embeds: [d] }).then(async function (message) {
+                writePlayerSynergy(message, playerPick);
+            });
+        }
     }
 }
 
