@@ -5,7 +5,7 @@
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const c = require('./helper/envHandler');
+const c = require('./envHandler');
 
 // Get guild ID from command line argument
 const guildId = process.argv[2];
@@ -44,7 +44,7 @@ function loadCommands (dir) {
 
 // Load commands
 console.log('Loading slash commands...');
-loadCommands(path.join(__dirname, 'commands'));
+loadCommands(path.join(__dirname, '../commands'));
 
 // Get bot token and extract client ID
 const token = c.botToken();

@@ -6,7 +6,7 @@
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const c = require('./helper/envHandler');
+const c = require('./envHandler');
 
 const commands = [];
 
@@ -33,7 +33,7 @@ function loadCommands (dir) {
 
 // Load commands
 console.log('Loading slash commands...');
-loadCommands(path.join(__dirname, 'commands'));
+loadCommands(path.join(__dirname, '../commands'));
 
 // Get bot token and extract client ID from it
 const token = c.botToken();

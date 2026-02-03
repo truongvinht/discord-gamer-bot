@@ -7,7 +7,7 @@
 //   npm run cleanup -- <name> - Delete specific command by name
 
 const { REST, Routes } = require('discord.js');
-const c = require('./helper/envHandler');
+const c = require('./envHandler');
 
 // Get bot token and extract client ID from it
 const token = c.botToken();

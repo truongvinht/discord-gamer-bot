@@ -2,7 +2,7 @@
 // Extract client ID from bot token
 // ================
 
-const c = require('./helper/envHandler');
+const c = require('./envHandler');
 
 const token = c.botToken();
 if (!token) {
