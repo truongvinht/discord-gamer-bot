@@ -1,4 +1,7 @@
 {
   "token": "",
-  "prefix": "!"
+  "prefix": "!",
+  "eventFridayTime": "19:00",
+  "eventSundayTime": "15:00",
+  "eventDuration": 2
 }

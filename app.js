@@ -10,7 +10,8 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent, // PRIVILEGED - must enable in portal
-        GatewayIntentBits.GuildMessageReactions
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildScheduledEvents
     ],
     partials: [Partials.Message, Partials.Reaction],
     allowedMentions: { parse: [], repliedUser: false }

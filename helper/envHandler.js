@@ -41,5 +41,10 @@ module.exports = {
 
     // Bot metadata from package.json
     author: () => packageJson.author || 'Unknown',
-    version: () => packageJson.version
+    version: () => packageJson.version,
+
+    // Event configuration
+    eventFridayTime: () => settings.eventFridayTime || '19:00',
+    eventSundayTime: () => settings.eventSundayTime || '15:00',
+    eventDuration: () => settings.eventDuration || 2
 };
