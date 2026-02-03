@@ -1,54 +1,45 @@
 // envHandler.js
-// handle environment variable
+// Configuration loader for bot settings
 // ==================
 
-let botSettings = {};
-const exampleSettings = require('../template/example_settings.json');
+const path = require('path');
+
+// Load package.json for version and author
+const packageJson = require('../package.json');
+
+// Try to load settings.json, fallback to example_settings.json
+let settings = {};
+const settingsPath = path.join(__dirname, '../config/settings.json');
+const examplePath = path.join(__dirname, '../template/example_settings.json');
 
 try {
-    botSettings = require('../config/settings.json');
+    settings = require(settingsPath);
 } catch (e) {
-    if (e.code !== 'MODULE_NOT_FOUND') {
+    if (e.code === 'MODULE_NOT_FOUND') {
+        console.log('⚠️  config/settings.json not found. Using template/example_settings.json');
+        console.log('    Copy template/example_settings.json to config/settings.json and add your bot token.\n');
+        settings = require(examplePath);
+    } else {
         throw e;
     }
-    console.log('settings.json not found. Loading default example_settings.json...');
-    botSettings = exampleSettings;
 }
 
-// Bot Token
-const botToken = botSettings.token || process.env.BOT_TOKEN || '';
+// Validate required settings
+if (!settings.token) {
+    console.error('❌ Error: Bot token is required in config/settings.json');
+    console.log('   Copy template/example_settings.json to config/settings.json and add your token.\n');
+    process.exit(1);
+}
 
-// Command prefix
-const prefix = process.env.PREFIX || botSettings.prefix;
-
-const getBotToken = () => {
-    return botToken;
-};
-
-// load prefix
-const getPrefix = () => {
-    return prefix;
-};
-
-// load roles
-const getRoles = () => {
-    return botSettings.roles;
-};
-
-// author information
-const author = () => {
-    return exampleSettings.author;
-};
-
-const getVersion = () => {
-    return exampleSettings.version;
-};
-
-// export
+// Export configuration accessors
 module.exports = {
-    botToken: getBotToken,
-    prefix: getPrefix,
-    roles: getRoles,
-    author: author,
-    version: getVersion
+    // Bot credentials
+    botToken: () => settings.token,
+
+    // Command prefix (default: '!')
+    prefix: () => settings.prefix || '!',
+
+    // Bot metadata from package.json
+    author: () => packageJson.author || 'Unknown',
+    version: () => packageJson.version
 };
