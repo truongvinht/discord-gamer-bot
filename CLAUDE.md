@@ -4,38 +4,57 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Discord bot for displaying game-related details and interacting with players. Built with native Discord.js v14. The bot provides commands for multiple games including Pokémon Masters and Dota Auto Chess.
+Production-ready Discord bot for displaying game-related details and interacting with players. Built with native Discord.js v14 and deployed via automated CI/CD pipeline.
 
 **Key Features:**
 - Hybrid command system supporting both slash commands (/) and prefix commands (!)
 - Auto Chess random picks (race, class, synergy)
 - Pokémon Masters sync event tracking
 - Native Discord.js v14 implementation (no framework dependencies)
+- Automated CI/CD deployment with GitHub Actions
+- PM2 process management for zero-downtime restarts
+- Environment-based configuration with dotenv
+
+**Tech Stack:**
+- Discord.js v14.25.1
+- Node.js 18.x (production) / 22.x (development)
+- PM2 for process management
+- GitHub Actions for CI/CD
+- Jest for testing
+- ESLint for code quality
 
 ## Development Commands
 
-### Running the Bot
+### Local Development
 ```bash
 npm start                # Start the bot
-npm run deploy          # Deploy slash commands to Discord API
+npm run deploy           # Deploy slash commands globally
+npm run deploy:guild     # Deploy to test guild (faster)
 ```
 
-### Testing
+### Testing & Quality
 ```bash
 npm test                 # Run all tests
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate coverage report
-npm run test:staged      # Run tests on staged files (for git hooks)
+npm run test:staged      # Run tests on staged files (git hooks)
+npm run lint             # Run ESLint
+npm run lint -- --fix    # Auto-fix linting errors
 ```
 
-### Code Quality
+### Production PM2 Management
 ```bash
-npm run lint             # Run ESLint on entire project
+npm run pm2:start        # Start bot with PM2
+npm run pm2:reload       # Reload bot (zero-downtime)
+npm run pm2:restart      # Restart bot
+npm run pm2:stop         # Stop bot
+npm run pm2:logs         # View bot logs
+npm run pm2:status       # Check bot status
 ```
 
 ## Configuration
 
-The bot uses environment variables loaded from a `.env` file.
+The bot uses **environment variables only** via dotenv. No JSON configuration files are loaded.
 
 ### Setup Configuration
 
@@ -46,8 +65,11 @@ The bot uses environment variables loaded from a `.env` file.
 
 2. **Edit .env and add your credentials:**
    ```bash
+   # Required
    BOT_TOKEN=your_discord_bot_token
    CLIENT_ID=your_discord_application_id
+
+   # Optional
    GUILD_ID=your_test_guild_id_optional
    PREFIX=!
    NODE_ENV=development
@@ -57,173 +79,94 @@ The bot uses environment variables loaded from a `.env` file.
    ```
 
 3. **Get your Discord credentials:**
-   - BOT_TOKEN: https://discord.com/developers/applications → Your App → Bot → Reset Token
-   - CLIENT_ID: Same portal → General Information → Application ID
+   - **BOT_TOKEN**: https://discord.com/developers/applications → Your App → Bot → Reset Token
+   - **CLIENT_ID**: Same portal → General Information → Application ID
+   - **GUILD_ID**: Enable Developer Mode in Discord → Right-click server → Copy ID
 
-**Note:** The `.env` file is gitignored and never committed to version control.
+**Important:**
+- The `.env` file is gitignored and never committed
+- `config/settings.json` is **no longer used** (legacy)
+- All configuration must be in `.env` or environment variables
 
-## Deployment
+### Configuration Loader (`helper/envHandler.js`)
 
-The bot includes automated CI/CD deployment via GitHub Actions.
-
-### CI/CD Workflow
-
-**Combined CI/CD Pipeline** (`.github/workflows/main.yml`):
-- **Test Job**: Runs on all pushes/PRs (lint, test, coverage)
-- **Deploy Job**: Runs only on `main` branch after tests pass
-- **Smart Deployment**: Auto-detects PM2 start vs reload
-- **Verification**: Health checks and status validation
-- **Manual Trigger**: Supports workflow_dispatch for manual deploys
-
-### Server Setup
-
-See `DEPLOYMENT.md` for complete server setup guide. Quick overview:
-
-1. **Install Node.js 18+ and PM2:**
-   ```bash
-   sudo apt install nodejs npm
-   npm install -g pm2
-   ```
-
-2. **Clone repository:**
-   ```bash
-   git clone <repo> /opt/discord-gamer-bot
-   cd /opt/discord-gamer-bot
-   npm ci --production
-   ```
-
-3. **Create .env file:**
-   ```bash
-   nano .env
-   # Add BOT_TOKEN, CLIENT_ID, etc.
-   ```
-
-4. **Start with PM2:**
-   ```bash
-   pm2 start ecosystem.config.js
-   pm2 save
-   pm2 startup
-   ```
-
-### GitHub Secrets Required
-
-Configure these in GitHub repository settings (Settings → Secrets):
-- `SSH_PRIVATE_KEY` - Private SSH key for server access
-- `SERVER_HOST` - Server IP or hostname
-- `SERVER_USER` - SSH username
-
-### Deployment Process
-
-Every push to `main`:
-1. Runs CI checks (lint, test)
-2. SSH to server
-3. Pulls latest code
-4. Installs dependencies
-5. Deploys slash commands
-6. Reloads bot with PM2
-
-### Manual Deployment
-
-Deploy manually via SSH:
-```bash
-ssh user@server
-cd /opt/discord-gamer-bot
-bash scripts/deploy.sh
-```
-
-### Monitoring
-
-```bash
-pm2 status                    # View bot status
-pm2 logs discord-gamer-bot   # View live logs
-pm2 monit                     # Resource monitoring
-```
-
-For detailed deployment instructions, troubleshooting, and maintenance, see **`DEPLOYMENT.md`**.
-
-### Linting Rules
-- Uses ESLint with Standard config
-- Custom rules: 4-space indentation, semicolons required
-- Configuration in `.eslintrc.json`
+Simple environment variable reader with validation:
+- Reads from `process.env` (loaded by dotenv)
+- Validates `BOT_TOKEN` is present
+- Provides clear error messages with setup instructions
+- No file I/O, no fallbacks, just environment variables
 
 ## Architecture
 
 ### Command System (Native Discord.js v14)
 
-The bot uses a custom command handler with hybrid support for both command types:
+Custom command handler with hybrid support:
 
 **Slash Commands** (/) - Modern Discord API
-- Registered via Discord REST API using `deploy-commands.js`
-- Uses `SlashCommandBuilder` for command definitions
+- Registered via Discord REST API (`helper/deploy-commands.js`)
+- Uses `SlashCommandBuilder` for definitions
 - Responds via `interaction.reply()` and `interaction.followUp()`
 
 **Prefix Commands** (!) - Legacy support
-- Custom command loader from `./commands/` directory
+- Custom loader from `./commands/` directory
 - Responds via `message.channel.send()`
 - Supports command aliases
 
 ### Directory Structure
 
 ```
-/commands/           # Command definitions (module.exports pattern)
-  /pmmasters/       # Pokémon Masters commands
-  /autochess/       # Dota Auto Chess commands
-  generalHelp.js    # General help command
+/commands/                    # Command definitions
+  /pmmasters/                # Pokémon Masters commands
+  /autochess/                # Dota Auto Chess commands
+  generalHelp.js             # General help
 
-/service/           # Business logic layer
-  /autochess/       # Auto Chess services & controllers
-  /pmasters/        # Pokémon Masters services & controllers
-  /base/            # Shared utilities
-    colorManager.js       # Singleton for color codes
-    reactionHandler.js    # Message reaction handling
+/service/                    # Business logic
+  /autochess/               # Auto Chess services & controllers
+  /pmasters/                # Pokémon Masters services & controllers
+  /events/                  # Event services
+  /base/                    # Shared utilities
+    colorManager.js         # Color codes singleton
+    reactionHandler.js      # Message reactions
 
-/listeners/         # Event listeners
-  readyListener.js       # Bot ready event
-  reactionListener.js    # Message reaction handling
+/listeners/                  # Discord event listeners
+  readyListener.js          # Bot ready event
+  reactionListener.js       # Reaction handling
 
-/helper/           # Shared utilities
-  envHandler.js    # Configuration management
-  dateExtension.js # Date formatting utilities
+/helper/                     # Utilities
+  envHandler.js             # Environment variable config
+  deploy-commands.js        # Slash command deployment
+  dateExtension.js          # Date formatting
 
-/config/           # Configuration files
-  settings.json    # Bot configuration (gitignored)
+/.github/workflows/          # CI/CD pipelines
+  main.yml                  # Combined CI/CD workflow
 
-/template/         # Template files
-  example_settings.json  # Configuration template
+/scripts/                    # Deployment scripts
+  deploy.sh                 # Server deployment script
 
-/deploy-commands.js  # Slash command deployment script
+/logs/                       # PM2 logs (gitignored)
+  error.log                 # Error output
+  output.log                # Standard output
+
+ecosystem.config.js          # PM2 configuration
+.env                         # Environment variables (gitignored)
+.env.example                 # Configuration template
+package-lock.json            # Locked dependencies (committed)
 ```
-
-### Configuration System (`helper/envHandler.js`)
-
-Hierarchical configuration loading:
-1. Attempts to load `config/settings.json`
-2. Falls back to `template/example_settings.json`
-3. Supports environment variable overrides
-
-Required configuration keys:
-- `token` / `BOT_TOKEN` - Discord bot token
-- `prefix` / `PREFIX` - Command prefix (default: `!`)
-
-**Setup:**
-1. Copy `template/example_settings.json` to `config/settings.json`
-2. Add your Discord bot token
-3. Optionally customize prefix and other settings
 
 ### Service Layer Pattern
 
-Commands are thin wrappers that delegate to controller/service layers:
+Commands delegate to controller/service layers:
 
-**Command** → **Controller** → **Service** → **External API** (if applicable)
+**Command** → **Controller** → **Service** → **External API**
 
-- Commands in `/commands/` use module.exports pattern
-- They define both `data` (SlashCommandBuilder) and `execute()` function
-- Universal `execute()` handles both Message and Interaction objects
-- Controllers handle Discord message formatting and business logic
-- Services handle data processing and external API calls
-- This separation keeps commands lightweight and makes business logic testable
+- Commands in `/commands/` use `module.exports` pattern
+- Define `data` (SlashCommandBuilder) and `execute()` function
+- Universal `execute()` handles both Message and Interaction
+- Controllers format Discord messages and handle business logic
+- Services process data and call external APIs
+- Separation enables testing and maintainability
 
-### Key Patterns
+### Key Implementation Patterns
 
 #### Hybrid Command Structure
 ```javascript
@@ -250,7 +193,6 @@ module.exports = {
 ```
 
 #### Interaction Detection
-Controllers detect command type using `source.commandName`:
 ```javascript
 if (source.commandName) {
     // Slash command (Interaction)
@@ -258,36 +200,6 @@ if (source.commandName) {
 } else {
     // Prefix command (Message)
     return source.channel.send({ embeds: [embed] });
-}
-```
-
-#### Multiple Message Responses
-For slash commands sending multiple messages:
-```javascript
-function sendMultipleMessages(source, dataList, isSlashCommand, hasReplied) {
-    if (dataList.length > 0) {
-        const data = dataList.shift();
-        const embed = createEmbed(data);
-
-        if (isSlashCommand) {
-            if (!hasReplied) {
-                // First message MUST use reply()
-                source.reply({ embeds: [embed] }).then(() => {
-                    sendMultipleMessages(source, dataList, isSlashCommand, true);
-                });
-            } else {
-                // Subsequent messages use followUp()
-                source.followUp({ embeds: [embed] }).then(() => {
-                    sendMultipleMessages(source, dataList, isSlashCommand, true);
-                });
-            }
-        } else {
-            // Prefix command uses channel.send()
-            source.channel.send({ embeds: [embed] }).then(() => {
-                sendMultipleMessages(source, dataList, false, false);
-            });
-        }
-    }
 }
 ```
 
@@ -314,12 +226,6 @@ const embed = new EmbedBuilder()
 - `setFooter(string)` → `setFooter({ text: string })`
 - `send(embed)` → `send({ embeds: [embed] })`
 
-#### Image Generation
-Uses `node-html-to-image` with Puppeteer for dynamic content:
-- Services generate HTML templates
-- Controllers convert to Discord attachments
-- Puppeteer args include `--no-sandbox` for production environments
-
 ### Client Configuration
 
 **Gateway Intents (Required):**
@@ -329,63 +235,185 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,  // PRIVILEGED
-        GatewayIntentBits.GuildMessageReactions
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildScheduledEvents
     ],
     partials: [Partials.Message, Partials.Reaction]
 });
 ```
 
-**Important:** MESSAGE_CONTENT intent must be enabled in Discord Developer Portal:
+**Critical:** MESSAGE_CONTENT intent must be enabled in Discord Developer Portal:
 1. Go to https://discord.com/developers/applications
-2. Select your bot
-3. Navigate to "Bot" section
-4. Enable "MESSAGE CONTENT INTENT" under Privileged Gateway Intents
+2. Select your bot → Bot section
+3. Enable "MESSAGE CONTENT INTENT" under Privileged Gateway Intents
 
-### Testing
+### Dependencies
 
-- Jest test environment configured for Node.js
-- Test files located alongside source files: `*.test.js`
-- Example: `service/autochess/autochessService.test.js`
-- Coverage ignores `node_modules`
-
-### External Dependencies
-
-Key dependencies:
+**Production:**
 - `discord.js` ^14.25.1 - Discord API client
+- `dotenv` ^17.2.3 - Environment variable loader
 - `node-html-to-image` ^3.1.0 - Dynamic image generation
 - `puppeteer-cluster` ^0.22.0 - Puppeteer pooling
-- `node-fetch` ^2.6.1 - HTTP client for external APIs
-- `request` ^2.88.2 - Legacy HTTP client
+- `node-fetch` ^2.6.1 - HTTP client
+- `request` ^2.88.2 - Legacy HTTP client (deprecated)
 
-## Development Notes
+**Development:**
+- `eslint` ^7.x - Code linting (Standard config)
+- `jest` ^26.6.3 - Testing framework
+- `jsdoc` ^3.6.x - Documentation generator
+
+**Note:** 24 known vulnerabilities exist (mostly dev dependencies). These require breaking changes (jest 26→30, jsdoc 3→4) and are tracked for gradual updates.
+
+## CI/CD & Deployment
+
+### Automated Pipeline
+
+**Single workflow** (`.github/workflows/main.yml`) handles everything:
+
+**Test Job** (runs on all branches):
+- Checkout code
+- Install dependencies
+- Run ESLint linter
+- Run Jest tests
+- Generate coverage report
+
+**Deploy Job** (only on `main` branch, after tests pass):
+- SSH to production server
+- Pull latest code
+- Install production dependencies
+- Deploy slash commands
+- Smart PM2 reload (auto-detects start vs reload)
+- Verify deployment with health check
+- Display PM2 logs
+
+**Trigger Options:**
+- Automatic: Push to `main` branch
+- Manual: GitHub Actions → CI/CD workflow → Run workflow
+
+### GitHub Secrets Required
+
+Configure in repository Settings → Secrets and variables → Actions:
+
+| Secret | Description |
+|--------|-------------|
+| `SSH_PRIVATE_KEY` | Private SSH key for server access |
+| `SERVER_HOST` | Server IP address or hostname |
+| `SERVER_USER` | SSH username (e.g., ubuntu, root) |
+
+**Note:** Bot token is stored in `.env` on server, not in GitHub Secrets.
+
+### Deployment Flow
+
+```
+Push to main
+    ↓
+GitHub Actions Triggered
+    ↓
+Run Tests (lint + test)
+    ↓
+Tests Pass? → Deploy Job Starts
+    ↓
+SSH to Server
+    ↓
+Git Pull + npm ci
+    ↓
+Deploy Slash Commands
+    ↓
+Smart PM2 Reload
+    ↓
+Verify + Show Logs
+    ↓
+✅ Deployment Complete
+```
+
+### Production Setup
+
+See **`DEPLOYMENT.md`** for complete guide. Quick steps:
+
+1. **Provision server** (VPS with SSH)
+2. **Install Node.js 18 and PM2**
+3. **Clone repository** to production path
+4. **Create `.env` file** with BOT_TOKEN and CLIENT_ID
+5. **Start with PM2**: `npm run pm2:start`
+6. **Configure GitHub Secrets**
+7. **Push to main** → automatic deployment
+
+### Monitoring
+
+```bash
+# Check bot status
+pm2 status discord-gamer-bot
+pm2 info discord-gamer-bot
+
+# View logs
+pm2 logs discord-gamer-bot
+pm2 logs discord-gamer-bot --lines 100
+
+# Monitor resources
+pm2 monit
+
+# Manage process
+npm run pm2:reload    # Zero-downtime restart
+npm run pm2:restart   # Full restart
+npm run pm2:stop      # Stop bot
+```
+
+## Development Workflow
 
 ### Adding New Commands
 
-1. Create command file in appropriate `/commands/` subdirectory
-2. Use module.exports pattern with `name`, `aliases`, `data`, `execute`
-3. Add SlashCommandBuilder configuration in `data` property
-4. Implement universal `execute()` function that handles both Message and Interaction
-5. Delegate business logic to controller/service layer
-6. Run `npm run deploy` to register slash command with Discord API
-7. Command files are auto-loaded by custom loader in `app.js`
+1. **Create command file** in `/commands/[domain]/`
+2. **Use hybrid command pattern:**
+   - `name`, `aliases`, `description` for prefix commands
+   - `data` with SlashCommandBuilder for slash commands
+   - Universal `execute(source, args, client)` function
+3. **Delegate to controller/service** for business logic
+4. **Test locally** with `npm start`
+5. **Deploy slash commands**: `npm run deploy`
+6. **Commit and push** to `main` → auto-deployment
 
-### Slash Command Deployment
+### Deploying Slash Commands
 
-After adding or modifying slash commands:
+After adding or modifying commands:
+
 ```bash
+# Local testing (test guild)
+npm run deploy:guild
+
+# Production (global)
 npm run deploy
 ```
 
-This registers commands globally with Discord API. Changes take effect immediately.
+Commands register with Discord API immediately but may take up to 1 hour to propagate globally.
 
-### Bot Startup
+### Testing Changes
 
-Ensure `.env` file exists with your bot token:
 ```bash
+# Run tests
+npm test
+
+# Run linter
+npm run lint
+
+# Auto-fix linting errors
+npm run lint -- --fix
+
+# Watch mode for development
+npm run test:watch
+```
+
+### Local Bot Startup
+
+```bash
+# Ensure .env exists
+cp .env.example .env
+# Edit .env with your credentials
+
+# Start bot
 npm start
 ```
 
-Expected console output:
+**Expected output:**
 ```
 ✓ Configuration loaded from environment variables
 Loading commands...
@@ -401,7 +429,7 @@ Logged in as YourBot#1234
 Serving X guilds
 ```
 
-If BOT_TOKEN is missing, you'll see:
+**Error if BOT_TOKEN missing:**
 ```
 ❌ Error: BOT_TOKEN environment variable is required
 
@@ -409,19 +437,74 @@ If BOT_TOKEN is missing, you'll see:
   1. Copy .env.example to .env
   2. Edit .env and add your Discord bot token
   3. Run: npm start
+
+💡 Get your bot token from:
+   https://discord.com/developers/applications
+
+📖 See DEPLOYMENT.md for detailed configuration guide
 ```
 
-### Common Issues
+## Common Issues
 
-**"Used disallowed intents" error:**
-- Enable MESSAGE_CONTENT intent in Discord Developer Portal
+### "Used disallowed intents" error
+**Fix:** Enable MESSAGE_CONTENT intent in Discord Developer Portal
 
-**Slash commands timeout:**
-- Ensure first response uses `interaction.reply()`
+### Slash commands timeout
+**Fix:**
+- First response MUST use `interaction.reply()`
 - Subsequent responses use `interaction.followUp()`
 - Respond within 3 seconds
 
-**Prefix commands not working:**
-- Check bot has proper channel permissions
-- Verify prefix in settings.json matches usage
-- Check bot token is valid
+### Prefix commands not working
+**Fix:**
+- Verify bot has proper channel permissions
+- Check PREFIX in `.env` matches usage
+- Ensure bot token is valid
+
+### PM2 bot won't start
+**Fix:**
+```bash
+# Check logs
+pm2 logs discord-gamer-bot
+
+# Common issues:
+# - Missing .env file
+# - Invalid BOT_TOKEN
+# - Missing dependencies (run npm ci --production)
+```
+
+### CI/CD deployment fails
+**Fix:**
+- Verify GitHub Secrets are configured
+- Check SSH key has correct permissions
+- Ensure server path matches workflow
+- Review GitHub Actions logs for specific errors
+
+## Code Quality Standards
+
+### ESLint Configuration
+- Standard config base
+- 4-space indentation required
+- Semicolons required
+- Configuration in `.eslintrc.json`
+- Auto-fix available: `npm run lint -- --fix`
+
+### Testing Standards
+- Jest for unit tests
+- Test files alongside source: `*.test.js`
+- Coverage tracking enabled
+- Minimum coverage: Not enforced but encouraged
+
+### Git Workflow
+- Main branch: `main` (protected)
+- All changes via pull requests recommended
+- CI must pass before merge
+- Auto-deployment on merge to `main`
+
+## Additional Resources
+
+- **Discord.js Guide**: https://discordjs.guide/
+- **PM2 Documentation**: https://pm2.keymetrics.io/docs/
+- **Deployment Guide**: See `DEPLOYMENT.md` in this repository
+- **GitHub Actions**: https://docs.github.com/en/actions
+- **Discord Developer Portal**: https://discord.com/developers/applications
