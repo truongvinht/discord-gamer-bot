@@ -3,6 +3,9 @@
 // Run this once to deploy all slash commands
 // ================
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -35,15 +38,22 @@ function loadCommands (dir) {
 console.log('Loading slash commands...');
 loadCommands(path.join(__dirname, '../commands'));
 
-// Get bot token and extract client ID from it
+// Get bot token
 const token = c.botToken();
 if (!token) {
-    console.error('❌ Error: BOT_TOKEN not found in settings.json');
+    console.error('❌ Error: BOT_TOKEN not found');
+    console.log('   Set BOT_TOKEN in .env file OR config/settings.json\n');
     process.exit(1);
 }
 
-// Extract client ID from token (first part before first dot)
-const clientId = Buffer.from(token.split('.')[0], 'base64').toString();
+// Get client ID - prefer explicit CLIENT_ID, fallback to extracting from token
+let clientId = c.clientId();
+if (!clientId) {
+    console.log('⚠️  CLIENT_ID not set, extracting from token...');
+    clientId = Buffer.from(token.split('.')[0], 'base64').toString();
+} else {
+    console.log('✓ Using CLIENT_ID from configuration');
+}
 
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(token);

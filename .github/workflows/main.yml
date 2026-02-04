@@ -1,0 +1,108 @@
+# Combined CI/CD workflow for Discord Gamer Bot
+# Runs tests on all branches, deploys to production on main branch
+
+name: CI/CD
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:  # Allow manual deployment trigger
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Generate coverage report
+        run: npm run test:coverage
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov (optional)
+        if: success()
+        uses: codecov/codecov-action@v3
+        continue-on-error: true
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: test  # Only deploy if tests pass
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Navigate to application directory
+            cd /opt/discord-gamer-bot
+
+            # Pull latest changes
+            git pull origin main
+
+            # Install production dependencies
+            npm ci --production
+
+            # Deploy Discord slash commands
+            node helper/deploy-commands.js
+
+            # Smart PM2 start/reload
+            if npx pm2 describe discord-gamer-bot > /dev/null 2>&1; then
+              echo "Process exists, reloading..."
+              npm run pm2:reload
+            else
+              echo "Process doesn't exist, starting..."
+              npm run pm2:start
+            fi
+
+            # Show recent logs
+            npx pm2 logs discord-gamer-bot --lines 50 --nostream
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Check PM2 status
+            npx pm2 info discord-gamer-bot
+
+            # Verify process is running
+            if ! npx pm2 describe discord-gamer-bot | grep -q "online"; then
+              echo "❌ Bot is not online!"
+              exit 1
+            fi
+
+            echo "✅ Bot is running successfully"

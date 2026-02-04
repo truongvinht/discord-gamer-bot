@@ -1,6 +1,7 @@
 #ignore following files
 node_modules
 settings.json
+.env
 .DS_Store
 package-lock.json
 .idea

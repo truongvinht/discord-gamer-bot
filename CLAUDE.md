@@ -33,6 +33,114 @@ npm run test:staged      # Run tests on staged files (for git hooks)
 npm run lint             # Run ESLint on entire project
 ```
 
+## Configuration
+
+The bot uses environment variables loaded from a `.env` file.
+
+### Setup Configuration
+
+1. **Copy the example file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit .env and add your credentials:**
+   ```bash
+   BOT_TOKEN=your_discord_bot_token
+   CLIENT_ID=your_discord_application_id
+   GUILD_ID=your_test_guild_id_optional
+   PREFIX=!
+   NODE_ENV=development
+   EVENT_FRIDAY_TIME=20:00
+   EVENT_SUNDAY_TIME=20:00
+   EVENT_DURATION=2
+   ```
+
+3. **Get your Discord credentials:**
+   - BOT_TOKEN: https://discord.com/developers/applications → Your App → Bot → Reset Token
+   - CLIENT_ID: Same portal → General Information → Application ID
+
+**Note:** The `.env` file is gitignored and never committed to version control.
+
+## Deployment
+
+The bot includes automated CI/CD deployment via GitHub Actions.
+
+### CI/CD Workflow
+
+**Combined CI/CD Pipeline** (`.github/workflows/main.yml`):
+- **Test Job**: Runs on all pushes/PRs (lint, test, coverage)
+- **Deploy Job**: Runs only on `main` branch after tests pass
+- **Smart Deployment**: Auto-detects PM2 start vs reload
+- **Verification**: Health checks and status validation
+- **Manual Trigger**: Supports workflow_dispatch for manual deploys
+
+### Server Setup
+
+See `DEPLOYMENT.md` for complete server setup guide. Quick overview:
+
+1. **Install Node.js 18+ and PM2:**
+   ```bash
+   sudo apt install nodejs npm
+   npm install -g pm2
+   ```
+
+2. **Clone repository:**
+   ```bash
+   git clone <repo> /opt/discord-gamer-bot
+   cd /opt/discord-gamer-bot
+   npm ci --production
+   ```
+
+3. **Create .env file:**
+   ```bash
+   nano .env
+   # Add BOT_TOKEN, CLIENT_ID, etc.
+   ```
+
+4. **Start with PM2:**
+   ```bash
+   pm2 start ecosystem.config.js
+   pm2 save
+   pm2 startup
+   ```
+
+### GitHub Secrets Required
+
+Configure these in GitHub repository settings (Settings → Secrets):
+- `SSH_PRIVATE_KEY` - Private SSH key for server access
+- `SERVER_HOST` - Server IP or hostname
+- `SERVER_USER` - SSH username
+
+### Deployment Process
+
+Every push to `main`:
+1. Runs CI checks (lint, test)
+2. SSH to server
+3. Pulls latest code
+4. Installs dependencies
+5. Deploys slash commands
+6. Reloads bot with PM2
+
+### Manual Deployment
+
+Deploy manually via SSH:
+```bash
+ssh user@server
+cd /opt/discord-gamer-bot
+bash scripts/deploy.sh
+```
+
+### Monitoring
+
+```bash
+pm2 status                    # View bot status
+pm2 logs discord-gamer-bot   # View live logs
+pm2 monit                     # Resource monitoring
+```
+
+For detailed deployment instructions, troubleshooting, and maintenance, see **`DEPLOYMENT.md`**.
+
 ### Linting Rules
 - Uses ESLint with Standard config
 - Custom rules: 4-space indentation, semicolons required
@@ -272,13 +380,14 @@ This registers commands globally with Discord API. Changes take effect immediate
 
 ### Bot Startup
 
-Ensure `config/settings.json` exists with your bot token:
+Ensure `.env` file exists with your bot token:
 ```bash
 npm start
 ```
 
 Expected console output:
 ```
+✓ Configuration loaded from environment variables
 Loading commands...
 Loaded command: help
 Loaded command: autochessHelp
@@ -290,6 +399,16 @@ Login Done!
 Started up!
 Logged in as YourBot#1234
 Serving X guilds
+```
+
+If BOT_TOKEN is missing, you'll see:
+```
+❌ Error: BOT_TOKEN environment variable is required
+
+📝 Setup instructions:
+  1. Copy .env.example to .env
+  2. Edit .env and add your Discord bot token
+  3. Run: npm start
 ```
 
 ### Common Issues

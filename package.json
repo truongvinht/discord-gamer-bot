@@ -14,7 +14,13 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls",
-    "test:staged": "jest --findRelatedTests"
+    "test:staged": "jest --findRelatedTests",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:reload": "pm2 reload discord-gamer-bot",
+    "pm2:stop": "pm2 stop discord-gamer-bot",
+    "pm2:restart": "pm2 restart discord-gamer-bot",
+    "pm2:logs": "pm2 logs discord-gamer-bot",
+    "pm2:status": "pm2 status discord-gamer-bot"
   },
   "engines": {
     "node": "18.x"
@@ -43,6 +49,7 @@
   "homepage": "https://github.com/truongvinht/discord-gamer-bot#readme",
   "dependencies": {
     "discord.js": "^14.25.1",
+    "dotenv": "^16.0.3",
     "http": "^0.0.1-security",
     "node-fetch": "^2.6.1",
     "node-html-to-image": "^3.1.0",
