@@ -41,29 +41,29 @@ function createErrorEmbed (result) {
     let troubleshooting = '';
 
     switch (result.error) {
-        case 'INVALID_TIME_FORMAT':
-            description = 'Invalid time configuration.';
-            troubleshooting = 'Please check your `config/settings.json` file and ensure event times are in HH:mm format (24-hour).';
-            break;
-        case 'MISSING_PERMISSIONS':
-            description = 'Bot is missing required permissions.';
-            troubleshooting = 'Please ensure the bot has the **Manage Events** permission in this server.\n\n' +
+    case 'INVALID_TIME_FORMAT':
+        description = 'Invalid time configuration.';
+        troubleshooting = 'Please check your `config/settings.json` file and ensure event times are in HH:mm format (24-hour).';
+        break;
+    case 'MISSING_PERMISSIONS':
+        description = 'Bot is missing required permissions.';
+        troubleshooting = 'Please ensure the bot has the **Manage Events** permission in this server.\n\n' +
                 'Server Settings → Roles → Bot Role → Enable "Manage Events"';
-            break;
-        case 'NO_VOICE_CHANNELS':
-            description = 'No voice channels available.';
-            troubleshooting = 'Please create at least one voice channel in this server before creating events.';
-            break;
-        case 'API_ERROR':
-            description = 'Discord API error.';
-            troubleshooting = 'An unexpected error occurred. Please try again later.';
-            break;
-        case 'EVENT_TIME_NOT_CONFIGURED':
-            description = 'Event time not configured.';
-            troubleshooting = 'Please add event time configuration to your `config/settings.json` file.';
-            break;
-        default:
-            troubleshooting = 'Please contact the bot administrator.';
+        break;
+    case 'NO_VOICE_CHANNELS':
+        description = 'No voice channels available.';
+        troubleshooting = 'Please create at least one voice channel in this server before creating events.';
+        break;
+    case 'API_ERROR':
+        description = 'Discord API error.';
+        troubleshooting = 'An unexpected error occurred. Please try again later.';
+        break;
+    case 'EVENT_TIME_NOT_CONFIGURED':
+        description = 'Event time not configured.';
+        troubleshooting = 'Please add event time configuration to your `config/settings.json` file.';
+        break;
+    default:
+        troubleshooting = 'Please contact the bot administrator.';
     }
 
     embed.setDescription(description);
