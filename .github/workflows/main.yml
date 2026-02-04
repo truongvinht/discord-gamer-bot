@@ -5,10 +5,10 @@ name: CI/CD
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
-    branches: ['**']
-  workflow_dispatch:  # Allow manual deployment trigger
+    branches: ["**"]
+  workflow_dispatch: # Allow manual deployment trigger
 
 jobs:
   test:
@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -54,7 +54,7 @@ jobs:
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: test  # Only deploy if tests pass
+    needs: test # Only deploy if tests pass
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -66,7 +66,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Navigate to application directory
-            cd /opt/discord-gamer-bot
+            cd /home/ubuntu/Documents/development/discord-gamer-bot
 
             # Pull latest changes
             git pull origin main
