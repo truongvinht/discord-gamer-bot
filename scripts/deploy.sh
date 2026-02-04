@@ -8,7 +8,7 @@ set -e  # Exit on error
 echo "🚀 Starting deployment..."
 
 # Navigate to bot directory
-cd /opt/discord-gamer-bot || exit 1
+cd /home/ubuntu/Documents/development/discord-gamer-bot || exit 1
 
 echo "📥 Pulling latest changes..."
 git pull origin main

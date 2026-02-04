@@ -143,12 +143,11 @@ pm2 --version
 ### Step 3: Setup Bot Directory
 
 ```bash
-# Create directory
-sudo mkdir -p /opt/discord-gamer-bot
-sudo chown $USER:$USER /opt/discord-gamer-bot
+# Create directory (adjust path to match your deployment location)
+mkdir -p /home/ubuntu/Documents/development
+cd /home/ubuntu/Documents/development
 
 # Clone repository
-cd /opt
 git clone https://github.com/truongvinht/discord-gamer-bot.git
 cd discord-gamer-bot
 
